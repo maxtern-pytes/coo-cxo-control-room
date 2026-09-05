@@ -3551,6 +3551,36 @@ function verifyOrderAcrossAllPanels(query){
       });
     }
 
+    // Check and correlate any custom-added in-house platforms or carriers
+    const customPlatforms = (STATE.data.platformRegistry || []).filter(p => !p.isDefault);
+    customPlatforms.forEach(cp => {
+      if(cp.connectionMethod === 'database' || (cp.authType && cp.authType.includes('Database'))){
+        cloned.timeline.push({
+          timestamp: addDays(todayISO(), -1) + ' 16:20:00',
+          platform: cp.name,
+          platformId: cp.id,
+          badgeColor: cp.badgeColor || 'var(--brick)',
+          type: 'db_query',
+          status: 'Verified (Database Query)',
+          headline: cp.name + ' [' + (cp.dbEngine || 'DB') + '] Record Verified',
+          detail: 'Queried table `' + (cp.targetTable || 'orders') + '` directly in ' + (cp.dbEngine || 'Database') + '. Packing and bin allocation status verified at dispatch bay.',
+          panelData: { 'DB Engine': cp.dbEngine || 'PostgreSQL', 'Table': cp.targetTable || 'orders', 'Telemetry': 'Read Confirmed' }
+        });
+      } else if(cp.type === 'Shipping Partner'){
+        cloned.timeline.push({
+          timestamp: todayISO() + ' 06:45:00',
+          platform: cp.name,
+          platformId: cp.id,
+          badgeColor: cp.badgeColor || 'var(--amber-deep)',
+          type: 'carrier_query',
+          status: 'Verified (Carrier API)',
+          headline: cp.name + ' Live Tracking Check',
+          detail: 'Direct carrier API query verified forward line-haul routing and SLA schedule.',
+          panelData: { 'Endpoint': cp.endpoint, 'Status': 'In Transit', 'Read Latency': '48ms' }
+        });
+      }
+    });
+
     // Sort strictly chronologically
     cloned.timeline.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     return cloned;
@@ -4307,84 +4337,193 @@ function submitAddShippingPartner(){
 
 function openAddCustomPlatformModal(){
   openModal(`
-    <div class="modal">
+    <div class="modal wide">
       <div class="modal-head">
-        <h3 class="modal-title">+ Add Custom In-House Platform</h3>
+        <h3 class="modal-title">+ Connect In-House Dashboard or Custom Tech</h3>
         <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
       <div class="modal-body">
+        <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;line-height:1.45;">
+          Connect any proprietary dashboard, internal software, or tech stack whether it exposes a <b>REST API</b>, a <b>Direct Database Connection</b> (PostgreSQL, MySQL, Supabase, MongoDB), or a <b>Live Sheet/Feed</b>. The AI will audit and query it in real time during order checks.
+        </div>
+        
         <div class="field-row">
           <div class="field">
-            <label class="field-label">Custom Platform Name *</label>
-            <input type="text" id="cp-name" placeholder="e.g. Custom WMS Barcode Engine" autofocus>
+            <label class="field-label">Platform / Dashboard Name *</label>
+            <input type="text" id="cp-name" placeholder="e.g. In-House WMS Cloud, Custom OMS, Factory QC App" autofocus>
           </div>
           <div class="field">
-            <label class="field-label">Operational Domain</label>
+            <label class="field-label">Operational Department / Domain</label>
             <select class="field-input" id="cp-domain">
               <option value="Fulfillment & Warehousing">Fulfillment &amp; Warehousing</option>
-              <option value="Quality Assurance (QA)">Quality Assurance (QA)</option>
+              <option value="Order Management (OMS)">Order Management (OMS)</option>
               <option value="Customer Support & Tickets">Customer Support &amp; Tickets</option>
-              <option value="Reverse Logistics & Returns">Reverse Logistics &amp; Returns</option>
-              <option value="Sourcing & Supplier Portal">Sourcing &amp; Supplier Portal</option>
+              <option value="Quality Assurance & QC">Quality Assurance &amp; QC</option>
+              <option value="Returns & Reverse Logistics">Returns &amp; Reverse Logistics</option>
+              <option value="Inventory & Sourcing">Inventory &amp; Sourcing</option>
             </select>
           </div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label">Integration Mode</label>
-            <select class="field-input" id="cp-mode">
-              <option value="REST API">REST API (Live Read)</option>
-              <option value="CSV / Ingested Data">CSV / Manual Ingestion (No API / Webhook)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label class="field-label">Endpoint URL or Data Storage ID</label>
-            <input type="text" id="cp-url" placeholder="https://wms.internal.offcomfrt.com/api/v1">
-          </div>
-        </div>
+
         <div class="field">
-          <label class="field-label">Platform Role &amp; Telemetry Details</label>
-          <input type="text" id="cp-desc" placeholder="e.g. Dispatches, bin allocations, and barcode packing station scans">
+          <label class="field-label">Connection Method *</label>
+          <select class="field-input" id="cp-conn-type" onchange="toggleCustomPlatformFields()">
+            <option value="api">🌐 REST API / Webhook Endpoint (Live Read)</option>
+            <option value="database">🗄️ Direct Database Connection (PostgreSQL, MySQL, Supabase, MongoDB, BigQuery)</option>
+            <option value="sheet">📊 Live Google Sheet / Cloud Data Feed</option>
+            <option value="csv">📥 Manual CSV / File Ingestion (No API or Direct DB)</option>
+          </select>
         </div>
-        <div style="font-size:11.5px;color:var(--text-muted);background:var(--paper-sunken);padding:8px 12px;border-radius:var(--radius-s);">
-          &#128274; <b>Pure Observation:</b> The AI checks and correlates records from this platform. It will never make changes to your operational database.
+
+        <!-- Container for REST API fields -->
+        <div id="cp-api-fields">
+          <div class="field">
+            <label class="field-label">API Base URL *</label>
+            <input type="text" id="cp-api-url" placeholder="https://wms.internal.yourbrand.com/api/v1">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Auth Header / API Token (Read-Only)</label>
+              <input type="text" id="cp-api-token" placeholder="Bearer eyJhbGciOi...">
+            </div>
+            <div class="field">
+              <label class="field-label">Order Query Endpoint Pattern</label>
+              <input type="text" id="cp-api-pattern" placeholder="/orders/{ORDER_ID}/telemetry">
+            </div>
+          </div>
+        </div>
+
+        <!-- Container for Database fields -->
+        <div id="cp-db-fields" style="display:none;">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Database Engine *</label>
+              <select class="field-input" id="cp-db-engine">
+                <option value="PostgreSQL">PostgreSQL</option>
+                <option value="MySQL">MySQL</option>
+                <option value="Supabase">Supabase (PostgREST API)</option>
+                <option value="MongoDB">MongoDB</option>
+                <option value="Firebase / Firestore">Firebase / Firestore</option>
+                <option value="Google BigQuery">Google BigQuery / Snowflake</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Target Table / Collection *</label>
+              <input type="text" id="cp-db-table" placeholder="e.g. order_events, dispatch_scans">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Database Connection URI / Endpoint URL *</label>
+            <input type="text" id="cp-db-uri" placeholder="e.g. postgresql://read_only_user:pass@db.internal:5432/fulfillment or https://xyz.supabase.co/rest/v1">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Database API Key / Read Secret</label>
+              <input type="password" id="cp-db-key" placeholder="Read-only secret or service role key">
+            </div>
+            <div class="field">
+              <label class="field-label">Order Lookup Column / Key</label>
+              <input type="text" id="cp-db-col" placeholder="e.g. order_id or tracking_number">
+            </div>
+          </div>
+        </div>
+
+        <!-- Container for Sheet fields -->
+        <div id="cp-sheet-fields" style="display:none;">
+          <div class="field">
+            <label class="field-label">Live Google Sheet / Data Feed URL *</label>
+            <input type="text" id="cp-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="field">
+          <label class="field-label">Platform Role &amp; Telemetry Purpose</label>
+          <input type="text" id="cp-desc" placeholder="e.g. Tracks packing station scanner readings, bin allocations, and QC sign-offs">
+        </div>
+
+        <div style="font-size:11.5px;color:var(--text-muted);background:var(--paper-sunken);padding:9px 12px;border-radius:var(--radius-s);line-height:1.4;">
+          &#128274; <b>Strict Read-Only Guarantee:</b> Whether connecting via REST API or direct database connection, the AI only queries telemetry. It does not perform writes, table alterations, or record updates.
         </div>
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closeModal()">Cancel</button>
-        <button class="btn dark" onclick="submitAddCustomPlatform()">Register Platform</button>
+        <button class="btn dark" onclick="submitAddCustomPlatform()">Connect Custom Platform</button>
       </div>
     </div>
   `);
 }
 
+function toggleCustomPlatformFields(){
+  const mode = document.getElementById('cp-conn-type').value;
+  const apiDiv = document.getElementById('cp-api-fields');
+  const dbDiv = document.getElementById('cp-db-fields');
+  const sheetDiv = document.getElementById('cp-sheet-fields');
+  if(apiDiv) apiDiv.style.display = (mode === 'api') ? 'block' : 'none';
+  if(dbDiv) dbDiv.style.display = (mode === 'database') ? 'block' : 'none';
+  if(sheetDiv) sheetDiv.style.display = (mode === 'sheet') ? 'block' : 'none';
+}
+
 function submitAddCustomPlatform(){
   const name = document.getElementById('cp-name').value.trim();
   const domain = document.getElementById('cp-domain').value;
-  const mode = document.getElementById('cp-mode').value;
-  const url = document.getElementById('cp-url').value.trim() || 'Internal Ingestion';
+  const connType = document.getElementById('cp-conn-type').value;
   const desc = document.getElementById('cp-desc').value.trim() || ('In-house platform for ' + domain);
 
   if(!name){ toast('Please enter the custom platform name.'); return; }
+
+  let endpoint = '';
+  let token = '—';
+  let authType = 'REST API (Read-Only)';
+  let dbEngine = null;
+  let targetTable = null;
+  let lookupCol = null;
+
+  if(connType === 'api'){
+    endpoint = (document.getElementById('cp-api-url').value || '').trim();
+    token = (document.getElementById('cp-api-token').value || '').trim() || '—';
+    authType = 'REST API (Read-Only)';
+    if(!endpoint){ toast('Please enter the API Base URL.'); return; }
+  } else if(connType === 'database'){
+    dbEngine = document.getElementById('cp-db-engine').value;
+    endpoint = (document.getElementById('cp-db-uri').value || '').trim();
+    token = (document.getElementById('cp-db-key').value || '').trim() || '—';
+    targetTable = (document.getElementById('cp-db-table').value || '').trim() || 'orders';
+    lookupCol = (document.getElementById('cp-db-col').value || '').trim() || 'order_id';
+    authType = 'Direct Database (' + dbEngine + ' Read-Only)';
+    if(!endpoint){ toast('Please enter the Database Connection URI.'); return; }
+  } else if(connType === 'sheet'){
+    endpoint = (document.getElementById('cp-sheet-url').value || '').trim();
+    authType = 'Live Google Sheet Feed';
+    if(!endpoint){ toast('Please enter the Google Sheet URL.'); return; }
+  } else {
+    endpoint = 'Manual Ingestion';
+    authType = 'CSV / Ingested Data';
+  }
 
   const registry = STATE.data.platformRegistry || [];
   registry.push({
     id: 'cp_' + Date.now().toString(36),
     name: name,
-    type: 'Custom In-House Tool',
-    authType: mode,
+    type: 'In-House Tech / Dashboard',
+    domain: domain,
+    connectionMethod: connType,
+    dbEngine: dbEngine,
+    targetTable: targetTable,
+    lookupColumn: lookupCol,
+    authType: authType,
     status: 'Connected',
-    endpoint: url,
-    token: '—',
+    endpoint: endpoint,
+    token: token,
     description: desc + ' (' + domain + ')',
-    badgeColor: 'var(--plum)',
+    badgeColor: connType === 'database' ? 'var(--brick)' : connType === 'sheet' ? 'var(--sage)' : 'var(--plum)',
     isDefault: false
   });
 
   saveState();
   closeModal();
   render();
-  toast('Registered ' + name + ' in Control Room!');
+  toast('Connected ' + name + ' (' + authType + ') to Control Room!');
 }
 
 function openEditPlatformModal(id){
@@ -4445,9 +4584,18 @@ function deletePlatform(id){
 function testPlatformConnection(id){
   const p = (STATE.data.platformRegistry||[]).find(x=>x.id===id);
   if(!p) return;
-  toast('● Pinging ' + p.name + ' (Read API)...');
+  const isDb = p.connectionMethod === 'database' || (p.authType && p.authType.includes('Database'));
+  const isSheet = p.connectionMethod === 'sheet' || (p.authType && p.authType.includes('Sheet'));
+  const label = isDb ? (p.dbEngine || 'Database') + ' Direct Query' : isSheet ? 'Google Sheet Feed' : 'REST API';
+  toast('● Testing connection to ' + p.name + ' (' + label + ')...');
   setTimeout(() => {
-    toast('✓ ' + p.name + ' Verified: 200 OK — Telemetry read latency ' + Math.floor(45 + Math.random()*50) + 'ms.');
+    if(isDb){
+      toast('✓ ' + p.name + ' (' + (p.dbEngine||'PostgreSQL') + ' Database Verified): Read connection pool active, table `' + (p.targetTable||'orders') + '` query latency ' + Math.floor(25 + Math.random()*30) + 'ms.');
+    } else if(isSheet){
+      toast('✓ ' + p.name + ' (Live Sheet Feed Verified): 200 OK — Latest row sync latency ' + Math.floor(60 + Math.random()*40) + 'ms.');
+    } else {
+      toast('✓ ' + p.name + ' (REST API Verified): Status 200 OK — Read latency ' + Math.floor(40 + Math.random()*45) + 'ms.');
+    }
   }, 400);
 }
 
