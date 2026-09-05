@@ -1,0 +1,19 @@
+{
+  "name": "coo-cxo-control-room",
+  "version": "1.0.0",
+  "description": "Executive COO & CXO Control Room Dashboard for Operations and Customer Experience",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "coo",
+    "cxo",
+    "dashboard",
+    "operations",
+    "customer-experience",
+    "control-room"
+  ],
+  "author": "",
+  "license": "MIT"
+}

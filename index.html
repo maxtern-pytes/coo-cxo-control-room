@@ -110,6 +110,15 @@ button:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--amber-dee
 .search-hit-title{font-size:13px;font-weight:600;}
 .search-hit-meta{font-size:11px;color:var(--text-muted);}
 .topbar-spacer{flex:1;}
+.profile-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--paper-raised);border:1px solid var(--line);
+  border-radius:20px;padding:3px 10px 3px 4px;font-size:12px;font-weight:600;
+  cursor:pointer;color:var(--text);transition:border-color 0.15s ease;
+}
+.profile-btn:hover{border-color:var(--amber-deep);background:var(--paper-sunken);}
+.profile-btn-badge{font-size:10px;color:var(--amber-deep);background:var(--amber-tint);padding:1px 6px;border-radius:10px;font-weight:700;}
+
 .icon-btn{position:relative;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-m);width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;}
 .icon-btn:hover{border-color:var(--amber-deep);}
 .dot-badge{position:absolute;top:-4px;right:-4px;background:var(--brick);color:#fff;font-size:9.5px;font-weight:700;border-radius:10px;min-width:15px;height:15px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--paper);}
@@ -373,6 +382,11 @@ function escapeHtml(s){
 function nl2br(s){ return escapeHtml(s).replace(/\n/g,'<br>'); }
 
 /* ---------------------------- demo data seed ---------------------------- */
+
+function brandName(){ return (STATE.data && STATE.data.brandName) || 'Offcomfrt'; }
+function brandSub(){ return (STATE.data && STATE.data.brandSub) || 'COO / CXO Control Room'; }
+function brandMark(){ return (brandName() || 'O').charAt(0).toUpperCase(); }
+
 function buildDemoData(){
   const today = todayISO();
   const rel = (n) => addDays(today, n); // n days from today
@@ -601,7 +615,7 @@ function buildDemoData(){
 
   const endOfDayLogs = [];
 
-  return { people, projects, tasks, meetings, approvals, followUps, oneOnOnes, goals, sops, recurringTemplates, auditLog, endOfDayLogs,
+  return { brandName:"Offcomfrt", brandSub:"COO / CXO Control Room", people, projects, tasks, meetings, approvals, followUps, oneOnOnes, goals, sops, recurringTemplates, auditLog, endOfDayLogs,
     settings:{ staleNoUpdateDays:3, staleOpenDays:7, staleDeadlineDays:2, escalation:{owner:1, manager:2, cmo:4}, seededOn: today },
     notifDismissed: [],
   };
@@ -663,6 +677,8 @@ async function loadState(){
     if(res && res.value){
       STATE.data = JSON.parse(res.value);
       if(!STATE.data.settings) STATE.data.settings = buildDemoData().settings;
+      if(!STATE.data.brandName) STATE.data.brandName = 'Offcomfrt';
+      if(!STATE.data.brandSub) STATE.data.brandSub = 'COO / CXO Control Room';
       if(!STATE.data.endOfDayLogs) STATE.data.endOfDayLogs = [];
       if(!STATE.data.notifDismissed) STATE.data.notifDismissed = [];
     } else {
@@ -923,7 +939,7 @@ function viewHomeCOO(){
   return `
     <div class="hero-card">
       <div class="hero-greeting">Good morning, ${escapeHtml(person.name.split(' ')[0])}</div>
-      <div class="hero-date">${currentDateHeaderStr()} · Offcomfrt Operations & Customer Experience Control</div>
+      <div class="hero-date">${currentDateHeaderStr()} · ${escapeHtml(brandName())} Operations & CX Control</div>
       <div class="priority-list">
         ${topPriorities().length ? topPriorities().map((t,i)=>`
           <li class="priority-item" style="cursor:pointer;" onclick="openTaskModal('${t.id}')">
@@ -1345,6 +1361,283 @@ function openTaskModal(id){
 function refreshTaskModal(id){ openTaskModal(id); render(); }
 
 /* ============================== VIEW: TEAM ============================== */
+
+/* ---------- Profile & Team Member Management Modals ---------- */
+function openEditProfileModal(){
+  const coo = personById('p-coo') || (STATE.data && STATE.data.people ? STATE.data.people[0] : null);
+  if(!coo) return;
+  openModal(`
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">Edit Executive Profile & Brand</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Your Full Name *</label>
+            <input type="text" id="prof-name" value="${escapeHtml(coo.name)}" placeholder="e.g. Alex Morgan">
+          </div>
+          <div class="field">
+            <label class="field-label">Executive Role / Title *</label>
+            <input type="text" id="prof-role" value="${escapeHtml(coo.role)}" placeholder="e.g. Chief Operating & Experience Officer">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Company / Brand Name *</label>
+            <input type="text" id="prof-brand" value="${escapeHtml(brandName())}" placeholder="e.g. Offcomfrt">
+          </div>
+          <div class="field">
+            <label class="field-label">Control Room Subtitle</label>
+            <input type="text" id="prof-sub" value="${escapeHtml(brandSub())}" placeholder="e.g. COO / CXO Control Room">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Email / Contact</label>
+            <input type="text" id="prof-contact" value="${escapeHtml(coo.contact||'')}" placeholder="e.g. alex@company.com">
+          </div>
+          <div class="field">
+            <label class="field-label">Weekly Working Hours (Capacity)</label>
+            <input type="number" id="prof-hours" value="${coo.workingHours||45}" min="10" max="80">
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;background:var(--paper-sunken);padding:9px 12px;border-radius:var(--radius-s);line-height:1.4;">
+          &#128161; Updating your name updates your greeting, personal queue, standup notes, and export reports automatically.
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitEditProfile()">Save Profile & Brand</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitEditProfile(){
+  const name = document.getElementById('prof-name').value.trim();
+  const role = document.getElementById('prof-role').value.trim();
+  const brand = document.getElementById('prof-brand').value.trim();
+  const sub = document.getElementById('prof-sub').value.trim();
+  const contact = document.getElementById('prof-contact').value.trim();
+  const hours = Number(document.getElementById('prof-hours').value) || 45;
+
+  if(!name){ toast('Please enter your name.'); return; }
+  if(!brand){ toast('Please enter a company or brand name.'); return; }
+
+  const coo = personById('p-coo') || STATE.data.people[0];
+  const oldName = coo.name;
+  coo.name = name;
+  coo.role = role || 'Chief Operating & Experience Officer';
+  coo.contact = contact;
+  coo.workingHours = hours;
+  STATE.data.brandName = brand;
+  STATE.data.brandSub = sub || 'COO / CXO Control Room';
+
+  logAudit('Profile', oldName, 'Updated Profile', oldName, name);
+  saveState();
+  closeModal();
+  document.title = brandName() + ' — ' + brandSub();
+  render();
+  toast(`Profile updated! Hello, ${name.split(' ')[0]}.`);
+}
+
+function openEditPersonModal(id){
+  const p = personById(id);
+  if(!p) return;
+  if(p.id === 'p-coo'){ openEditProfileModal(); return; }
+  openModal(`
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">Edit Team Member — ${escapeHtml(p.name)}</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Full Name *</label>
+            <input type="text" id="ep-name" value="${escapeHtml(p.name)}">
+          </div>
+          <div class="field">
+            <label class="field-label">Job Title / Role *</label>
+            <input type="text" id="ep-role" value="${escapeHtml(p.role)}">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Functional Department</label>
+            <select class="field-input" id="ep-dept">
+              ${DEPARTMENTS.map(d=>`<option value="${d}" ${p.function===d?'selected':''}>${escapeHtml(d)}</option>`).join('')}
+              <option value="Executive Leadership" ${p.function==='Executive Leadership'?'selected':''}>Executive Leadership</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Reports To (Manager)</label>
+            <select class="field-input" id="ep-manager">
+              <option value="p-coo">${escapeHtml(personName('p-coo'))} (COO / CXO)</option>
+              ${STATE.data.people.filter(x=>x.id!==p.id && x.id!=='p-coo').map(m=>`<option value="${m.id}" ${p.manager===m.id?'selected':''}>${escapeHtml(m.name)} (${escapeHtml(m.role)})</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Email / Contact</label>
+            <input type="text" id="ep-contact" value="${escapeHtml(p.contact||'')}">
+          </div>
+          <div class="field">
+            <label class="field-label">Weekly Working Hours (Capacity)</label>
+            <input type="number" id="ep-hours" value="${p.workingHours||40}" min="10" max="80">
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn danger" onclick="deletePerson('${p.id}')">Remove Member</button>
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitEditPerson('${p.id}')">Save Changes</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitEditPerson(id){
+  const p = personById(id);
+  if(!p) return;
+  const name = document.getElementById('ep-name').value.trim();
+  const role = document.getElementById('ep-role').value.trim();
+  const dept = document.getElementById('ep-dept').value;
+  const manager = document.getElementById('ep-manager').value || null;
+  const contact = document.getElementById('ep-contact').value.trim();
+  const hours = Number(document.getElementById('ep-hours').value) || 40;
+
+  if(!name){ toast('Team member name is required.'); return; }
+  if(!role){ toast('Job title is required.'); return; }
+
+  const oldName = p.name;
+  p.name = name;
+  p.role = role;
+  p.function = dept;
+  p.manager = manager;
+  p.contact = contact;
+  p.workingHours = hours;
+
+  logAudit('Team', oldName, 'Updated Details', oldName, name);
+  saveState();
+  closeModal();
+  render();
+  toast(`Updated ${name}'s profile.`);
+}
+
+function openAddPersonModal(){
+  openModal(`
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">Add New Team Member</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Full Name *</label>
+            <input type="text" id="ap-name" placeholder="e.g. Priya Sharma" autofocus>
+          </div>
+          <div class="field">
+            <label class="field-label">Job Title / Role *</label>
+            <input type="text" id="ap-role" placeholder="e.g. Returns & Refund Specialist">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Functional Department</label>
+            <select class="field-input" id="ap-dept">
+              ${DEPARTMENTS.map(d=>`<option value="${d}">${escapeHtml(d)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Reports To (Manager)</label>
+            <select class="field-input" id="ap-manager">
+              <option value="p-coo">${escapeHtml(personName('p-coo'))} (COO / CXO)</option>
+              ${STATE.data.people.filter(x=>x.id!=='p-coo').map(m=>`<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.role)})</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Email / Contact</label>
+            <input type="text" id="ap-contact" placeholder="e.g. priya@company.com">
+          </div>
+          <div class="field">
+            <label class="field-label">Weekly Working Hours</label>
+            <input type="number" id="ap-hours" value="40" min="10" max="80">
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitAddPerson()">Add to Team</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitAddPerson(){
+  const name = document.getElementById('ap-name').value.trim();
+  const role = document.getElementById('ap-role').value.trim();
+  const dept = document.getElementById('ap-dept').value;
+  const manager = document.getElementById('ap-manager').value || 'p-coo';
+  const contact = document.getElementById('ap-contact').value.trim();
+  const hours = Number(document.getElementById('ap-hours').value) || 40;
+
+  if(!name){ toast('Please provide a name.'); return; }
+  if(!role){ toast('Please provide a job title.'); return; }
+
+  const newPerson = {
+    id: genId('p'),
+    name,
+    role,
+    function: dept,
+    manager,
+    joinDate: todayISO(),
+    workingHours: hours,
+    contact: contact || (name.toLowerCase().replace(/\s+/g, '.') + '@offcomfrt.com')
+  };
+
+  STATE.data.people.push(newPerson);
+  logAudit('Team', name, 'Added to Team', '', role);
+  saveState();
+  closeModal();
+  goTo('team');
+  toast(`Added ${name} to the team!`);
+}
+
+function deletePerson(id){
+  const p = personById(id);
+  if(!p) return;
+  if(p.id === 'p-coo'){ toast('The executive COO/CXO profile cannot be deleted.'); return; }
+  const activeTasks = STATE.data.tasks.filter(t=>t.assignee===id && ACTIVE_STATUSES.includes(t.status));
+  const confirmMsg = activeTasks.length > 0 
+    ? `Remove ${p.name}? They have ${activeTasks.length} active tasks which will be reassigned to ${personName('p-coo')}.`
+    : `Are you sure you want to remove ${p.name} from the team?`;
+  
+  if(!confirm(confirmMsg)) return;
+
+  activeTasks.forEach(t=>{
+    t.assignee = 'p-coo';
+    t.lastUpdated = todayISO();
+  });
+
+  STATE.data.people.forEach(x=>{
+    if(x.manager === id) x.manager = 'p-coo';
+  });
+
+  STATE.data.people = STATE.data.people.filter(x=>x.id!==id);
+  logAudit('Team', p.name, 'Removed from Team', p.role, '');
+  saveState();
+  closeModal();
+  goTo('team');
+  toast(`Removed ${p.name} from the team.`);
+}
+
 function viewTeam(){
   const tab = STATE.currentTab.team || (STATE.selectedPersonId ? 'directory' : 'glance');
   const tabs = [['glance','At a Glance'],['capacity','Capacity Planner'],['directory','Directory'],['org','Org Structure'],['leave','Availability & Shifts']];
@@ -1358,7 +1651,13 @@ function viewTeam(){
   else if(tab==='leave') body = teamLeaveHtml();
 
   return `
-    <div class="page-head"><div><div class="page-eyebrow">Operations & CX Team</div><h1 class="page-title">Team & Workforce Management</h1><div class="page-sub">Resource allocation, capacity utilization, and operational accountability across supply chain and customer experience.</div></div></div>
+    <div class="page-head">
+      <div><div class="page-eyebrow">Operations & CX Team</div><h1 class="page-title">Team & Workforce Management</h1><div class="page-sub">Resource allocation, capacity utilization, and operational accountability across supply chain and customer experience.</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" onclick="openEditProfileModal()">&#9998; Edit My Profile</button>
+        <button class="btn-primary" onclick="openAddPersonModal()">+ Add Team Member</button>
+      </div>
+    </div>
     ${STATE.selectedPersonId ? `<button class="btn small" style="margin-bottom:14px;" onclick="goTo('team',{selectedPersonId:null})">&larr; Back to team roster</button>` : `<div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${tab===id?'active':''}" onclick="STATE.selectedPersonId=null; setTab('team','${id}')">${label}</button>`).join('')}</div>`}
     ${body}
   `;
@@ -1431,6 +1730,10 @@ function teamDirectoryHtml(){
           <span class="chip chip-outline">${tasks.length} active tasks</span>
           <span class="chip chip-outline">${projects.length} projects</span>
         </div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <button class="btn small" onclick="event.stopPropagation();${p.id==='p-coo'?'openEditProfileModal()':`openEditPersonModal('${p.id}')`}">&#9998; Edit</button>
+          ${p.id!=='p-coo'?`<button class="btn small danger ghost" onclick="event.stopPropagation();deletePerson('${p.id}')">Remove</button>`:''}
+        </div>
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -1454,7 +1757,10 @@ function personDetailHtml(id){
           <div style="font-size:17px;font-weight:600;">${escapeHtml(p.name)}</div>
           <div style="font-size:12.5px;color:var(--text-muted);">${escapeHtml(p.role)} · ${escapeHtml(p.function)}${p.manager?' · Reports to '+escapeHtml(personName(p.manager)):''}</div>
         </div>
-        <div style="margin-left:auto;">${workloadChip(u.level, u.pct<75?'🟢':u.pct<100?'🟡':u.pct<130?'🟠':'🔴')}</div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          ${workloadChip(u.level, u.pct<75?'🟢':u.pct<100?'🟡':u.pct<130?'🟠':'🔴')}
+          <button class="btn small" onclick="${id==='p-coo'?'openEditProfileModal()':`openEditPersonModal('${id}')`}">&#9998; Edit Profile</button>
+        </div>
       </div>
     </div>
     <div class="kpi-strip">
@@ -2273,7 +2579,7 @@ function downloadWeeklyReport(){
 
   const lines = [];
   lines.push('=====================================================');
-  lines.push('OFFCOMFRT — COO / CXO EXECUTIVE OPERATIONS REPORT');
+  lines.push(brandName().toUpperCase() + ' — COO / CXO EXECUTIVE OPERATIONS REPORT');
   lines.push('Period Ending: '+fmtDateLong(todayISO()));
   lines.push('Leader: Arjun Mehta (COO & CXO)');
   lines.push('=====================================================');
@@ -2542,11 +2848,11 @@ function render(){
   app.innerHTML = `
     <div class="shell">
       <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-mark">O</div>
+        <div class="brand" onclick="openEditProfileModal()" style="cursor:pointer;" title="Click to customize brand & profile">
+          <div class="brand-mark">${brandMark()}</div>
           <div class="brand-text">
-            <span class="b1">Offcomfrt</span>
-            <span class="b2">COO / CXO Control Room</span>
+            <span class="b1">${escapeHtml(brandName())}</span>
+            <span class="b2">${escapeHtml(brandSub())} &bull; &#9998;</span>
           </div>
         </div>
         <div class="nav-group-label">Executive Workspace</div>
@@ -2556,7 +2862,7 @@ function render(){
         <div class="sidebar-foot">
           <label class="field-label" style="color:#9a9fb0;">Viewing Role</label>
           <select class="role-select" id="role-select" onchange="setRole(this.value)">
-            ${PERSON_ROLE_OPTIONS.map(r=>`<option value="${r}" ${STATE.currentRole===r?'selected':''}>${r}${r==='COO / CXO'?' (Arjun Mehta)':r==='Operations Lead'?' (Devina Nair)':r==='CX & Support Lead'?' (Sameer Joshi)':' (Tanvi Shah)'}</option>`).join('')}
+            ${PERSON_ROLE_OPTIONS.map(r=>`<option value="${r}" ${STATE.currentRole===r?'selected':''}>${r}${r==='COO / CXO'?(' ('+personName('p-coo')+')'):r==='Operations Lead'?(' ('+personName('p-lead-ops')+')'):r==='CX & Support Lead'?(' ('+personName('p-lead-cx')+')'):(' ('+personName('p-support')+')')}</option>`).join('')}
           </select>
           <div class="demo-tag">OPERATIONAL CONTROL ROOM · Offcomfrt operations, logistics, quality & CX data engine.</div>
         </div>
@@ -2570,6 +2876,11 @@ function render(){
             <div id="search-results-slot"></div>
           </div>
           <div class="topbar-spacer"></div>
+          <button class="profile-btn" onclick="openEditProfileModal()" title="Edit Your Profile & Brand">
+            ${avatarHtml('p-coo')}
+            <span>${escapeHtml(personName('p-coo').split(' ')[0])}</span>
+            <span class="profile-btn-badge">Edit Profile</span>
+          </button>
           <button class="icon-btn" title="Alerts & Notifications" onclick="openNotifications()">&#128276;${notifCount()>0?`<span class="dot-badge">${notifCount()}</span>`:''}</button>
           <button class="btn-primary" onclick="openQuickAddTask()">+ Quick Task</button>
         </div>
