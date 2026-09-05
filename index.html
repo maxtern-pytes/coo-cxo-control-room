@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>COO / CXO Control Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -541,6 +541,292 @@ button:focus-visible, [tabindex]:focus-visible{outline:2px solid #09090b;outline
   background:#ffffff;
 }
 
+
+/* ---------- SMOOTH TRANSITIONS & NATIVE APP RESPONSIVENESS ---------- */
+button, input, select, textarea, .nav-item, .chip, .card, .stat-card, .tab-btn {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+button:active {
+  transform: scale(0.97);
+}
+.view {
+  animation: viewSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes viewSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes modalPopIn {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal {
+  animation: modalPopIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-backdrop {
+  animation: backdropFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sidebar Drawer & Backdrop */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 9, 11, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-sidebar-header {
+  display: none;
+}
+.mobile-nav-toggle {
+  display: none;
+}
+.mobile-topbar-title {
+  display: none;
+}
+.topbar-main-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.topbar-search-row {
+  display: none;
+}
+.quick-task-compact {
+  display: none;
+}
+.quick-task-full {
+  display: inline;
+}
+
+/* Enhanced Table Scroll Container */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+}
+.data-table {
+  min-width: 580px;
+}
+
+@media (max-width: 880px) {
+  .shell {
+    display: block;
+    min-height: 100vh;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 284px;
+    max-width: 84vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 1000;
+    box-shadow: none;
+    transform: translateX(-100%);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.32s ease;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.5);
+  }
+  .mobile-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .mobile-sidebar-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9a9fb0;
+  }
+  .mobile-sidebar-close {
+    background: var(--ink-soft);
+    border: 1px solid var(--ink-line);
+    color: #fff;
+    border-radius: var(--radius-s);
+    padding: 4px 10px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .mobile-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    color: var(--text);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .mobile-topbar-title {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .topbar-date {
+    display: none;
+  }
+  .desktop-search {
+    display: none !important;
+  }
+  .topbar-search-row.mobile-search {
+    display: block;
+    width: 100%;
+  }
+  .topbar-search-row .search-wrap {
+    max-width: 100%;
+    width: 100%;
+  }
+  .topbar-actions {
+    gap: 6px;
+  }
+  .quick-task-full {
+    display: none;
+  }
+  .quick-task-compact {
+    display: inline;
+  }
+  .view {
+    padding: 14px 12px 60px;
+  }
+  .tab-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .assistant-shell {
+    height: calc(100dvh - 140px);
+    min-height: 380px;
+  }
+  .chip-row {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 12px 10px !important;
+  }
+  .suggest-chip {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar-actions {
+    gap: 4px;
+  }
+  .gdrive-btn {
+    padding: 3px 6px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .gdrive-btn-text {
+    display: none;
+  }
+  .profile-btn {
+    padding: 2px 6px 2px 3px;
+    font-size: 11px;
+  }
+  .profile-btn-name {
+    display: none;
+  }
+  .profile-btn-badge {
+    display: none;
+  }
+  .quick-task-btn {
+    padding: 6px 8px;
+    font-size: 11.5px;
+  }
+  .floating-buddy-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .floating-buddy-drawer {
+    right: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: 85vh !important;
+    height: 85dvh !important;
+    max-height: 85dvh !important;
+    border-radius: 16px 16px 0 0 !important;
+    border-bottom: none !important;
+  }
+  .modal-backdrop {
+    padding: 16px 10px;
+  }
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .kpi-strip {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .hero-card {
+    padding: 16px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -928,6 +1214,16 @@ function getGDriveConfig(){
 
 function saveGDriveConfig(cfg){
   try{ localStorage.setItem(GDRIVE_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){}
+  // Sync to central Render server so all connected devices inherit Google Drive DB
+  if(cfg && cfg.url){
+    try{
+      fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gdriveUrl: cfg.url })
+      }).catch(()=>{});
+    }catch(e){}
+  }
 }
 
 function isGDriveConnected(){
@@ -1080,10 +1376,51 @@ async function loadState(){
     // 1. Try local storage first for instant render
     const res = await StorageEngine.get(STORAGE_KEY);
     if(res && res.value){
-      STATE.data = JSON.parse(res.value);
+      try{ STATE.data = JSON.parse(res.value); }catch(e){}
     }
 
-    // 2. Check if Google Drive database is connected
+    // 2. Fetch Central Server Configuration (Multi-device auto-sync!)
+    try{
+      const srvCfgResp = await fetch('/api/config', { method: 'GET' });
+      if(srvCfgResp.ok){
+        const srvCfg = await srvCfgResp.json();
+        if(srvCfg){
+          const localGcfg = getGDriveConfig();
+          if(srvCfg.gdriveUrl && !localGcfg.url){
+            localGcfg.url = srvCfg.gdriveUrl;
+            localGcfg.autoSync = true;
+            try{ localStorage.setItem(GDRIVE_CONFIG_KEY, JSON.stringify(localGcfg)); }catch(e){}
+          }
+          if(srvCfg.apiKey){
+            if(!STATE.data) STATE.data = {};
+            if(!STATE.data.aiConfig) STATE.data.aiConfig = { provider: 'gemini', apiKey: '', model: 'gemini-2.5-flash' };
+            STATE.data.aiConfig.apiKey = srvCfg.apiKey;
+            if(srvCfg.model) STATE.data.aiConfig.model = srvCfg.model;
+            if(srvCfg.provider) STATE.data.aiConfig.provider = srvCfg.provider;
+          }
+        }
+      }
+    }catch(e){
+      console.log('Server config fetch notice:', e.message);
+    }
+
+    // If local data was empty or missing people/tasks, fetch central state from server
+    if(!STATE.data || !STATE.data.people){
+      try{
+        const srvStateResp = await fetch('/api/state', { method: 'GET' });
+        if(srvStateResp.ok){
+          const srvState = await srvStateResp.json();
+          if(srvState && srvState.data && srvState.data.people && srvState.data.tasks){
+            STATE.data = srvState.data;
+            await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
+          }
+        }
+      }catch(e){
+        console.log('Server state fetch notice:', e.message);
+      }
+    }
+
+    // 3. Check if Google Drive database is connected (auto-pull latest live data)
     const gcfg = getGDriveConfig();
     if(gcfg.url && gcfg.autoSync){
       try{
@@ -1094,7 +1431,15 @@ async function loadState(){
             STATE.data = gdata;
             await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
             gcfg.lastSync = new Date().toISOString();
-            saveGDriveConfig(gcfg);
+            try{ localStorage.setItem(GDRIVE_CONFIG_KEY, JSON.stringify(gcfg)); }catch(e){}
+            // Push latest state to server so other devices load fast
+            try{
+              fetch('/api/state', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: STATE.data })
+              }).catch(()=>{});
+            }catch(e){}
           }
         }
       }catch(err){
@@ -1102,7 +1447,7 @@ async function loadState(){
       }
     }
 
-    if(STATE.data){
+    if(STATE.data && STATE.data.people){
       refreshAssistantGreeting();
       // Auto-purge any legacy mock orders or sample discrepancies from previous sessions
       if(STATE.data.orders && STATE.data.orders.some(o => o.orderId === '#10842' || o.orderId === '#10843' || o.orderId === '#10844' || o.orderId === '#10845')){
@@ -1123,7 +1468,7 @@ async function loadState(){
       await saveState();
     }
   }catch(e){
-    STATE.data = buildDemoData();
+    if(!STATE.data || !STATE.data.people) STATE.data = buildDemoData();
     try{ await saveState(); }catch(e2){}
   }
 }
@@ -1140,6 +1485,14 @@ function saveState(){
         if(gcfg.url && gcfg.autoSync){
           syncWithGDrive({ notify: false });
         }
+        // Asynchronously sync state with central Render server
+        try{
+          fetch('/api/state', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: STATE.data })
+          }).catch(()=>{});
+        }catch(e){}
       }catch(e){}
       resolve();
     }, 250);
@@ -4547,10 +4900,19 @@ function submitAIConfig(){
   STATE.data.aiConfig.provider = provider;
   STATE.data.aiConfig.model = model;
 
+  // Sync to central server so all connected devices automatically inherit the API key
+  try{
+    fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey, model, provider })
+    }).catch(()=>{});
+  }catch(e){}
+
   saveState();
   closeModal();
   render();
-  toast(apiKey ? 'Google Gemini AI connected successfully!' : 'AI settings saved (using built-in engine).');
+  toast(apiKey ? 'Google Gemini AI connected & synced across all devices!' : 'AI settings saved (using built-in engine).');
 }
 
 function renderAIChatView(){
@@ -5699,14 +6061,18 @@ function buildDashboardSnapshot(){
 /* ============================== SEARCH ============================== */
 function onSearchInput(val){
   STATE.searchQuery = val;
+  const dInp = document.getElementById('global-search');
+  const mInp = document.getElementById('global-search-mobile');
+  if(dInp && dInp.value !== val) dInp.value = val;
+  if(mInp && mInp.value !== val) mInp.value = val;
   renderSearchResults();
 }
 
 function renderSearchResults(){
-  const slot = document.getElementById('search-results-slot');
-  if(!slot) return;
+  const slots = [document.getElementById('search-results-slot'), document.getElementById('search-results-slot-mobile')].filter(Boolean);
+  if(!slots.length) return;
   const q = STATE.searchQuery.trim().toLowerCase();
-  if(!q){ slot.innerHTML=''; return; }
+  if(!q){ slots.forEach(s => s.innerHTML=''); return; }
   const hits = [];
   STATE.data.tasks.forEach(t=>{ if(t.name.toLowerCase().includes(q)) hits.push({type:'Task', label:t.name, meta:personName(t.assignee)+' · '+t.status, action:`openTaskModal('${t.id}')`}); });
   STATE.data.projects.forEach(p=>{ if(p.name.toLowerCase().includes(q)) hits.push({type:'Initiative', label:p.name, meta:p.status, action:`goTo('projects',{selectedProjectId:'${p.id}'})`}); });
@@ -5715,18 +6081,20 @@ function renderSearchResults(){
   STATE.data.approvals.forEach(a=>{ if(a.item.toLowerCase().includes(q)) hits.push({type:'Approval', label:a.item, meta:a.status, action:`openApprovalModal('${a.id}')`}); });
   STATE.data.sops.forEach(s=>{ if(s.name.toLowerCase().includes(q)) hits.push({type:'SOP', label:s.name, meta:s.department, action:`goTo('sops')`}); });
   STATE.data.goals.forEach(g=>{ if(g.teamGoal.toLowerCase().includes(q)) hits.push({type:'Strategic Goal', label:g.teamGoal, meta:g.objective, action:`goTo('goals')`}); });
-  if(!hits.length){ slot.innerHTML = `<div class="search-results"><div class="search-hit" style="cursor:default;">No matches found for "${escapeHtml(STATE.searchQuery)}"</div></div>`; return; }
-  slot.innerHTML = `<div class="search-results">${hits.slice(0,10).map(h=>`<div class="search-hit" onclick="${h.action};clearSearch();">
-    <div class="search-hit-title">${escapeHtml(h.label)}</div>
-    <div class="search-hit-meta">${escapeHtml(h.type)} · ${escapeHtml(h.meta)}</div>
-  </div>`).join('')}</div>`;
+  const html = !hits.length
+    ? `<div class="search-results"><div class="search-hit" style="cursor:default;">No matches found for "${escapeHtml(STATE.searchQuery)}"</div></div>`
+    : `<div class="search-results">${hits.slice(0,10).map(h=>`<div class="search-hit" onclick="${h.action};clearSearch();">
+        <div class="search-hit-title">${escapeHtml(h.label)}</div>
+        <div class="search-hit-meta">${escapeHtml(h.type)} · ${escapeHtml(h.meta)}</div>
+      </div>`).join('')}</div>`;
+  slots.forEach(s => s.innerHTML = html);
 }
 
 function clearSearch(){ STATE.searchQuery=''; render(); }
 document.addEventListener('click', function(e){
   if(!e.target.closest('.search-wrap')){
-    const slot = document.getElementById('search-results-slot');
-    if(slot && STATE.searchQuery){ slot.innerHTML=''; }
+    const slots = [document.getElementById('search-results-slot'), document.getElementById('search-results-slot-mobile')].filter(Boolean);
+    if(STATE.searchQuery){ slots.forEach(s => s.innerHTML=''); }
   }
 });
 
@@ -5765,6 +6133,7 @@ const NAV_ITEMS = [
 function visibleNav(){ return NAV_ITEMS.filter(n=>n.roles.includes(STATE.currentRole)); }
 
 function goTo(view, extra){
+  closeMobileSidebar();
   STATE.currentView = view;
   if(extra){
     if(extra.currentTab) Object.assign(STATE.currentTab, extra.currentTab);
@@ -5817,13 +6186,44 @@ function currentDateHeaderStr(){
   return new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
 }
 
+
+/* ---------- Mobile Sidebar Drawer Controller ---------- */
+let MOBILE_SIDEBAR_OPEN = false;
+
+function toggleMobileSidebar(){
+  MOBILE_SIDEBAR_OPEN = !MOBILE_SIDEBAR_OPEN;
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if(sidebar) sidebar.classList.toggle('mobile-open', MOBILE_SIDEBAR_OPEN);
+  if(backdrop) backdrop.classList.toggle('active', MOBILE_SIDEBAR_OPEN);
+  if(MOBILE_SIDEBAR_OPEN){
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+}
+
+function closeMobileSidebar(){
+  MOBILE_SIDEBAR_OPEN = false;
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if(sidebar) sidebar.classList.remove('mobile-open');
+  if(backdrop) backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 function render(){
   if(!STATE.data){ return; }
   const app = document.getElementById('app');
   const nav = visibleNav();
   app.innerHTML = `
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
     <div class="shell">
       <aside class="sidebar">
+        <div class="mobile-sidebar-header">
+          <span class="mobile-sidebar-title">Menu &bull; ${escapeHtml(brandName())}</span>
+          <button class="mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Close menu">&times;</button>
+        </div>
         <div class="brand" onclick="openEditProfileModal()" style="cursor:pointer;" title="Click to customize brand & profile">
           <div class="brand-mark">${brandMark()}</div>
           <div class="brand-text">
@@ -5845,25 +6245,54 @@ function render(){
       </aside>
       <div class="main">
         <div class="topbar">
-          <span class="topbar-date">${currentDateHeaderStr()}</span>
-          <div class="search-wrap">
-            <span class="search-icon">&#128269;</span>
-            <input class="search-input" id="global-search" placeholder="Search orders, carriers, SOPs, tasks, team..." value="${escapeHtml(STATE.searchQuery)}" oninput="onSearchInput(this.value)" onfocus="onSearchInput(this.value)">
-            <div id="search-results-slot"></div>
+          <div class="topbar-main-row">
+            <div class="topbar-left">
+              <button class="mobile-nav-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+              </button>
+              <span class="topbar-date">${currentDateHeaderStr()}</span>
+              <span class="mobile-topbar-title">${escapeHtml(brandName())}</span>
+            </div>
+            
+            <div class="search-wrap desktop-search">
+              <span class="search-icon">&#128269;</span>
+              <input class="search-input" id="global-search" placeholder="Search orders, carriers, SOPs, tasks, team..." value="${escapeHtml(STATE.searchQuery)}" oninput="onSearchInput(this.value)" onfocus="onSearchInput(this.value)">
+              <div id="search-results-slot"></div>
+            </div>
+
+            <div class="topbar-actions">
+              <button class="gdrive-btn" onclick="openGDriveModal()" title="Google Drive Database Sync & Backup">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                <span class="gdrive-btn-text">Drive DB</span>
+                <span class="gdrive-badge ${isGDriveConnected()?'connected':'disconnected'}" id="gdrive-status-badge">${isGDriveConnected()?'Synced':'Connect'}</span>
+              </button>
+              <button class="profile-btn" onclick="openEditProfileModal()" title="Edit Your Profile & Brand">
+                ${avatarHtml('p-coo')}
+                <span class="profile-btn-name">${escapeHtml(personName('p-coo').split(' ')[0])}</span>
+                <span class="profile-btn-badge">Edit Profile</span>
+              </button>
+              <button class="icon-btn" title="Alerts & Notifications" onclick="openNotifications()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                ${notifCount()>0?`<span class="dot-badge">${notifCount()}</span>`:''}
+              </button>
+              <button class="btn-primary quick-task-btn" onclick="openQuickAddTask()">
+                <span class="quick-task-full">+ Quick Task</span>
+                <span class="quick-task-compact">+ Task</span>
+              </button>
+            </div>
           </div>
-          <div class="topbar-spacer"></div>
-          <button class="gdrive-btn" onclick="openGDriveModal()" title="Google Drive Database Sync & Backup">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
-            <span>Drive DB</span>
-            <span class="gdrive-badge ${isGDriveConnected()?'connected':'disconnected'}" id="gdrive-status-badge">${isGDriveConnected()?'Synced':'Connect'}</span>
-          </button>
-          <button class="profile-btn" onclick="openEditProfileModal()" title="Edit Your Profile & Brand">
-            ${avatarHtml('p-coo')}
-            <span>${escapeHtml(personName('p-coo').split(' ')[0])}</span>
-            <span class="profile-btn-badge">Edit Profile</span>
-          </button>
-          <button class="icon-btn" title="Alerts & Notifications" onclick="openNotifications()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>${notifCount()>0?`<span class="dot-badge">${notifCount()}</span>`:''}</button>
-          <button class="btn-primary" onclick="openQuickAddTask()">+ Quick Task</button>
+
+          <div class="topbar-search-row mobile-search">
+            <div class="search-wrap">
+              <span class="search-icon">&#128269;</span>
+              <input class="search-input" id="global-search-mobile" placeholder="Search orders, carriers, SOPs, tasks, team..." value="${escapeHtml(STATE.searchQuery)}" oninput="onSearchInput(this.value)" onfocus="onSearchInput(this.value)">
+              <div id="search-results-slot-mobile"></div>
+            </div>
+          </div>
         </div>
         <div class="view" id="view">${renderView()}</div>
       </div>
