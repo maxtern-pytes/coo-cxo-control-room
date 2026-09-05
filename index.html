@@ -3772,9 +3772,90 @@ let ASSISTANT_MESSAGES = [
   }
 ];
 
+
+function getAiConfig(){
+  return (STATE.data && STATE.data.aiConfig) ? STATE.data.aiConfig : { provider: 'gemini', apiKey: '', model: 'gemini-2.5-flash' };
+}
+
+function openAIConfigModal(){
+  const cfg = getAiConfig();
+  openModal(`
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">&#9881; Connect AI Engine (Google Gemini / LLM)</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px;line-height:1.45;">
+          Your Order Verifier already works locally out-of-the-box. To power the <b>AI Copilot Chat</b> with real-time deep executive reasoning, connect your free <b>Google Gemini API Key</b> below.
+        </div>
+        
+        <div class="field">
+          <label class="field-label">AI Model Provider</label>
+          <select class="field-input" id="ai-provider-select">
+            <option value="gemini" ${cfg.provider==='gemini'?'selected':''}>Google Gemini (Gemini 2.5 Flash / 1.5 Flash) — Recommended (Free)</option>
+            <option value="custom" ${cfg.provider==='custom'?'selected':''}>Custom OpenAI-compatible / Proxy Endpoint</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Google Gemini API Key *</label>
+          <input type="password" id="ai-api-key-input" value="${escapeHtml(cfg.apiKey||'')}" placeholder="AIzaSy...">
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">
+            Get a free key in 30 seconds from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--amber-deep);font-weight:600;text-decoration:underline;">Google AI Studio</a>.
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Model Selection</label>
+          <select class="field-input" id="ai-model-select">
+            <option value="gemini-2.5-flash" ${cfg.model==='gemini-2.5-flash'?'selected':''}>gemini-2.5-flash (Ultra-fast, high precision)</option>
+            <option value="gemini-1.5-flash" ${cfg.model==='gemini-1.5-flash'?'selected':''}>gemini-1.5-flash (Standard fallback)</option>
+            <option value="gemini-1.5-pro" ${cfg.model==='gemini-1.5-pro'?'selected':''}>gemini-1.5-pro (Deep complex reasoning)</option>
+          </select>
+        </div>
+
+        <div style="font-size:11.5px;color:var(--text-muted);background:var(--paper-sunken);padding:9px 12px;border-radius:var(--radius-s);line-height:1.4;">
+          &#128274; <b>Privacy & Security:</b> Your API key is stored only in your browser storage and your private Google Drive database. It is never shared or sent to any third party other than Google's official Gemini endpoint.
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitAIConfig()">Save &amp; Connect AI</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitAIConfig(){
+  const apiKey = document.getElementById('ai-api-key-input').value.trim();
+  const provider = document.getElementById('ai-provider-select').value;
+  const model = document.getElementById('ai-model-select').value;
+
+  if(!STATE.data.aiConfig) STATE.data.aiConfig = {};
+  STATE.data.aiConfig.apiKey = apiKey;
+  STATE.data.aiConfig.provider = provider;
+  STATE.data.aiConfig.model = model;
+
+  saveState();
+  closeModal();
+  render();
+  toast(apiKey ? 'Google Gemini AI connected successfully!' : 'AI settings saved (using built-in engine).');
+}
+
 function renderAIChatView(){
+  const cfg = getAiConfig();
+  const hasKey = Boolean(cfg.apiKey);
   return `
     <div class="assistant-shell">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--paper-sunken);border-radius:var(--radius-s);margin-bottom:12px;font-size:12px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-weight:700;">&#10024; AI Copilot Engine:</span>
+          <span>${hasKey ? 'Google ' + escapeHtml(cfg.model) : 'Embedded Operations Copilot'}</span>
+          <span class="chip ${hasKey?'chip-good':'chip-outline'}">${hasKey?'● Live LLM Connected':'● Active (Local Engine)'}</span>
+        </div>
+        <button class="btn small" onclick="openAIConfigModal()">&#9881; ${hasKey?'Change Key':'Connect Free Gemini Key'}</button>
+      </div>
       <div class="assistant-msgs" id="assistant-msgs">
         ${ASSISTANT_MESSAGES.map(m => `
           <div class="msg ${m.role==='user'?'user':'ai'} ${m.loading?'loading':''}">
@@ -4088,6 +4169,35 @@ async function askAssistant(question){
   }
 
   // General operational AI copilot response
+  const cfg = getAiConfig();
+  if(cfg.apiKey && cfg.provider === 'gemini'){
+    const snapshot = buildDashboardSnapshot();
+    const systemPrompt = "You are the executive AI copilot embedded in the Offcomfrt COO & CXO Control Room dashboard. You advise Arjun Mehta, who holds dual leadership over both Operations (Supply Chain, Warehouse, Logistics, Quality) and Customer Experience (Customer Support, Unboxing, CSAT, Returns).\n\nAnswer using the live dashboard state below. Ground your advice in named leaders, active projects, carrier SLAs, and current metrics. Be sharp, executive, and actionable.\n\nDASHBOARD STATE:\n" + JSON.stringify(snapshot);
+    
+    try {
+      const gUrl = "https://generativelanguage.googleapis.com/v1beta/models/" + (cfg.model || "gemini-2.5-flash") + ":generateContent?key=" + cfg.apiKey;
+      const gResp = await fetch(gUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemPrompt + "\n\nExecutive Question: " + question }] }]
+        })
+      });
+      if(gResp.ok){
+        const gData = await gResp.json();
+        const aiText = gData.candidates?.[0]?.content?.parts?.[0]?.text;
+        if(aiText){
+          ASSISTANT_MESSAGES.push({ role: 'ai', text: aiText });
+          render();
+          setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 40);
+          return;
+        }
+      }
+    } catch(err) {
+      console.log('Gemini API query error, falling back to embedded engine:', err);
+    }
+  }
+
   setTimeout(() => {
     let fallbackText = `Here is what the live control room data indicates across all connected platforms:\n`;
     const snapshot = buildDashboardSnapshot();
