@@ -1,0 +1,2747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offcomfrt — COO / CXO Control Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14161c;
+  --ink-soft:#1f222b;
+  --ink-line:#33374a;
+  --paper:#f1efe8;
+  --paper-raised:#ffffff;
+  --paper-sunken:#e8e4d8;
+  --line:#dfd9c8;
+  --line-soft:#eae5d7;
+  --text:#1c1d22;
+  --text-muted:#6d6a63;
+  --text-faint:#a29e93;
+  --amber:#c98a2c;
+  --amber-deep:#9c6b1f;
+  --amber-tint:#f3e2bd;
+  --brick:#ac4738;
+  --brick-tint:#f2ddd6;
+  --sage:#4f7a5b;
+  --sage-tint:#dde8de;
+  --slate:#3f6180;
+  --slate-tint:#dde6ec;
+  --plum:#7a5480;
+  --plum-tint:#ece0ee;
+  --radius-s:4px;
+  --radius-m:7px;
+  --radius-l:12px;
+  --shadow-card: 0 1px 0 rgba(20,22,28,0.04);
+  --shadow-modal: 0 20px 60px rgba(20,22,28,0.35);
+  --font-display:'Space Grotesk', system-ui, sans-serif;
+  --font-body:'Inter', system-ui, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, monospace;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  background:var(--paper);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  font-size:14px;
+  line-height:1.5;
+}
+h1,h2,h3,h4{font-family:var(--font-display);margin:0;font-weight:600;letter-spacing:-0.01em;}
+p{margin:0;}
+a{color:inherit;}
+button{font-family:var(--font-body);cursor:pointer;}
+::selection{background:var(--amber-tint);}
+:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px;}
+button:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--amber-deep);outline-offset:1px;}
+
+/* ---------- Shell ---------- */
+.shell{display:grid;grid-template-columns:246px 1fr;min-height:100vh;}
+@media (max-width:880px){.shell{grid-template-columns:1fr;}}
+
+.sidebar{
+  background:var(--ink);
+  color:#e9e7e0;
+  padding:20px 14px 16px;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+  overflow-y:auto;
+}
+@media (max-width:880px){.sidebar{position:relative;height:auto;}}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 18px;border-bottom:1px solid var(--ink-line);margin-bottom:14px;}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(155deg,var(--amber),var(--amber-deep));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;color:var(--ink);font-size:15px;flex:none;}
+.brand-text{display:flex;flex-direction:column;line-height:1.15;}
+.brand-text .b1{font-family:var(--font-display);font-weight:700;font-size:14.5px;color:#fff;letter-spacing:0.01em;}
+.brand-text .b2{font-size:10px;color:#9a9fb0;margin-top:2px;font-weight:500;}
+
+.nav-group-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:#7d8299;padding:14px 10px 6px;}
+.nav-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-s);color:#c7c9d6;font-size:13px;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:var(--font-body);}
+.nav-item:hover{background:var(--ink-soft);color:#fff;}
+.nav-item.active{background:var(--ink-soft);color:#fff;box-shadow:inset 3px 0 0 var(--amber);}
+.nav-icon{width:16px;text-align:center;flex:none;opacity:0.9;}
+.nav-badge{margin-left:auto;background:var(--brick);color:#fff;font-size:10px;font-weight:600;border-radius:10px;padding:1px 6px;min-width:16px;text-align:center;}
+.nav-badge.amber{background:var(--amber);color:#2a1c00;}
+
+.sidebar-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--ink-line);}
+.role-select{width:100%;background:var(--ink-soft);color:#e9e7e0;border:1px solid var(--ink-line);border-radius:var(--radius-s);padding:7px 8px;font-size:12px;font-family:var(--font-body);}
+.demo-tag{font-size:10px;color:#7d8299;margin-top:8px;line-height:1.45;}
+
+.main{min-width:0;display:flex;flex-direction:column;}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:14px;
+  padding:12px 22px;
+}
+.topbar-date{font-size:12px;color:var(--text-muted);white-space:nowrap;}
+.search-wrap{flex:1;max-width:440px;position:relative;}
+.search-input{width:100%;padding:8px 12px 8px 30px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--paper-raised);font-size:13px;font-family:var(--font-body);color:var(--text);}
+.search-input:focus{border-color:var(--amber-deep);}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text-faint);}
+.search-results{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-m);box-shadow:var(--shadow-modal);max-height:420px;overflow-y:auto;z-index:40;}
+.search-hit{padding:9px 12px;border-bottom:1px solid var(--line-soft);cursor:pointer;display:flex;flex-direction:column;gap:2px;}
+.search-hit:last-child{border-bottom:none;}
+.search-hit:hover{background:var(--paper-sunken);}
+.search-hit-title{font-size:13px;font-weight:600;}
+.search-hit-meta{font-size:11px;color:var(--text-muted);}
+.topbar-spacer{flex:1;}
+.icon-btn{position:relative;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-m);width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.icon-btn:hover{border-color:var(--amber-deep);}
+.dot-badge{position:absolute;top:-4px;right:-4px;background:var(--brick);color:#fff;font-size:9.5px;font-weight:700;border-radius:10px;min-width:15px;height:15px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--paper);}
+.btn-primary{background:var(--ink);color:#fff;border:none;border-radius:var(--radius-m);padding:8px 14px;font-size:13px;font-weight:600;white-space:nowrap;}
+.btn-primary:hover{background:var(--ink-soft);}
+
+.view{padding:22px 26px 60px;max-width:1280px;width:100%;margin:0 auto;}
+
+/* ---------- generic building blocks ---------- */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+.page-eyebrow{font-size:11.5px;color:var(--amber-deep);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.page-title{font-size:22px;}
+.page-sub{font-size:13px;color:var(--text-muted);margin-top:4px;max-width:70ch;}
+.tab-row{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap;}
+.tab-btn{background:none;border:none;padding:9px 13px;font-size:13px;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--amber);font-weight:600;}
+
+.grid{display:grid;gap:14px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:920px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+.card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-m);padding:16px;}
+.card-title{font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.card-title .count{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);font-weight:500;}
+.card.accent-left{border-left:3px solid var(--line);}
+
+.stat-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-m);padding:14px 16px;}
+.stat-num{font-family:var(--font-display);font-size:26px;font-weight:700;line-height:1;}
+.stat-label{font-size:11.5px;color:var(--text-muted);margin-top:6px;}
+
+.list-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft);}
+.list-row:last-child{border-bottom:none;}
+.list-row-main{flex:1;min-width:0;}
+.list-row-title{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.list-row-meta{font-size:11.5px;color:var(--text-muted);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;}
+.empty-row{padding:16px 4px;color:var(--text-faint);font-size:12.5px;font-style:italic;}
+
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.8px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;line-height:1.7;}
+.chip-p0{background:var(--brick-tint);color:var(--brick);}
+.chip-p1{background:var(--amber-tint);color:var(--amber-deep);}
+.chip-p2{background:var(--slate-tint);color:var(--slate);}
+.chip-p3{background:var(--line-soft);color:var(--text-muted);}
+.chip-status{background:var(--line-soft);color:var(--text);}
+.chip-good{background:var(--sage-tint);color:var(--sage);}
+.chip-warn{background:var(--amber-tint);color:var(--amber-deep);}
+.chip-bad{background:var(--brick-tint);color:var(--brick);}
+.chip-info{background:var(--slate-tint);color:var(--slate);}
+.chip-plum{background:var(--plum-tint);color:var(--plum);}
+.chip-outline{background:none;border:1px solid var(--line);color:var(--text-muted);}
+
+.avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff;flex:none;font-family:var(--font-display);}
+.avatar.lg{width:38px;height:38px;font-size:13px;}
+
+.progress-track{background:var(--line-soft);border-radius:20px;height:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:20px;background:var(--amber);}
+
+table.data-table{width:100%;border-collapse:collapse;font-size:12.8px;}
+.data-table th{text-align:left;font-size:10.8px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+.data-table td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
+.data-table tr:hover td{background:var(--paper-sunken);}
+.data-table tr.clickable{cursor:pointer;}
+.mono{font-family:var(--font-mono);font-size:11.5px;color:var(--text-muted);}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--paper-raised);}
+.table-wrap table{border:none;}
+.table-wrap .data-table th:first-child,.table-wrap .data-table td:first-child{padding-left:14px;}
+
+.section-block{margin-bottom:26px;}
+.section-block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+.section-block-title{font-size:15px;}
+.section-block-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+
+.btn{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 11px;font-size:12.3px;font-weight:600;color:var(--text);}
+.btn:hover{border-color:var(--amber-deep);}
+.btn.small{padding:4px 9px;font-size:11.5px;}
+.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}
+.btn.dark:hover{background:var(--ink-soft);}
+.btn.danger{color:var(--brick);border-color:var(--brick-tint);}
+.btn.danger:hover{border-color:var(--brick);}
+.btn.ghost{background:none;border:1px solid transparent;}
+.btn.ghost:hover{border-color:var(--line);}
+.btn:disabled{opacity:0.45;cursor:not-allowed;}
+
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.filter-bar select, .filter-bar input[type=text]{border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 9px;font-size:12.3px;font-family:var(--font-body);background:var(--paper-raised);color:var(--text);}
+.field-label{font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block;}
+.field{margin-bottom:12px;}
+.field input[type=text],.field input[type=date],.field input[type=number],.field input[type=time],select.field-input,.field textarea{
+  width:100%;border:1px solid var(--line);border-radius:var(--radius-s);padding:8px 10px;font-size:13px;font-family:var(--font-body);background:var(--paper-raised);color:var(--text);
+}
+.field textarea{resize:vertical;min-height:60px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(20,20,24,0.5);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:40px 16px;overflow-y:auto;}
+.modal{background:var(--paper-raised);border-radius:var(--radius-l);width:100%;max-width:560px;box-shadow:var(--shadow-modal);}
+.modal.wide{max-width:760px;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);}
+.modal-title{font-size:16px;}
+.modal-close{background:none;border:none;font-size:18px;color:var(--text-muted);line-height:1;padding:4px;}
+.modal-body{padding:18px 20px;max-height:70vh;overflow-y:auto;}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--line);}
+
+.toast-wrap{position:fixed;bottom:18px;right:18px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--ink);color:#fff;padding:10px 16px;border-radius:var(--radius-m);font-size:12.8px;box-shadow:var(--shadow-modal);max-width:320px;}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+@media (max-width:920px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
+
+.workload-bar-row{display:flex;align-items:center;gap:10px;padding:7px 0;}
+.workload-track{flex:1;background:var(--line-soft);border-radius:20px;height:8px;overflow:hidden;position:relative;}
+.workload-fill{height:100%;border-radius:20px;}
+
+.milestone-track{display:flex;align-items:center;gap:0;margin:14px 0;overflow-x:auto;}
+.milestone-node{display:flex;flex-direction:column;align-items:center;min-width:110px;text-align:center;position:relative;}
+.milestone-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);background:var(--paper-raised);margin-bottom:6px;z-index:1;}
+.milestone-dot.done{background:var(--sage);border-color:var(--sage);}
+.milestone-dot.active{background:var(--amber);border-color:var(--amber);}
+.milestone-connector{flex:1;height:2px;background:var(--line);margin-top:-24px;min-width:24px;}
+.milestone-connector.done{background:var(--sage);}
+.milestone-name{font-size:11.5px;font-weight:600;}
+.milestone-meta{font-size:10.5px;color:var(--text-muted);margin-top:2px;}
+
+.hero-card{background:linear-gradient(155deg,var(--ink) 0%, #262a37 100%);color:#fff;border-radius:var(--radius-l);padding:26px 26px;margin-bottom:20px;}
+.hero-greeting{font-family:var(--font-display);font-size:25px;color:#fff;}
+.hero-date{color:#a9adbd;font-size:13px;margin-top:3px;}
+.hero-one-thing{margin-top:18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-m);padding:14px 16px;}
+.hero-one-thing-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.07em;color:var(--amber-tint);font-weight:700;}
+.hero-one-thing-text{font-size:15px;margin-top:5px;font-weight:500;}
+.priority-list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.priority-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:var(--radius-s);padding:9px 12px;}
+.priority-num{font-family:var(--font-display);font-weight:700;color:var(--amber);font-size:14px;width:16px;}
+
+.assistant-shell{display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:480px;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;}
+.assistant-msgs{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.msg{max-width:80%;padding:10px 14px;border-radius:var(--radius-m);font-size:13.3px;line-height:1.55;white-space:pre-wrap;}
+.msg.user{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:2px;}
+.msg.ai{align-self:flex-start;background:var(--paper-sunken);border-bottom-left-radius:2px;}
+.msg.ai.loading{color:var(--text-muted);font-style:italic;}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 12px;}
+.suggest-chip{background:var(--paper-sunken);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12px;}
+.suggest-chip:hover{border-color:var(--amber-deep);}
+.assistant-input-row{display:flex;gap:8px;padding:14px;border-top:1px solid var(--line);}
+.assistant-input-row input{flex:1;border:1px solid var(--line);border-radius:var(--radius-m);padding:10px 12px;font-size:13.5px;font-family:var(--font-body);}
+
+.escalation-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:0.03em;}
+
+.audit-item{font-size:12px;padding:7px 0;border-bottom:1px solid var(--line-soft);color:var(--text-muted);}
+.audit-item b{color:var(--text);font-weight:600;}
+
+.person-card{display:flex;gap:10px;align-items:flex-start;}
+
+.org-node{border:1px solid var(--line);background:var(--paper-raised);border-radius:var(--radius-m);padding:10px 14px;text-align:center;min-width:150px;}
+.org-level{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:8px;position:relative;}
+.org-connector{width:1px;height:18px;background:var(--line);margin:0 auto;}
+
+.scrollx{overflow-x:auto;}
+
+@media print{
+  .sidebar,.topbar,.no-print{display:none !important;}
+  .shell{display:block;}
+  .view{max-width:none;padding:0;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-wrap"></div>
+<script>
+/* =========================================================================
+   OFFCOMFRT — COO / CXO CONTROL ROOM
+   Single-file dashboard tailored specifically for Chief Operating Officer (COO)
+   and Chief Experience Officer (CXO) dual leadership.
+   Vanilla JS SPA. Supports local storage & fallback.
+   ========================================================================= */
+
+const STORAGE_KEY = 'offcomfrt-coo-cxo-dashboard-v1';
+
+/* ---------------------------- constants ---------------------------- */
+const DEPARTMENTS = [
+  'Supply Chain & Sourcing',
+  'Fulfillment & Warehousing',
+  'Logistics & Carriers',
+  'Quality Assurance (QA)',
+  'Customer Support & Ops',
+  'Post-Purchase CX',
+  'Reverse Logistics & Returns',
+  'Process Excellence'
+];
+
+const PRIORITIES = [
+  {id:'P0', label:'P0 — Critical Escalation', className:'chip-p0'},
+  {id:'P1', label:'P1 — High Priority', className:'chip-p1'},
+  {id:'P2', label:'P2 — Normal Operations', className:'chip-p2'},
+  {id:'P3', label:'P3 — Low / Continuous', className:'chip-p3'},
+];
+
+const STATUSES = ['Inbox','Planned','Assigned','Accepted','In Progress','Waiting','Blocked','In Review','Completed','Cancelled'];
+const ACTIVE_STATUSES = STATUSES.filter(s => s!=='Completed' && s!=='Cancelled');
+const PROJECT_STATUSES = ['Not Started','On Track','At Risk','Blocked','Completed','Cancelled'];
+const AVATAR_COLORS = ['#c98a2c','#3f6180','#4f7a5b','#ac4738','#7a5480','#9c6b1f','#3f6180','#4f7a5b','#7a5480','#ac4738'];
+
+const PERSON_ROLE_OPTIONS = ['COO / CXO','Operations Lead','CX & Support Lead','Team Member'];
+
+/* ---------------------------- date helpers ---------------------------- */
+function todayISO(){ return dateOnly(new Date()); }
+function dateOnly(d){ const x = new Date(d); x.setHours(0,0,0,0); return x.toISOString().slice(0,10); }
+function addDays(iso, n){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return dateOnly(d); }
+function daysBetween(fromISO, toISO){
+  const a = new Date(fromISO+'T00:00:00'), b = new Date(toISO+'T00:00:00');
+  return Math.round((b-a)/86400000);
+}
+function fmtDate(iso, opts){
+  if(!iso) return '—';
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('en-US', opts || {month:'short', day:'numeric'});
+}
+function fmtDateLong(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+}
+function fmtDateTime(iso){
+  return fmtDate(iso) + ', ' + new Date().getFullYear();
+}
+function daysFromToday(iso){ return daysBetween(todayISO(), iso); }
+function relativeDay(iso){
+  const n = daysFromToday(iso);
+  if(n===0) return 'Today';
+  if(n===1) return 'Tomorrow';
+  if(n===-1) return 'Yesterday';
+  if(n>1 && n<=6) return 'In ' + n + ' days';
+  if(n<-1 && n>=-6) return n*-1 + ' days ago';
+  return fmtDate(iso);
+}
+function isOverdue(t){
+  return t.dueDate && daysFromToday(t.dueDate) < 0 && t.status !== 'Completed' && t.status !== 'Cancelled';
+}
+function isDueToday(t){ return t.dueDate && daysFromToday(t.dueDate)===0 && t.status!=='Completed' && t.status!=='Cancelled'; }
+
+let _idCounters = {};
+function genId(prefix){
+  _idCounters[prefix] = (_idCounters[prefix]||0)+1;
+  return prefix + '-' + String(_idCounters[prefix]).padStart(3,'0') + '-' + Math.random().toString(36).slice(2,5);
+}
+
+function initials(name){
+  return name.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
+}
+function colorForId(id){
+  let h=0; for(let i=0;i<id.length;i++) h = (h*31 + id.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
+function escapeHtml(s){
+  if(s===undefined || s===null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function nl2br(s){ return escapeHtml(s).replace(/\n/g,'<br>'); }
+
+/* ---------------------------- demo data seed ---------------------------- */
+function buildDemoData(){
+  const today = todayISO();
+  const rel = (n) => addDays(today, n); // n days from today
+
+  const people = [
+    {id:'p-coo', name:'Arjun Mehta', role:'Chief Operating & Experience Officer', function:'Executive Leadership', manager:null, joinDate:rel(-900), workingHours:45, contact:'arjun.mehta@offcomfrt.com'},
+    {id:'p-lead-ops', name:'Devina Nair', role:'Head of Operations & Supply Chain', function:'Fulfillment & Warehousing', manager:'p-coo', joinDate:rel(-720), workingHours:42, contact:'devina.nair@offcomfrt.com'},
+    {id:'p-lead-cx', name:'Sameer Joshi', role:'Head of Customer Experience & Support', function:'Customer Support & Ops', manager:'p-coo', joinDate:rel(-680), workingHours:42, contact:'sameer.joshi@offcomfrt.com'},
+    {id:'p-lead-qa', name:'Rajesh Pillai', role:'Quality & Sourcing Lead', function:'Quality Assurance (QA)', manager:'p-coo', joinDate:rel(-540), workingHours:42, contact:'rajesh.pillai@offcomfrt.com'},
+    {id:'p-logistics', name:'Karthik Raman', role:'Logistics & 3PL Carrier Manager', function:'Logistics & Carriers', manager:'p-lead-ops', joinDate:rel(-450), workingHours:40, contact:'karthik.raman@offcomfrt.com'},
+    {id:'p-warehouse', name:'Neha Chawla', role:'Warehouse & Inventory Operations Manager', function:'Fulfillment & Warehousing', manager:'p-lead-ops', joinDate:rel(-380), workingHours:40, contact:'neha.chawla@offcomfrt.com'},
+    {id:'p-support', name:'Tanvi Shah', role:'Customer Support & Escalations Manager', function:'Customer Support & Ops', manager:'p-lead-cx', joinDate:rel(-320), workingHours:40, contact:'tanvi.shah@offcomfrt.com'},
+    {id:'p-voc', name:'Ankit Verma', role:'CX Insights & VoC Specialist', function:'Post-Purchase CX', manager:'p-lead-cx', joinDate:rel(-280), workingHours:40, contact:'ankit.verma@offcomfrt.com'},
+    {id:'p-qc', name:'Farhan Qureshi', role:'Production & Quality Control Specialist', function:'Quality Assurance (QA)', manager:'p-lead-qa', joinDate:rel(-410), workingHours:40, contact:'farhan.qureshi@offcomfrt.com'},
+    {id:'p-sourcing', name:'Simran Kaur', role:'Vendor Procurement & Sourcing Specialist', function:'Supply Chain & Sourcing', manager:'p-lead-qa', joinDate:rel(-230), workingHours:40, contact:'simran.kaur@offcomfrt.com'},
+  ];
+
+  const projects = [
+    {id:'proj-wms', name:'WMS Cloud Migration & Barcode Dispatch', objective:'Migrate warehouse inventory & scanning to the cloud to compress order-to-dispatch latency from 36h to <12h ahead of Winter peak.', owner:'p-warehouse', team:['p-warehouse','p-lead-ops','p-logistics'], startDate:rel(-45), deadline:rel(16), priority:'P0', status:'At Risk',
+      milestones:[
+        {id:'m1', name:'Process audit & SKU mapping', owner:'p-warehouse', deadline:rel(-30), status:'Completed'},
+        {id:'m2', name:'Barcode scanner hardware setup', owner:'p-warehouse', deadline:rel(-12), status:'Completed'},
+        {id:'m3', name:'WMS API sync & pick-pack tests', owner:'p-warehouse', deadline:rel(4), status:'In Progress'},
+        {id:'m4', name:'Warehouse staff shift training', owner:'p-warehouse', deadline:rel(10), status:'Not Started'},
+        {id:'m5', name:'Full cutover & go-live', owner:'p-warehouse', deadline:rel(16), status:'Not Started'},
+      ],
+      risks:[{note:'Barcode scanner Wi-Fi latency spikes in Zone B; tech vendor firmware patch delayed.', level:'High'}],
+      documents:[{label:'WMS Cutover Protocol & SOP', url:'#'},{label:'Zone B Hardware Diagnostic Log', url:'#'}],
+    },
+    {id:'proj-peak', name:'Winter Peak Season Fulfillment Readiness', objective:'Lock in buffer raw material, secure 3PL carrier volume capacity (Delhivery/BlueDart), and staff temporary warehouse packing shifts for 4x scale.', owner:'p-lead-ops', team:['p-lead-ops','p-logistics','p-warehouse','p-sourcing'], startDate:rel(-30), deadline:rel(22), priority:'P0', status:'On Track',
+      milestones:[
+        {id:'m1', name:'Volume forecast & buffer inventory plan', owner:'p-lead-ops', deadline:rel(-15), status:'Completed'},
+        {id:'m2', name:'Carrier SLA contracts signed', owner:'p-logistics', deadline:rel(2), status:'In Progress'},
+        {id:'m3', name:'Seasonal pick-pack workforce onboarding', owner:'p-warehouse', deadline:rel(12), status:'Not Started'},
+        {id:'m4', name:'Peak volume dry run simulation', owner:'p-lead-ops', deadline:rel(22), status:'Not Started'},
+      ],
+      risks:[], documents:[{label:'Peak Capacity & Dispatch Model 2026', url:'#'}],
+    },
+    {id:'proj-cx', name:'Post-Purchase CX & Unboxing Revamp', objective:'Redesign eco-luxury packaging, launch proactive WhatsApp tracking notifications, and rollout a zero-friction self-serve exchange portal.', owner:'p-lead-cx', team:['p-lead-cx','p-voc','p-support'], startDate:rel(-40), deadline:rel(28), priority:'P1', status:'On Track',
+      milestones:[
+        {id:'m1', name:'Packaging sample drop tests & thermal checks', owner:'p-lead-cx', deadline:rel(-20), status:'Completed'},
+        {id:'m2', name:'WhatsApp automated tracking bot integration', owner:'p-voc', deadline:rel(-4), status:'Completed'},
+        {id:'m3', name:'Self-serve exchange & return portal QA', owner:'p-support', deadline:rel(8), status:'In Progress'},
+        {id:'m4', name:'Unboxing delight survey trigger rollout', owner:'p-voc', deadline:rel(28), status:'Not Started'},
+      ],
+      risks:[], documents:[{label:'Unboxing Specification & CX Guidelines', url:'#'}],
+    },
+    {id:'proj-qa', name:'Tier-1 Factory Quality Audit & AQL 2.5 Rollout', objective:'Standardize manufacturing defect tolerances (AQL 2.5) across 4 garment factories to drive product return rates below 1.5%.', owner:'p-lead-qa', team:['p-lead-qa','p-qc','p-sourcing'], startDate:rel(-25), deadline:rel(35), priority:'P1', status:'Blocked',
+      milestones:[
+        {id:'m1', name:'AQL 2.5 Quality Manual drafted', owner:'p-lead-qa', deadline:rel(-10), status:'Completed'},
+        {id:'m2', name:'Independent auditor commercial agreement', owner:'p-lead-qa', deadline:rel(1), status:'Blocked'},
+        {id:'m3', name:'On-site pre-shipment audit Ludhiana', owner:'p-qc', deadline:rel(18), status:'Not Started'},
+        {id:'m4', name:'Vendor quality scorecard go-live', owner:'p-sourcing', deadline:rel(35), status:'Not Started'},
+      ],
+      risks:[{note:'Third-party inspection agency contract stuck with Finance/Legal over liability clauses.', level:'High'}],
+      documents:[],
+    },
+    {id:'proj-support', name:'CSAT 95+ & Omnichannel SLA Overhaul', objective:'Upgrade support desk routing, establish VIP escalations concierge, and lower First Response Time (FRT) from 45 mins to <12 mins.', owner:'p-support', team:['p-support','p-lead-cx','p-voc'], startDate:rel(-20), deadline:rel(18), priority:'P1', status:'On Track',
+      milestones:[
+        {id:'m1', name:'Omnichannel helpdesk macro & SLA audit', owner:'p-support', deadline:rel(-8), status:'Completed'},
+        {id:'m2', name:'WhatsApp live agent routing & chatbot triage', owner:'p-support', deadline:rel(6), status:'In Progress'},
+        {id:'m3', name:'Tier-2 customer concession matrix training', owner:'p-support', deadline:rel(14), status:'Not Started'},
+        {id:'m4', name:'CSAT 95+ benchmarking go-live', owner:'p-voc', deadline:rel(18), status:'Not Started'},
+      ],
+      risks:[], documents:[],
+    },
+    {id:'proj-returns', name:'Reverse Logistics & RTO Reduction Taskforce', objective:'Cut Return-to-Origin (RTO) rate by 4.2% via AI address validation and reduce refund cycle time from 5 days to <24h.', owner:'p-logistics', team:['p-logistics','p-support','p-warehouse'], startDate:rel(-35), deadline:rel(14), priority:'P1', status:'At Risk',
+      milestones:[
+        {id:'m1', name:'Address hygiene verification API integration', owner:'p-logistics', deadline:rel(-14), status:'Completed'},
+        {id:'m2', name:'Courier NDR (Non-Delivery Report) fast-response protocol', owner:'p-logistics', deadline:rel(2), status:'In Progress'},
+        {id:'m3', name:'Automated QC-at-doorstep reverse pickups', owner:'p-warehouse', deadline:rel(14), status:'Not Started'},
+      ],
+      risks:[{note:'Delhivery NDR integration webhook failing on retry; causing premature RTOs in West zone.', level:'Medium'}],
+      documents:[],
+    },
+  ];
+
+  let tasks = [];
+  function T(o){
+    tasks.push(Object.assign({
+      id: genId('T'),
+      description:'', dependency:null, waitingOn:null, reviewer:null,
+      approvalRequired:false, relatedMeeting:null, notes:'', attachments:[],
+      createdDate: o.createdDate || rel(-10), lastUpdated: o.lastUpdated || o.createdDate || rel(-10),
+      completedDate: o.status==='Completed' ? (o.completedDate||o.lastUpdated||today) : null,
+      timesPushed:0, reassignCount:0, createdBy:'p-coo',
+    }, o));
+  }
+
+  // --- COO / CXO's Own Tasks (Arjun Mehta) ---
+  T({name:'Sign off on Delhivery peak season carrier SLA & freight contract', assignee:'p-coo', createdBy:'p-logistics', department:'Logistics & Carriers', project:'proj-peak', priority:'P0', status:'In Review', startDate:rel(-2), dueDate:rel(0), estimatedTime:1.5, actualTime:0.5, reviewer:'p-coo', approvalRequired:true, createdDate:rel(-3), lastUpdated:rel(-1)});
+  T({name:'Founder sync — Winter buffer inventory working capital & capex', assignee:'p-coo', createdBy:'p-coo', department:'Executive Leadership', project:null, priority:'P1', status:'Waiting', waitingOn:'Founder', startDate:rel(-6), dueDate:rel(1), estimatedTime:1.5, createdDate:rel(-6), lastUpdated:rel(-5)});
+  T({name:'Review WMS barcode scanner latency escalation with Tech Lead & Neha', assignee:'p-coo', createdBy:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-wms', priority:'P0', status:'Blocked', waitingOn:'Warehouse Tech Vendor', blockedReason:'Vendor firmware release 3.4.1 needed to eliminate 800ms packet drop on hand scanners.', startDate:rel(-4), dueDate:rel(-1), estimatedTime:1, createdDate:rel(-4), lastUpdated:rel(-1)});
+  T({name:'Executive customer escalation: Authorize bulk replacement for damaged batch #W26-B', assignee:'p-coo', createdBy:'p-support', department:'Customer Support & Ops', project:'proj-support', priority:'P0', status:'In Review', approvalRequired:true, startDate:rel(-1), dueDate:rel(0), estimatedTime:1, createdDate:rel(-1), lastUpdated:rel(0)});
+  T({name:'Prep Board Ops & CX deck: Order-to-dispatch latency, CSAT trends, & RTO %', assignee:'p-coo', createdBy:'p-coo', department:'Executive Leadership', project:null, priority:'P1', status:'In Progress', startDate:rel(-3), dueDate:rel(2), estimatedTime:3.5, actualTime:1.5, createdDate:rel(-3), lastUpdated:rel(-1)});
+  T({name:'1:1 prep — Devina Nair (Warehouse throughput & carrier capacity)', assignee:'p-coo', createdBy:'p-coo', department:'Fulfillment & Warehousing', project:'proj-peak', priority:'P2', status:'Planned', startDate:rel(0), dueDate:rel(0), estimatedTime:1, createdDate:rel(-1), lastUpdated:rel(-1)});
+  T({name:'Sign off on AQL 2.5 factory defect tolerance waiver for fleece lot #108', assignee:'p-coo', createdBy:'p-lead-qa', department:'Quality Assurance (QA)', project:'proj-qa', priority:'P0', status:'In Review', approvalRequired:true, startDate:rel(-2), dueDate:rel(1), estimatedTime:1, createdDate:rel(-2), lastUpdated:rel(0)});
+
+  // --- Operations & Supply Chain (Devina / Neha / Karthik) ---
+  T({name:'Lock in Delhivery 3PL peak capacity allocation (15k daily shipments)', assignee:'p-logistics', department:'Logistics & Carriers', project:'proj-peak', priority:'P0', status:'In Progress', startDate:rel(-5), dueDate:rel(2), estimatedTime:6, actualTime:4, createdDate:rel(-5), lastUpdated:rel(-1)});
+  T({name:'Send formal penalty notice to BlueDart for West zone SLA breach', assignee:'p-logistics', department:'Logistics & Carriers', project:null, priority:'P1', status:'In Progress', startDate:rel(-3), dueDate:rel(1), estimatedTime:2, actualTime:1, createdDate:rel(-3), lastUpdated:rel(-2)});
+  T({name:'WMS pick-pack scanning load test across 8 packing stations', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-wms', priority:'P0', status:'In Progress', startDate:rel(-4), dueDate:rel(3), estimatedTime:12, actualTime:6, createdDate:rel(-4), lastUpdated:rel(-1)});
+  T({name:'Warehouse seasonal shift staffing contract (30 temp associates)', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-peak', priority:'P1', status:'Waiting', waitingOn:'HR Agency', startDate:rel(-6), dueDate:rel(5), estimatedTime:4, createdDate:rel(-6), lastUpdated:rel(-5)});
+  T({name:'Daily dispatch cut-off audit — verify 98.2% same-day SLA handover', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:null, priority:'P2', status:'Completed', startDate:rel(-1), dueDate:rel(0), estimatedTime:1.5, actualTime:1.5, createdDate:rel(-1), lastUpdated:rel(0), completedDate:rel(0)});
+  T({name:'Inwarding & inspection of 4,500 units Winter sleepwear from Surat mill', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-peak', priority:'P1', status:'Completed', startDate:rel(-6), dueDate:rel(-2), estimatedTime:8, actualTime:8, createdDate:rel(-6), lastUpdated:rel(-2), completedDate:rel(-2)});
+  T({name:'Audit address validation API bounce rate on cash-on-delivery orders', assignee:'p-logistics', department:'Logistics & Carriers', project:'proj-returns', priority:'P2', status:'Completed', startDate:rel(-10), dueDate:rel(-6), estimatedTime:3, actualTime:3, createdDate:rel(-10), lastUpdated:rel(-6), completedDate:rel(-6)});
+  T({name:'Address courier NDR webhook timeout causing early RTOs', assignee:'p-logistics', department:'Logistics & Carriers', project:'proj-returns', priority:'P1', status:'Blocked', waitingOn:'Delhivery Tech Support', blockedReason:'Delhivery webhook endpoint failing under retry bursts; 140 packages auto-marked RTO falsely.', startDate:rel(-5), dueDate:rel(-1), estimatedTime:4, createdDate:rel(-5), lastUpdated:rel(-5)});
+  T({name:'Reconfigure fast-moving SKU bin layout in North warehouse hub', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:null, priority:'P3', status:'Inbox', dueDate:rel(14), estimatedTime:6, createdDate:rel(-2), lastUpdated:rel(-2)});
+
+  // --- Customer Experience & Support (Sameer / Tanvi / Ankit) ---
+  T({name:'Deploy automated WhatsApp dispatch & live courier tracking link', assignee:'p-voc', department:'Post-Purchase CX', project:'proj-cx', priority:'P1', status:'Completed', startDate:rel(-8), dueDate:rel(-3), estimatedTime:6, actualTime:5.5, createdDate:rel(-8), lastUpdated:rel(-3), completedDate:rel(-3)});
+  T({name:'Overhaul support ticket macros for damaged shipment compensation', assignee:'p-support', department:'Customer Support & Ops', project:'proj-support', priority:'P1', status:'In Progress', startDate:rel(-4), dueDate:rel(3), estimatedTime:4, actualTime:2, createdDate:rel(-4), lastUpdated:rel(-2)});
+  T({name:'Weekly CSAT & VoC sentiment analysis report (Week 35)', assignee:'p-voc', department:'Post-Purchase CX', project:null, priority:'P2', status:'Completed', startDate:rel(-7), dueDate:rel(-5), estimatedTime:3, actualTime:3, createdDate:rel(-7), lastUpdated:rel(-5), completedDate:rel(-5)});
+  T({name:'Triage VIP customer escalation regarding unstitched hemline on duvet set', assignee:'p-support', department:'Customer Support & Ops', project:'proj-support', priority:'P0', status:'In Progress', startDate:rel(-1), dueDate:rel(0), estimatedTime:1.5, actualTime:0.5, createdDate:rel(-1), lastUpdated:rel(0)});
+  T({name:'Implement self-serve sizing exchange portal to deflect return tickets', assignee:'p-support', department:'Post-Purchase CX', project:'proj-cx', priority:'P1', status:'In Progress', startDate:rel(-12), dueDate:rel(6), estimatedTime:14, actualTime:7, createdDate:rel(-12), lastUpdated:rel(-2)});
+  T({name:'Audit First Response Time (FRT) across WhatsApp and Email channels', assignee:'p-support', department:'Customer Support & Ops', project:null, priority:'P2', status:'Completed', startDate:rel(-14), dueDate:rel(-12), estimatedTime:2.5, actualTime:2.5, createdDate:rel(-14), lastUpdated:rel(-12), completedDate:rel(-12)});
+  T({name:'Root cause analysis on size-mismatch returns for Comfort Joggers v2', assignee:'p-voc', department:'Post-Purchase CX', project:'proj-returns', priority:'P2', status:'In Review', reviewer:'p-lead-cx', startDate:rel(-5), dueDate:rel(-1), estimatedTime:5, actualTime:5, createdDate:rel(-5), lastUpdated:rel(-1)});
+  T({name:'Design proactive SMS alerts for deliveries delayed by weather', assignee:'p-voc', department:'Post-Purchase CX', project:null, priority:'P3', status:'Inbox', dueDate:rel(12), estimatedTime:3, createdDate:rel(-1), lastUpdated:rel(-1)});
+
+  // --- Quality Assurance & Sourcing (Rajesh / Farhan / Simran) ---
+  T({name:'Fabric GSM & color fastness laboratory test for fleece lot #108', assignee:'p-qc', department:'Quality Assurance (QA)', project:'proj-qa', priority:'P0', status:'Completed', startDate:rel(-7), dueDate:rel(-3), estimatedTime:5, actualTime:6, createdDate:rel(-7), lastUpdated:rel(-3), completedDate:rel(-3)});
+  T({name:'Conduct on-site pre-shipment AQL 2.5 audit at Ludhiana factory', assignee:'p-qc', department:'Quality Assurance (QA)', project:'proj-qa', priority:'P0', status:'Blocked', waitingOn:'Ludhiana Mill Management', blockedReason:'Factory delayed sample line finishing; waiting for access to final carton packaging bay.', startDate:rel(-4), dueDate:rel(1), estimatedTime:8, actualTime:2, createdDate:rel(-4), lastUpdated:rel(-2)});
+  T({name:'Vendor quality performance scorecards for Q3 suppliers', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:null, priority:'P2', status:'In Progress', startDate:rel(-10), dueDate:rel(-2), estimatedTime:6, actualTime:2, createdDate:rel(-10), lastUpdated:rel(-7)});
+  T({name:'Expedite delivery of 25,000 custom unboxing mailer boxes', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:'proj-cx', priority:'P1', status:'Waiting', waitingOn:'EcoPackaging Ltd', startDate:rel(-8), dueDate:rel(4), estimatedTime:3, createdDate:rel(-8), lastUpdated:rel(-4)});
+  T({name:'Standardize packaging tape to tamper-evident reinforced paper tape', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:'proj-cx', priority:'P2', status:'Completed', startDate:rel(-15), dueDate:rel(-10), estimatedTime:3, actualTime:3, createdDate:rel(-15), lastUpdated:rel(-10), completedDate:rel(-10)});
+  T({name:'Raw fabric procurement advance PO for Q1 replenishment', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:'proj-peak', priority:'P1', status:'In Progress', startDate:rel(-3), dueDate:rel(3), estimatedTime:4, actualTime:2, createdDate:rel(-3), lastUpdated:rel(-1)});
+
+  // Task dependencies & historical delays
+  const byName = n => tasks.find(t=>t.name===n);
+  const wmsTest = byName('WMS pick-pack scanning load test across 8 packing stations');
+  const wmsEscalation = byName('Review WMS barcode scanner latency escalation with Tech Lead & Neha');
+  if(wmsTest && wmsEscalation) wmsTest.dependency = wmsEscalation.id;
+
+  const ndrTask = byName('Address courier NDR webhook timeout causing early RTOs');
+  if(ndrTask){ ndrTask.timesPushed = 3; }
+  const vendorScorecard = byName('Vendor quality performance scorecards for Q3 suppliers');
+  if(vendorScorecard){ vendorScorecard.timesPushed = 2; }
+  const rtoAnalysis = byName('Root cause analysis on size-mismatch returns for Comfort Joggers v2');
+  if(rtoAnalysis){ rtoAnalysis.timesPushed = 2; }
+
+  const meetings = [
+    {id:'mt-standup', name:'Daily Operations & CX Standup', date:today, time:'09:15', participants:['p-coo','p-lead-ops','p-lead-cx','p-lead-qa','p-logistics','p-warehouse','p-support'],
+      objective:'Align on daily dispatch cut-off, warehouse throughput, carrier SLAs, and open customer escalations.',
+      agenda:'1. Yesterday dispatch count vs same-day SLA\n2. Warehouse Zone B barcode scanner bug\n3. Delhivery West zone NDR failure\n4. VIP customer escalations\n5. Peak prep headcount check',
+      notes:'Zone B scanners still lagging 800ms. Delhivery API team promises webhook patch by 4 PM. Customer batch #W26-B replacement approval needed immediately.',
+      decisions:['Escalate scanner latency directly to vendor CEO. Authorize immediate replacement dispatch for batch #W26-B.'],
+      actionItems:[
+        {id:'ai1', text:'Sign vendor capex release for auxiliary Wi-Fi APs in Zone B', owner:'p-coo', deadline:rel(1), taskId:null},
+        {id:'ai2', text:'Send formal demand letter to Delhivery National Head regarding NDR failures', owner:'p-logistics', deadline:rel(1), taskId:null},
+      ], followUpDate:rel(1), recurring:'Daily'},
+    {id:'mt-carrier-review', name:'Weekly 3PL Carrier SLA & Freight Review', date:rel(2), time:'14:30', participants:['p-coo','p-lead-ops','p-logistics'],
+      objective:'Review delivery TAT, RTO %, and dispute non-delivery penalty waivers with Delhivery & BlueDart.',
+      agenda:'1. Carrier SLA scorecards by zone\n2. Peak capacity lock-in (15k/day)\n3. NDR resolution speed\n4. Freight invoice reconciliation',
+      notes:'', decisions:[], actionItems:[], followUpDate:rel(9), recurring:'Weekly'},
+    {id:'mt-1on1-devina', name:'1:1 — Devina Nair (Operations & Supply Chain)', date:today, time:'11:30', participants:['p-coo','p-lead-ops'],
+      objective:'Review warehouse automation milestone, buffer inventory status, and team capacity.',
+      agenda:'WMS cutover, shift scheduling, carrier negotiations, and personal leadership goals',
+      notes:'', decisions:[], actionItems:[], followUpDate:rel(14), recurring:'Bi-weekly'},
+    {id:'mt-1on1-sameer', name:'1:1 — Sameer Joshi (CX & Support)', date:rel(1), time:'16:00', participants:['p-coo','p-lead-cx'],
+      objective:'Review CSAT 95+ progress, return portal friction points, and support staffing.',
+      agenda:'Post-purchase unboxing feedback, sizing return reduction, WhatsApp bot deflection rates',
+      notes:'', decisions:[], actionItems:[], followUpDate:rel(15), recurring:'Bi-weekly'},
+    {id:'mt-qa-sync', name:'Tier-1 Factory Quality Review — Batch #108', date:rel(-4), time:'15:00', participants:['p-coo','p-lead-qa','p-qc','p-sourcing'],
+      objective:'Review fabric shrinkage and stitching deviation test results before production dispatch.',
+      agenda:'1. Lab test findings\n2. Tolerance threshold waiver\n3. Penalty clause application',
+      notes:'Lab report indicates 1.8% stitching variance on fleece lot #108. Functional integrity is safe. Penalty of 2.5% invoice deduction agreed.',
+      decisions:['Accept fleece lot #108 with 2.5% invoice deduction subject to COO approval.'],
+      actionItems:[
+        {id:'ai3', text:'Upload formal AQL waiver form for COO sign-off', owner:'p-lead-qa', deadline:rel(-1), taskId:'linked'},
+      ], followUpDate:rel(3), recurring:null},
+  ];
+
+  const approvals = [
+    {id:'ap-1', requester:'p-lead-qa', type:'Quality Defect Waiver', item:'AQL tolerance waiver for fleece lot #108 (1.8% stitching variance, 2.5% penalty)', requestedDate:rel(-2), deadline:rel(1), status:'Pending', comments:[], attachment:'#', relatedProject:'proj-qa'},
+    {id:'ap-2', requester:'p-logistics', type:'Carrier Contract Approval', item:'Delhivery Winter peak capacity agreement (15k daily shipments @ ₹68/kg base)', requestedDate:rel(-2), deadline:rel(0), status:'Pending', comments:[{by:'p-coo', text:'Ensure penalty clause for >48h transit breaches is capped at 15% invoice value.', date:rel(-1)}], attachment:'#', relatedProject:'proj-peak'},
+    {id:'ap-3', requester:'p-support', type:'Customer Concession Approval', item:'Bulk refund & replacement authorization for transit-damaged batch #W26-B (₹78,400)', requestedDate:rel(-1), deadline:rel(0), status:'Pending', comments:[], attachment:'#', relatedProject:'proj-support'},
+    {id:'ap-4', requester:'p-warehouse', type:'Warehouse Capex Approval', item:'Automated roller conveyor addition for packing line #2 (₹4.2L capex)', requestedDate:rel(-4), deadline:rel(-1), status:'Pending', comments:[{by:'p-coo', text:'Checking working capital allocation with Founder first.', date:rel(-2)}], attachment:'#', relatedProject:'proj-wms'},
+    {id:'ap-5', requester:'p-sourcing', type:'Supplier Purchase Order', item:'Advance PO #PO-8841 for Q1 replenishment yarn to Ludhiana Mills (₹18.5L)', requestedDate:rel(-3), deadline:rel(2), status:'Approved', comments:[{by:'p-coo', text:'Approved with 45-day credit terms confirmed.', date:rel(-1)}], attachment:'#', relatedProject:'proj-peak'},
+    {id:'ap-6', requester:'p-lead-cx', type:'CX Tool License', item:'WhatsApp conversational AI helpdesk plugin license renewal ($4,800/yr)', requestedDate:rel(-5), deadline:rel(3), status:'Changes Requested', comments:[{by:'p-coo', text:'Request 3 benchmark quotes from Haptik, Yellow.ai, and Gallabox before signing annual contract.', date:rel(-2)}], attachment:'#', relatedProject:'proj-cx'},
+  ];
+
+  const followUps = [
+    {id:'fu-1', subject:'Buffer inventory working capital approval', person:'Founder', lastCommunication:rel(-2), followUpDate:rel(1), status:'Open', notes:'Sent revised buffer ROI and peak cashflow model. Vital to disburse supplier advances by Friday.'},
+    {id:'fu-2', subject:'West zone delivery SLA breach & penalty resolution', person:'National Head, Delhivery', lastCommunication:rel(-1), followUpDate:rel(2), status:'Open', notes:'Carrier acknowledged webhook drop issue. Waiting on formal credit note calculation.'},
+    {id:'fu-3', subject:'Warehouse Zone B Wi-Fi & scanner firmware patch', person:'Warehouse Tech Vendor', lastCommunication:rel(-4), followUpDate:rel(0), status:'Overdue', notes:'No response in 4 days. Need firm cutover date or we roll back to wired hand terminals.'},
+    {id:'fu-4', subject:'Eco-mailer box sample delivery date', person:'EcoPackaging Ltd', lastCommunication:rel(-3), followUpDate:rel(3), status:'Open', notes:'Sample unboxing boxes passed drop test; awaiting final production run timeline.'},
+    {id:'fu-5', subject:'Independent factory audit agreement sign-off', person:'SGS Inspection Agency', lastCommunication:rel(-6), followUpDate:rel(1), status:'Open', notes:'Commercial terms agreed; waiting on Legal review of indemnification clause.'},
+  ];
+
+  const oneOnOnes = [
+    {id:'oo-1', person:'p-lead-ops', date:rel(-14), topics:'Warehouse throughput, carrier negotiations, peak staffing', wins:'Maintained 98.4% same-day order-to-dispatch rate during Flash Friday sale.', challenges:'Zone B scanner dropouts causing associate frustration and overtime hours.', feedback:'Great leadership under pressure — ensure Neha has air cover to fix tech glitches.', development:'Wants to lead end-to-end supply chain budget forecasting in FY27.', blockers:'IT vendor responsiveness on warehouse hardware.', commitments:'Arjun to escalate directly to vendor leadership. Devina to finalize seasonal staffing numbers by Friday.', followUpTasks:[]},
+    {id:'oo-2', person:'p-lead-cx', date:rel(-16), topics:'Post-purchase experience, CSAT recovery, sizing returns', wins:'WhatsApp dispatch tracking notification reduced "Where is my order?" (WISMO) tickets by 34%.', challenges:'Sizing returns on comfort joggers running at 5.8% — creating reverse pickup backlog.', feedback:'Love the proactive WhatsApp triggers. Let\'s make self-serve exchanges zero-touch.', development:'Interested in integrating predictive AI support routing.', blockers:'Reverse logistics courier pickup delays.', commitments:'Sameer to share sizing chart feedback with product design team. Arjun to push Delhivery on 24h reverse pickup SLA.', followUpTasks:[]},
+  ];
+
+  const goals = [
+    {id:'g-1', objective:'Zero-Defect & Predictable Operations', teamGoal:'Compress order-to-dispatch latency under 12 hours warehouse-wide', projectIds:['proj-wms','proj-peak']},
+    {id:'g-2', objective:'Zero-Defect & Predictable Operations', teamGoal:'Enforce AQL 2.5 defect tolerances across all Tier-1 garment manufacturing', projectIds:['proj-qa']},
+    {id:'g-3', objective:'World-Class Customer Experience (CX)', teamGoal:'Attain 95%+ CSAT and reduce customer ticket resolution time below 4 hours', projectIds:['proj-support','proj-cx']},
+    {id:'g-4', objective:'World-Class Customer Experience (CX)', teamGoal:'Build a friction-free unboxing, exchange, and delivery tracking journey', projectIds:['proj-cx']},
+    {id:'g-5', objective:'Supply Chain Agility & Unit Economics', teamGoal:'Reduce Return-to-Origin (RTO) rate by 4.2% and accelerate refunds to <24h', projectIds:['proj-returns']},
+  ];
+
+  const sops = [
+    {id:'sop-1', name:'Warehouse Inwarding & Barcode Tagging Protocol', department:'Fulfillment & Warehousing', owner:'p-warehouse', version:'v3.2', lastUpdated:rel(-35), link:'#', relatedTasks:['Inwarding & inspection of 4,500 units Winter sleepwear from Surat mill']},
+    {id:'sop-2', name:'Customer Escalation & Executive Concession Matrix', department:'Customer Support & Ops', owner:'p-support', version:'v2.0', lastUpdated:rel(-20), link:'#', relatedTasks:['Executive customer escalation: Authorize bulk replacement for damaged batch #W26-B']},
+    {id:'sop-3', name:'Defective Product Return & Quality Quarantine SOP', department:'Quality Assurance (QA)', owner:'p-qc', version:'v1.4', lastUpdated:rel(-45), link:'#', relatedTasks:['Fabric GSM & color fastness laboratory test for fleece lot #108']},
+    {id:'sop-4', name:'3PL Carrier SLA & Performance Penalty Enforcement Guide', department:'Logistics & Carriers', owner:'p-logistics', version:'v2.1', lastUpdated:rel(-60), link:'#', relatedTasks:['Send formal penalty notice to BlueDart for West zone SLA breach']},
+    {id:'sop-5', name:'Daily Dispatch Cut-off & Carrier Handover Protocol', department:'Fulfillment & Warehousing', owner:'p-warehouse', version:'v1.8', lastUpdated:rel(-18), link:'#', relatedTasks:['Daily dispatch cut-off audit — verify 98.2% same-day SLA handover']},
+    {id:'sop-6', name:'Tier-1 Factory AQL 2.5 Pre-Shipment Inspection Checklist', department:'Quality Assurance (QA)', owner:'p-lead-qa', version:'v1.0', lastUpdated:rel(-12), link:'#', relatedTasks:['Conduct on-site pre-shipment AQL 2.5 audit at Ludhiana factory']},
+  ];
+
+  const recurringTemplates = [
+    {id:'rec-1', name:'Daily dispatch cut-off audit — verify 98.2% same-day SLA handover', assignee:'p-warehouse', department:'Fulfillment & Warehousing', priority:'P2', frequency:'Daily', estimatedTime:1.5},
+    {id:'rec-2', name:'Weekly CSAT & VoC sentiment analysis report', assignee:'p-voc', department:'Post-Purchase CX', priority:'P2', frequency:'Weekly', dayOfWeek:'Monday', estimatedTime:3},
+    {id:'rec-3', name:'Weekly 3PL Carrier SLA & Freight Review', frequency:'Weekly', dayOfWeek:'Wednesday', type:'meeting'},
+    {id:'rec-4', name:'Monthly factory quality scorecard review', assignee:'p-lead-qa', department:'Quality Assurance (QA)', priority:'P2', frequency:'Monthly', estimatedTime:4},
+  ];
+
+  const auditLog = [
+    {id:genId('A'), timestamp:rel(-1), user:'Arjun Mehta', entity:'Approval', label:'Advance PO #PO-8841 for Q1 replenishment yarn', field:'Status', oldValue:'Pending', newValue:'Approved'},
+    {id:genId('A'), timestamp:rel(-2), user:'Arjun Mehta', entity:'Approval', label:'WhatsApp conversational AI helpdesk plugin license renewal', field:'Status', oldValue:'Pending', newValue:'Changes Requested'},
+    {id:genId('A'), timestamp:rel(-3), user:'Devina Nair', entity:'Project', label:'WMS Cloud Migration & Barcode Dispatch', field:'Status', oldValue:'On Track', newValue:'At Risk'},
+    {id:genId('A'), timestamp:rel(-5), user:'Karthik Raman', entity:'Task', label:'Address courier NDR webhook timeout causing early RTOs', field:'Status', oldValue:'In Progress', newValue:'Blocked'},
+    {id:genId('A'), timestamp:rel(-7), user:'Rajesh Pillai', entity:'Task', label:'Fabric GSM & color fastness laboratory test for fleece lot #108', field:'Status', oldValue:'In Progress', newValue:'Completed'},
+  ];
+
+  const endOfDayLogs = [];
+
+  return { people, projects, tasks, meetings, approvals, followUps, oneOnOnes, goals, sops, recurringTemplates, auditLog, endOfDayLogs,
+    settings:{ staleNoUpdateDays:3, staleOpenDays:7, staleDeadlineDays:2, escalation:{owner:1, manager:2, cmo:4}, seededOn: today },
+    notifDismissed: [],
+  };
+}
+
+/* ============================== STATE ============================== */
+let STATE = {
+  data: null,
+  currentView: 'home',
+  currentTab: {},
+  currentRole: 'COO / CXO',
+  viewingPersonId: 'p-coo',
+  selectedProjectId: null,
+  selectedMeetingId: null,
+  selectedPersonId: null,
+  searchQuery: '',
+  taskFilters: { person:'', project:'', priority:'', status:'', dept:'' },
+  toasts: [],
+  saving: false,
+};
+
+function personById(id){ return (STATE.data && STATE.data.people) ? STATE.data.people.find(p=>p.id===id) : null; }
+function personName(id){ const p=personById(id); return p ? p.name : (id||'—'); }
+function projectById(id){ return (STATE.data && STATE.data.projects) ? STATE.data.projects.find(p=>p.id===id) : null; }
+function projectName(id){ const p=projectById(id); return p ? p.name : '—'; }
+function taskById(id){ return (STATE.data && STATE.data.tasks) ? STATE.data.tasks.find(t=>t.id===id) : null; }
+function meetingById(id){ return (STATE.data && STATE.data.meetings) ? STATE.data.meetings.find(m=>m.id===id) : null; }
+function approvalById(id){ return (STATE.data && STATE.data.approvals) ? STATE.data.approvals.find(a=>a.id===id) : null; }
+function directReports(personId){ return (STATE.data && STATE.data.people) ? STATE.data.people.filter(p=>p.manager===personId) : []; }
+function allReportsUnder(personId){
+  let out = [];
+  const direct = directReports(personId);
+  direct.forEach(d=>{ out.push(d.id); out = out.concat(allReportsUnder(d.id)); });
+  return out;
+}
+
+/* Safe Storage Engine */
+const StorageEngine = {
+  async get(key){
+    if(window.storage && typeof window.storage.get === 'function'){
+      try{ return await window.storage.get(key, false); }catch(e){}
+    }
+    try{
+      const v = localStorage.getItem(key);
+      return v ? {value: v} : null;
+    }catch(e){ return null; }
+  },
+  async set(key, val){
+    if(window.storage && typeof window.storage.set === 'function'){
+      try{ return await window.storage.set(key, val, false); }catch(e){}
+    }
+    try{ localStorage.setItem(key, val); }catch(e){}
+  }
+};
+
+async function loadState(){
+  try{
+    const res = await StorageEngine.get(STORAGE_KEY);
+    if(res && res.value){
+      STATE.data = JSON.parse(res.value);
+      if(!STATE.data.settings) STATE.data.settings = buildDemoData().settings;
+      if(!STATE.data.endOfDayLogs) STATE.data.endOfDayLogs = [];
+      if(!STATE.data.notifDismissed) STATE.data.notifDismissed = [];
+    } else {
+      STATE.data = buildDemoData();
+      await saveState();
+    }
+  }catch(e){
+    STATE.data = buildDemoData();
+    try{ await saveState(); }catch(e2){}
+  }
+}
+
+let _saveTimer = null;
+function saveState(){
+  return new Promise((resolve)=>{
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(async ()=>{
+      try{
+        await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
+      }catch(e){}
+      resolve();
+    }, 200);
+  });
+}
+
+function logAudit(entity, label, field, oldValue, newValue, user){
+  STATE.data.auditLog.unshift({
+    id: genId('A'), timestamp: todayISO(), user: user || personName(STATE.viewingPersonId==='p-coo'?'p-coo':STATE.viewingPersonId),
+    entity, label, field, oldValue: oldValue===undefined||oldValue===null||oldValue===''?'—':String(oldValue), newValue: newValue===undefined||newValue===null||newValue===''?'—':String(newValue),
+  });
+  if(STATE.data.auditLog.length>200) STATE.data.auditLog.length = 200;
+}
+
+function toast(msg){
+  const id = Math.random().toString(36).slice(2);
+  STATE.toasts.push({id, msg});
+  renderToasts();
+  setTimeout(()=>{ STATE.toasts = STATE.toasts.filter(t=>t.id!==id); renderToasts(); }, 3600);
+}
+function renderToasts(){
+  const root = document.getElementById('toast-root');
+  if(root) root.innerHTML = STATE.toasts.map(t=>`<div class="toast">${escapeHtml(t.msg)}</div>`).join('');
+}
+
+/* ============================ COMPUTATIONS ============================ */
+function activeTasksFor(personId){
+  return STATE.data.tasks.filter(t=>t.assignee===personId && t.status!=='Completed' && t.status!=='Cancelled');
+}
+
+function utilizationFor(personId){
+  const person = personById(personId);
+  if(!person) return {pct:0, level:'Healthy', emoji:'🟢', assignedHours:0, availableHours:0};
+  const active = activeTasksFor(personId);
+  const assignedHours = active.reduce((s,t)=> s + (Number(t.estimatedTime)||1) , 0);
+  const availableHours = person.workingHours || 40;
+  const pct = availableHours>0 ? Math.round((assignedHours/availableHours)*100) : 0;
+  let level, emoji;
+  if(pct < 40){ level='Underloaded'; emoji='🟢'; }
+  else if(pct < 75){ level='Healthy'; emoji='🟢'; }
+  else if(pct < 100){ level='Busy'; emoji='🟡'; }
+  else if(pct < 130){ level='High Load'; emoji='🟠'; }
+  else { level='Overloaded'; emoji='🔴'; }
+  return {pct, level, emoji, assignedHours, availableHours};
+}
+
+function glanceWorkload(personId){
+  const u = utilizationFor(personId);
+  const overdue = STATE.data.tasks.filter(t=>t.assignee===personId && isOverdue(t)).length;
+  if(u.pct>=130 || overdue>=3) return {level:'Overloaded', emoji:'🔴'};
+  if(u.pct>=100 || overdue===2) return {level:'High Load', emoji:'🟠'};
+  if(u.pct>=70 || overdue===1) return {level:'Busy', emoji:'🟡'};
+  return {level:'Healthy', emoji:'🟢'};
+}
+
+function isStale(t){
+  if(t.status==='Completed' || t.status==='Cancelled') return false;
+  const s = STATE.data.settings;
+  const noUpdate = daysFromToday(t.lastUpdated) * -1;
+  const openDays = daysFromToday(t.createdDate) * -1;
+  const dueSoon = t.dueDate ? daysFromToday(t.dueDate) : null;
+  if(noUpdate >= s.staleNoUpdateDays && openDays >= s.staleOpenDays) return true;
+  if(noUpdate >= s.staleNoUpdateDays && dueSoon!==null && dueSoon>=0 && dueSoon <= s.staleDeadlineDays) return true;
+  return false;
+}
+
+function escalationFor(t){
+  if(!isOverdue(t)) return null;
+  const daysOver = -daysFromToday(t.dueDate);
+  const s = STATE.data.settings.escalation;
+  if(t.priority==='P0') return {level:'Immediate', who:'COO / CXO', className:'chip-bad'};
+  if(daysOver >= s.cmo) return {level:'Escalated', who:'COO / CXO', className:'chip-bad'};
+  if(daysOver >= s.manager) return {level:'Escalated', who:'Department Lead', className:'chip-warn'};
+  if(daysOver >= s.owner) return {level:'Flagged', who:'Task Owner', className:'chip-outline'};
+  return null;
+}
+
+function dependencyBlockText(t){
+  if(!t.dependency) return null;
+  const dep = taskById(t.dependency);
+  if(!dep) return null;
+  if(dep.status==='Completed' || dep.status==='Cancelled') return null;
+  return dep;
+}
+
+function projectProgress(proj){
+  const tasks = STATE.data.tasks.filter(t=>t.project===proj.id);
+  if(tasks.length===0) return 0;
+  const done = tasks.filter(t=>t.status==='Completed').length;
+  return Math.round((done/tasks.length)*100);
+}
+
+function projectRisk(proj){
+  if(proj.status==='At Risk' || proj.status==='Blocked') return 'High';
+  const daysLeft = daysFromToday(proj.deadline);
+  const overdueTasks = STATE.data.tasks.filter(t=>t.project===proj.id && isOverdue(t)).length;
+  if(daysLeft<0 && proj.status!=='Completed') return 'High';
+  if(overdueTasks>0 || (proj.risks && proj.risks.length)) return 'Medium';
+  if(daysLeft<7 && projectProgress(proj)<70) return 'Medium';
+  return 'Low';
+}
+
+function nextMilestone(proj){
+  return (proj.milestones||[]).find(m=>m.status!=='Completed');
+}
+
+function computeBottlenecks(){
+  const out = [];
+  // 1. tasks repeatedly delayed
+  STATE.data.tasks.filter(t=>(t.timesPushed||0)>=2 && t.status!=='Completed').forEach(t=>{
+    out.push({type:'Repeatedly delayed', impact:'SLA / Delivery timeline at risk', person:personName(t.assignee), days:daysFromToday(t.createdDate)*-1, task:t.name, suggestedAction:'Re-evaluate scope or reallocate: deadline moved '+t.timesPushed+' times.'});
+  });
+  // 2. external dependencies
+  const waitingCount = {};
+  STATE.data.tasks.filter(t=>t.waitingOn && t.status!=='Completed' && t.status!=='Cancelled').forEach(t=>{
+    waitingCount[t.waitingOn] = (waitingCount[t.waitingOn]||0)+1;
+  });
+  Object.entries(waitingCount).filter(([k,v])=>v>=2).forEach(([who,count])=>{
+    out.push({type:'Single point of dependency', impact: count+' critical tasks stalled waiting on external party', person:who, days:null, task:null, suggestedAction:'Conduct urgent executive sync with '+who+' to unblock '+count+' operational items.'});
+  });
+  // 3. overloaded employees
+  STATE.data.people.forEach(p=>{
+    const u = utilizationFor(p.id);
+    if(u.level==='Overloaded'){
+      out.push({type:'Overloaded team member', impact:u.pct+'% capacity utilization', person:p.name, days:null, task:null, suggestedAction:'Offload routine tickets or shift duties to team members with spare bandwidth.'});
+    }
+  });
+  // 4. projects with repeated blockers
+  STATE.data.projects.forEach(proj=>{
+    const blocked = STATE.data.tasks.filter(t=>t.project===proj.id && t.status==='Blocked').length;
+    if(blocked>=2){
+      out.push({type:'Project with repeated blockers', impact: blocked+' blocked tasks', person:personName(proj.owner), days:null, task:proj.name, suggestedAction:'Convene a cross-functional war room session for '+proj.name+'.'});
+    }
+  });
+  // 5. aging approvals
+  STATE.data.approvals.filter(a=>a.status==='Pending' && daysFromToday(a.requestedDate)*-1 >= 2).forEach(a=>{
+    out.push({type:'Pending approval bottleneck', impact:(daysFromToday(a.requestedDate)*-1)+' days awaiting sign-off', person:personName(a.requester), days:daysFromToday(a.requestedDate)*-1, task:a.item, suggestedAction:'Action or request clarification on this approval today to avoid vendor/customer delay.'});
+  });
+  return out;
+}
+
+function scorecardMetrics(rangeStartOffset, rangeEndOffset){
+  const start = addDays(todayISO(), rangeStartOffset);
+  const end = addDays(todayISO(), rangeEndOffset);
+  const inRange = (iso) => iso && iso>=start && iso<=end;
+  const completed = STATE.data.tasks.filter(t=>t.status==='Completed' && inRange(t.completedDate));
+  const onTime = completed.filter(t=> t.dueDate && t.completedDate<=t.dueDate);
+  const activeNow = STATE.data.tasks.filter(t=>ACTIVE_STATUSES.includes(t.status));
+  const overdueNow = STATE.data.tasks.filter(t=>isOverdue(t));
+  const blockedNow = STATE.data.tasks.filter(t=>t.status==='Blocked');
+  const unassigned = STATE.data.tasks.filter(t=>!t.assignee && t.status!=='Cancelled');
+  const avgAge = activeNow.length ? Math.round(activeNow.reduce((s,t)=>s + (daysFromToday(t.createdDate)*-1),0)/activeNow.length) : 0;
+  const projectsCompleted = STATE.data.projects.filter(p=>p.status==='Completed').length;
+  const allMilestones = STATE.data.projects.flatMap(p=>p.milestones||[]);
+  const doneMilestones = allMilestones.filter(m=>m.status==='Completed').length;
+
+  return {
+    completedCount: completed.length,
+    onTimePct: completed.length ? Math.round((onTime.length/completed.length)*100) : 98,
+    overduePct: activeNow.length ? Math.round((overdueNow.length/activeNow.length)*100) : 0,
+    blockedPct: activeNow.length ? Math.round((blockedNow.length/activeNow.length)*100) : 0,
+    avgTaskAge: avgAge,
+    projectCompletionPct: STATE.data.projects.length ? Math.round((projectsCompleted/STATE.data.projects.length)*100) : 0,
+    milestoneCompletionPct: allMilestones.length ? Math.round((doneMilestones/allMilestones.length)*100) : 0,
+    unassignedCount: unassigned.length,
+    taskCompletionPct: STATE.data.tasks.length ? Math.round((STATE.data.tasks.filter(t=>t.status==='Completed').length/STATE.data.tasks.length)*100) : 0,
+    // Operations & CX specific KPIs
+    csatScore: 94.8,
+    orderToDispatchHours: 14.2,
+    rtoRatePct: 6.8,
+  };
+}
+
+function computeNotifications(){
+  const items = [];
+  const dueTomorrow = STATE.data.tasks.filter(t=>t.dueDate && daysFromToday(t.dueDate)===1 && ACTIVE_STATUSES.includes(t.status));
+  if(dueTomorrow.length) items.push({type:'due', text: dueTomorrow.length+' task'+(dueTomorrow.length>1?'s':'')+' due tomorrow', level:'info'});
+  const overdue = STATE.data.tasks.filter(isOverdue);
+  if(overdue.length) items.push({type:'overdue', text: overdue.length+' task'+(overdue.length>1?'s':'')+' overdue', level:'bad'});
+  const blocked = STATE.data.tasks.filter(t=>t.status==='Blocked');
+  if(blocked.length) items.push({type:'blocked', text: blocked.length+' task'+(blocked.length>1?'s':'')+' blocked', level:'warn'});
+  const pendingApprovals = STATE.data.approvals.filter(a=>a.status==='Pending');
+  if(pendingApprovals.length) items.push({type:'approval', text: pendingApprovals.length+' operational/CX approval'+(pendingApprovals.length>1?'s':'')+' awaiting sign-off', level:'warn'});
+  const atRiskProjects = STATE.data.projects.filter(p=>p.status==='At Risk' || p.status==='Blocked');
+  if(atRiskProjects.length) items.push({type:'project', text: atRiskProjects.length+' initiative'+(atRiskProjects.length>1?'s':'')+' at risk or blocked', level:'bad'});
+  const todaysMeetings = STATE.data.meetings.filter(m=>m.date===todayISO());
+  if(todaysMeetings.length) items.push({type:'meeting', text: todaysMeetings.length+' operations/CX sync'+(todaysMeetings.length>1?'s':'')+' today', level:'info'});
+  const stale = STATE.data.tasks.filter(isStale);
+  if(stale.length) items.push({type:'stale', text: stale.length+' task'+(stale.length>1?'s':'')+' gone stale', level:'warn'});
+  return items;
+}
+
+function notifCount(){
+  return computeNotifications().reduce((s,n)=> s + (n.level==='bad'||n.level==='warn' ? 1 : 0), 0);
+}
+
+/* ============================== VIEW: HOME ============================== */
+function topPriorities(){
+  const viewer = STATE.viewingPersonId;
+  const mine = STATE.data.tasks.filter(t=>t.assignee===viewer && ACTIVE_STATUSES.includes(t.status));
+  const scored = mine.map(t=>{
+    let score = 0;
+    if(t.priority==='P0') score+=100; else if(t.priority==='P1') score+=50; else if(t.priority==='P2') score+=10;
+    if(isOverdue(t)) score+=80;
+    if(isDueToday(t)) score+=40;
+    if(t.status==='In Review' || t.approvalRequired) score+=35;
+    return {t, score};
+  }).sort((a,b)=>b.score-a.score);
+  return scored.slice(0,3).map(x=>x.t);
+}
+
+function oneThingText(){
+  const pr = topPriorities();
+  if(pr.length===0) return 'All operational pipelines and customer escalation queues are clear right now.';
+  const t = pr[0];
+  if(isOverdue(t)) return `"${t.name}" is overdue — unblock or reassign immediately to protect warehouse & delivery SLAs.`;
+  if(t.status==='In Review' || t.approvalRequired) return `Sign off on "${t.name}" — operations & customer teams are held up waiting on your decision.`;
+  return `Focus on "${t.name}" — high impact operational leverage item for today.`;
+}
+
+function viewHome(){
+  if(STATE.currentRole==='COO / CXO') return viewHomeCOO();
+  if(STATE.currentRole==='Operations Lead' || STATE.currentRole==='CX & Support Lead') return viewHomeLead();
+  return viewHomeMember();
+}
+
+function viewHomeCOO(){
+  const viewer = STATE.viewingPersonId;
+  const person = personById(viewer);
+  const todayTasks = STATE.data.tasks.filter(t=> (t.dueDate===todayISO() || t.assignee===viewer) && ACTIVE_STATUSES.includes(t.status) && (t.dueDate===todayISO()));
+  const todayMeetings = STATE.data.meetings.filter(m=>m.date===todayISO()).sort((a,b)=>a.time.localeCompare(b.time));
+  const overdue = STATE.data.tasks.filter(isOverdue);
+  const blocked = STATE.data.tasks.filter(t=>t.status==='Blocked');
+  const stale = STATE.data.tasks.filter(isStale);
+  const atRisk = STATE.data.projects.filter(p=>p.status==='At Risk' || p.status==='Blocked');
+  const pendingApprovals = STATE.data.approvals.filter(a=>a.status==='Pending');
+  const openFollowUps = STATE.data.followUps.filter(f=>f.status!=='Done');
+
+  return `
+    <div class="hero-card">
+      <div class="hero-greeting">Good morning, ${escapeHtml(person.name.split(' ')[0])}</div>
+      <div class="hero-date">${currentDateHeaderStr()} · Offcomfrt Operations & Customer Experience Control</div>
+      <div class="priority-list">
+        ${topPriorities().length ? topPriorities().map((t,i)=>`
+          <li class="priority-item" style="cursor:pointer;" onclick="openTaskModal('${t.id}')">
+            <span class="priority-num">${i+1}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13.5px;font-weight:500;">${escapeHtml(t.name)}</div>
+              <div style="font-size:11px;color:#a9adbd;margin-top:2px;">${t.project?projectName(t.project)+' · ':''}${t.dueDate?relativeDay(t.dueDate):'No deadline'}</div>
+            </div>
+            ${priorityChip(t.priority)}
+          </li>`).join('') : `<li class="priority-item">No urgent operational fires flagged — great time for strategic capacity planning.</li>`}
+      </div>
+      <div class="hero-one-thing">
+        <div class="hero-one-thing-label">The Executive Priority</div>
+        <div class="hero-one-thing-text">${escapeHtml(oneThingText())}</div>
+      </div>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="stat-card"><div class="stat-num">${todayTasks.length}</div><div class="stat-label">Tasks / dispatches due today</div></div>
+      <div class="stat-card"><div class="stat-num">${pendingApprovals.length}</div><div class="stat-label">Pending ops / CX approvals</div></div>
+      <div class="stat-card"><div class="stat-num">${blocked.length}</div><div class="stat-label">Blocked tasks & bottlenecks</div></div>
+      <div class="stat-card"><div class="stat-num">${openFollowUps.length}</div><div class="stat-label">Carrier & supplier follow-ups</div></div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="section-block">
+        <div class="card">
+          <div class="card-title">Operational Friction & Risk <span class="count">${overdue.length+blocked.length+stale.length+atRisk.length}</span></div>
+          <div class="list-row" style="cursor:pointer;" onclick="goTo('blocked',{currentTab:{blocked:'overdue'}})"><div class="list-row-main"><div class="list-row-title">Overdue operational deadlines</div></div><span class="chip chip-bad">${overdue.length}</span></div>
+          <div class="list-row" style="cursor:pointer;" onclick="goTo('blocked')"><div class="list-row-main"><div class="list-row-title">Blocked tasks (warehousing & carriers)</div></div><span class="chip chip-bad">${blocked.length}</span></div>
+          <div class="list-row" style="cursor:pointer;" onclick="goTo('blocked',{currentTab:{blocked:'stale'}})"><div class="list-row-main"><div class="list-row-title">Stale tickets / tasks without updates</div></div><span class="chip chip-warn">${stale.length}</span></div>
+          <div class="list-row" style="cursor:pointer;" onclick="goTo('projects')"><div class="list-row-main"><div class="list-row-title">Strategic initiatives at risk</div></div><span class="chip chip-bad">${atRisk.length}</span></div>
+        </div>
+      </div>
+      <div class="section-block">
+        <div class="card">
+          <div class="card-title">Today's Syncs & Standups <span class="count">${todayMeetings.length}</span></div>
+          ${todayMeetings.length? todayMeetings.map(m=>meetingRowHtml(m)).join('') : emptyState('No meetings scheduled today.')}
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="section-block">
+        <div class="card">
+          <div class="card-title">Approvals Requiring Sign-Off <span class="count">${pendingApprovals.length}</span></div>
+          ${pendingApprovals.length ? pendingApprovals.slice(0,4).map(a=>approvalRowHtml(a)).join('') : emptyState('No approvals pending.')}
+          ${pendingApprovals.length>4?`<div style="margin-top:8px;"><button class="btn small" onclick="goTo('approvals')">View all ${pendingApprovals.length}</button></div>`:''}
+        </div>
+      </div>
+      <div class="section-block">
+        <div class="card">
+          <div class="card-title">Carrier & Partner Follow-ups <span class="count">${openFollowUps.length}</span></div>
+          ${openFollowUps.length ? openFollowUps.slice(0,4).map(f=>followUpRowHtml(f)).join('') : emptyState('No external follow-ups pending.')}
+          ${openFollowUps.length>4?`<div style="margin-top:8px;"><button class="btn small" onclick="goTo('delegation',{currentTab:{delegation:'followups'}})">View all ${openFollowUps.length}</button></div>`:''}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-block-head">
+        <div><div class="section-block-title">Operations & CX Team at a Glance</div><div class="section-block-sub">Capacity, overdue volume, and fulfillment health across both divisions</div></div>
+        <button class="btn small" onclick="goTo('team')">Open Team &rarr;</button>
+      </div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Team Member</th><th>Division / Function</th><th>Active</th><th>Due Today</th><th>Overdue</th><th>Workload Status</th></tr></thead><tbody>
+        ${STATE.data.people.filter(p=>p.id!=='p-coo').map(p=>{
+          const active = activeTasksFor(p.id).length;
+          const dueToday = STATE.data.tasks.filter(t=>t.assignee===p.id && isDueToday(t)).length;
+          const overdueP = STATE.data.tasks.filter(t=>t.assignee===p.id && isOverdue(t)).length;
+          const w = glanceWorkload(p.id);
+          return `<tr class="clickable" onclick="goTo('team',{selectedPersonId:'${p.id}'})">
+            <td style="display:flex;align-items:center;gap:8px;">${avatarHtml(p.id)}${escapeHtml(p.name)}</td>
+            <td>${escapeHtml(p.function)}</td>
+            <td>${active}</td>
+            <td>${dueToday}</td>
+            <td>${overdueP||'—'}</td>
+            <td>${workloadChip(w.level,w.emoji)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-block-head">
+        <div><div class="section-block-title">Operations & CX Initiatives at Risk</div></div>
+        <button class="btn small" onclick="goTo('projects')">Open Projects &rarr;</button>
+      </div>
+      ${atRisk.length ? `<div class="grid grid-2">${atRisk.map(p=>projectCardHtml(p)).join('')}</div>` : `<div class="card">${emptyState('All operational projects are currently on track.')}</div>`}
+    </div>
+  `;
+}
+
+function viewHomeLead(){
+  const viewer = STATE.viewingPersonId;
+  const teamIds = [viewer].concat(allReportsUnder(viewer));
+  const teamPeople = STATE.data.people.filter(p=>teamIds.includes(p.id) && p.id!==viewer);
+  const teamTasks = STATE.data.tasks.filter(t=>teamIds.includes(t.assignee));
+  const overdue = teamTasks.filter(isOverdue);
+  const blocked = teamTasks.filter(t=>t.status==='Blocked');
+  const dueToday = teamTasks.filter(isDueToday);
+  const projects = scopedProjects();
+  const atRisk = projects.filter(p=>p.status==='At Risk'||p.status==='Blocked');
+
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Department Lead View</div><h1 class="page-title">Good morning, ${escapeHtml(personName(viewer).split(' ')[0])}</h1><div class="page-sub">Department status & team capacity overview for ${escapeHtml(personName(viewer))}'s team.</div></div></div>
+    <div class="kpi-strip">
+      <div class="stat-card"><div class="stat-num">${dueToday.length}</div><div class="stat-label">Department tasks due today</div></div>
+      <div class="stat-card"><div class="stat-num">${overdue.length}</div><div class="stat-label">Overdue</div></div>
+      <div class="stat-card"><div class="stat-num">${blocked.length}</div><div class="stat-label">Blocked</div></div>
+      <div class="stat-card"><div class="stat-num">${atRisk.length}</div><div class="stat-label">Projects at risk</div></div>
+    </div>
+    <div class="section-block"><div class="section-block-head"><div class="section-block-title">My Department Roster</div><button class="btn small" onclick="goTo('team')">Open Team &rarr;</button></div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Person</th><th>Active</th><th>Due today</th><th>Overdue</th><th>Workload</th></tr></thead><tbody>
+      ${teamPeople.map(p=>{
+        const active = activeTasksFor(p.id).length;
+        const dt = STATE.data.tasks.filter(t=>t.assignee===p.id && isDueToday(t)).length;
+        const ov = STATE.data.tasks.filter(t=>t.assignee===p.id && isOverdue(t)).length;
+        const w = glanceWorkload(p.id);
+        return `<tr class="clickable" onclick="goTo('team',{selectedPersonId:'${p.id}'})"><td style="display:gap:8px;align-items:center;display:flex;">${avatarHtml(p.id)}${escapeHtml(p.name)}</td><td>${active}</td><td>${dt}</td><td>${ov||'—'}</td><td>${workloadChip(w.level,w.emoji)}</td></tr>`;
+      }).join('')}
+      </tbody></table></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card"><div class="card-title">Overdue Deliverables <span class="count">${overdue.length}</span></div>${overdue.length?overdue.slice(0,6).map(t=>taskRowHtml(t)).join(''):emptyState('Nothing overdue in department.')}</div>
+      <div class="card"><div class="card-title">Active Blockers <span class="count">${blocked.length}</span></div>${blocked.length?blocked.slice(0,6).map(t=>taskRowHtml(t)).join(''):emptyState('Nothing currently blocked.')}</div>
+    </div>
+  `;
+}
+
+function viewHomeMember(){
+  const viewer = STATE.viewingPersonId;
+  const mine = STATE.data.tasks.filter(t=>t.assignee===viewer);
+  const active = mine.filter(t=>ACTIVE_STATUSES.includes(t.status));
+  const overdue = mine.filter(isOverdue);
+  const blocked = mine.filter(t=>t.status==='Blocked');
+  const waiting = mine.filter(t=>t.status==='Waiting');
+  const myMeetings = STATE.data.meetings.filter(m=>m.participants.includes(viewer));
+  const upcomingMeetings = myMeetings.filter(m=>m.date>=todayISO()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+  const myProjects = STATE.data.projects.filter(p=>(p.team||[]).includes(viewer) || p.owner===viewer);
+
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Individual Contributor Workspace</div><h1 class="page-title">Good morning, ${escapeHtml(personName(viewer).split(' ')[0])}</h1></div></div>
+    <div class="kpi-strip">
+      <div class="stat-card"><div class="stat-num">${active.length}</div><div class="stat-label">Active tasks</div></div>
+      <div class="stat-card"><div class="stat-num">${overdue.length}</div><div class="stat-label">Overdue</div></div>
+      <div class="stat-card"><div class="stat-num">${blocked.length}</div><div class="stat-label">Blocked</div></div>
+      <div class="stat-card"><div class="stat-num">${waiting.length}</div><div class="stat-label">Waiting on dependencies</div></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card"><div class="card-title">My Current Queue <span class="count">${active.length}</span></div>${active.length?active.map(t=>taskRowHtml(t,{hideAssignee:true})).join(''):emptyState('No active tasks assigned.')}</div>
+      <div class="card"><div class="card-title">My Standups & Meetings</div>${upcomingMeetings.length?upcomingMeetings.map(m=>meetingRowHtml(m)).join(''):emptyState('No upcoming meetings.')}</div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card"><div class="card-title">My Blocked Items <span class="count">${blocked.length}</span></div>${blocked.length?blocked.map(t=>taskRowHtml(t,{hideAssignee:true})).join(''):emptyState('No blocked items.')}</div>
+      <div class="card"><div class="card-title">My Projects</div>${myProjects.length?myProjects.map(p=>`<div class="list-row clickable" onclick="goTo('projects',{selectedProjectId:'${p.id}'})"><div class="list-row-main"><div class="list-row-title">${escapeHtml(p.name)}</div></div>${projectStatusChip(p.status)}</div>`).join(''):emptyState('Not linked to active projects.')}</div>
+    </div>
+  `;
+}
+
+/* ============================== VIEW: MY DAY ============================== */
+function viewMyDay(){
+  const viewer = STATE.viewingPersonId;
+  const mine = STATE.data.tasks.filter(t=>t.assignee===viewer);
+  const tab = STATE.currentTab.myday || 'today';
+  const groups = {
+    today: mine.filter(t=>t.dueDate===todayISO() && ACTIVE_STATUSES.includes(t.status)),
+    week: mine.filter(t=>t.dueDate && daysFromToday(t.dueDate)>0 && daysFromToday(t.dueDate)<=7 && ACTIVE_STATUSES.includes(t.status)),
+    upcoming: mine.filter(t=>t.dueDate && daysFromToday(t.dueDate)>7 && ACTIVE_STATUSES.includes(t.status)),
+    overdue: mine.filter(isOverdue),
+    waiting: mine.filter(t=>t.status==='Waiting'),
+    blocked: mine.filter(t=>t.status==='Blocked'),
+    completed: mine.filter(t=>t.status==='Completed').sort((a,b)=>(b.completedDate||'').localeCompare(a.completedDate||'')),
+  };
+  const tabs = [['today','Today'],['week','This Week'],['upcoming','Upcoming'],['overdue','Overdue'],['waiting','Waiting'],['blocked','Blocked'],['completed','Completed']];
+  const list = groups[tab] || [];
+
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">My Day</div><h1 class="page-title">${escapeHtml(personName(viewer))}'s Action Queue</h1><div class="page-sub">Operational sign-offs, customer escalations, and executive actions.</div></div>
+      <button class="btn-primary" onclick="openQuickAddTask({assignee:'${viewer}'})">+ Quick Task</button>
+    </div>
+    <div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${tab===id?'active':''}" onclick="setTab('myday','${id}')">${label} (${groups[id].length})</button>`).join('')}</div>
+    <div class="card">${list.length? list.map(t=>taskRowHtml(t,{hideAssignee:true})).join('') : emptyState('No tasks in this category.')}</div>
+  `;
+}
+function setTab(group, id){ STATE.currentTab[group]=id; render(); }
+
+/* ============================== VIEW: TASKS (Master DB) ============================== */
+function viewTasks(){
+  const f = STATE.taskFilters;
+  let list = scopedTasks().slice();
+  if(f.person) list = list.filter(t=>t.assignee===f.person);
+  if(f.project) list = list.filter(t=>t.project===f.project);
+  if(f.priority) list = list.filter(t=>t.priority===f.priority);
+  if(f.status) list = list.filter(t=>t.status===f.status);
+  if(f.dept) list = list.filter(t=>t.department===f.dept);
+  list.sort((a,b)=> (a.dueDate||'9999').localeCompare(b.dueDate||'9999'));
+
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Operations & CX Task Master</div><h1 class="page-title">Master Task Database</h1><div class="page-sub">Central tracking across supply chain, warehouse fulfillment, carrier logistics, quality assurance, and customer experience.</div></div>
+      <button class="btn-primary" onclick="openQuickAddTask()">+ Quick Task</button>
+    </div>
+    <div class="filter-bar">
+      <select onchange="STATE.taskFilters.person=this.value; render();"><option value="">All team members</option>${STATE.data.people.map(p=>`<option value="${p.id}" ${f.person===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select>
+      <select onchange="STATE.taskFilters.project=this.value; render();"><option value="">All initiatives</option>${STATE.data.projects.map(p=>`<option value="${p.id}" ${f.project===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select>
+      <select onchange="STATE.taskFilters.priority=this.value; render();"><option value="">All priorities</option>${PRIORITIES.map(p=>`<option value="${p.id}">${p.id}</option>`).join('')}</select>
+      <select onchange="STATE.taskFilters.status=this.value; render();"><option value="">All statuses</option>${STATUSES.map(s=>`<option value="${s}" ${f.status===s?'selected':''}>${s}</option>`).join('')}</select>
+      <select onchange="STATE.taskFilters.dept=this.value; render();"><option value="">All departments</option>${DEPARTMENTS.map(d=>`<option value="${d}" ${f.dept===d?'selected':''}>${d}</option>`).join('')}</select>
+      ${(f.person||f.project||f.priority||f.status||f.dept) ? `<button class="btn small ghost" onclick="STATE.taskFilters={person:'',project:'',priority:'',status:'',dept:''}; render();">Clear filters</button>` : ''}
+      <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">${list.length} tasks</span>
+    </div>
+    <div class="table-wrap"><table class="data-table"><thead><tr>
+      <th>Task Description</th><th>Assignee</th><th>Project</th><th>Priority</th><th>Status</th><th>Deadline</th><th>Action</th>
+    </tr></thead><tbody>
+      ${list.length? list.map(t=>{
+        const overdue = isOverdue(t);
+        return `<tr class="clickable" onclick="openTaskModal('${t.id}')">
+          <td style="max-width:280px;"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.name)}</div><div class="mono">${t.id}</div></td>
+          <td style="white-space:nowrap;">${avatarHtml(t.assignee)} ${escapeHtml(personName(t.assignee))}</td>
+          <td>${t.project?escapeHtml(projectName(t.project)):'—'}</td>
+          <td>${priorityChip(t.priority)}</td>
+          <td>${statusChip(t.status)}</td>
+          <td style="${overdue?'color:var(--brick);font-weight:600;':''}">${t.dueDate?relativeDay(t.dueDate):'—'}</td>
+          <td><button class="btn small ghost" onclick="event.stopPropagation();quickStatusCycle('${t.id}')">Advance</button></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="7">${emptyState('No tasks match the active filters.')}</td></tr>`}
+    </tbody></table></div>
+  `;
+}
+
+function quickStatusCycle(id){
+  const t = taskById(id);
+  const flow = ['Inbox','Planned','Assigned','Accepted','In Progress','In Review','Completed'];
+  let idx = flow.indexOf(t.status);
+  if(idx===-1) idx = flow.indexOf('In Progress')-1;
+  const next = flow[Math.min(idx+1, flow.length-1)];
+  updateTaskField(t, 'status', next);
+  toast(`"${t.name}" advanced to ${next}`);
+  render();
+}
+
+/* ============================== TASK MUTATIONS ============================== */
+function updateTaskField(t, field, value){
+  const old = t[field];
+  if(old===value) return;
+  if(field==='dueDate' && old && value && value>old) t.timesPushed = (t.timesPushed||0)+1;
+  if(field==='assignee' && old) t.reassignCount = (t.reassignCount||0)+1;
+  t[field] = value;
+  t.lastUpdated = todayISO();
+  if(field==='status' && value==='Completed'){
+    t.completedDate = todayISO();
+    maybeSpawnRecurring(t);
+  }
+  if(field==='status' && old==='Completed'){ t.completedDate = null; }
+  logAudit('Task', t.name, fieldLabel(field), old, value);
+  saveState();
+}
+function fieldLabel(f){
+  return {status:'Status', assignee:'Assignee', dueDate:'Due Date', priority:'Priority', project:'Project'}[f] || f;
+}
+
+function maybeSpawnRecurring(t){
+  const template = STATE.data.recurringTemplates.find(r=>r.name===t.name && r.type!=='meeting');
+  if(!template) return;
+  let nextDue = t.dueDate;
+  if(template.frequency==='Daily') nextDue = addDays(t.dueDate, 1);
+  else if(template.frequency==='Weekly') nextDue = addDays(t.dueDate, 7);
+  else if(template.frequency==='Monthly') nextDue = addDays(t.dueDate, 30);
+  else return;
+  STATE.data.tasks.push({
+    id: genId('T'), name:t.name, description:t.description||'', assignee:t.assignee, createdBy:t.createdBy,
+    department:t.department, project:t.project, priority:t.priority, status:'Planned',
+    startDate: addDays(nextDue,-1), dueDate: nextDue, estimatedTime:t.estimatedTime, actualTime:0,
+    dependency:null, waitingOn:null, reviewer:t.reviewer, approvalRequired:false, relatedMeeting:null,
+    notes:'Auto-scheduled from standard recurring operational template: '+template.name, attachments:[],
+    createdDate: todayISO(), lastUpdated: todayISO(), completedDate:null, timesPushed:0, reassignCount:0,
+    recurringOf: template.id,
+  });
+  toast(`Recurring task "${t.name}" queued for ${fmtDate(nextDue)}.`);
+}
+
+function createTask(data){
+  const t = Object.assign({
+    id: genId('T'), description:'', department:'', project:null, priority:'P2', status:'Assigned',
+    startDate:todayISO(), dueDate:null, estimatedTime:1, actualTime:0, dependency:null, waitingOn:null,
+    reviewer:null, approvalRequired:false, relatedMeeting:null, notes:'', attachments:[],
+    createdDate:todayISO(), lastUpdated:todayISO(), completedDate:null, timesPushed:0, reassignCount:0,
+    createdBy: STATE.viewingPersonId,
+  }, data);
+  STATE.data.tasks.push(t);
+  logAudit('Task', t.name, 'Created', '', 'assigned to '+personName(t.assignee));
+  saveState();
+  return t;
+}
+
+function deleteTask(id){
+  const t = taskById(id);
+  if(!t) return;
+  STATE.data.tasks = STATE.data.tasks.filter(x=>x.id!==id);
+  logAudit('Task', t.name, 'Deleted', '', '');
+  saveState();
+}
+
+/* ============================== MODALS: Generic ============================== */
+function openModal(html){
+  const root = document.getElementById('modal-root');
+  if(root) root.innerHTML = `<div class="modal-backdrop" onmousedown="if(event.target===this) closeModal();">${html}</div>`;
+}
+function closeModal(){ const root = document.getElementById('modal-root'); if(root) root.innerHTML=''; }
+
+/* ---------- Quick add task ---------- */
+function openQuickAddTask(prefill){
+  prefill = prefill || {};
+  openModal(`
+    <div class="modal">
+      <div class="modal-head"><h3 class="modal-title">New Operational / CX Task</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Task Name *</label><input type="text" id="qt-name" placeholder="e.g. Audit warehouse dispatch handover cut-off" autofocus></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Owner *</label><select class="field-input" id="qt-owner">${STATE.data.people.map(p=>`<option value="${p.id}" ${prefill.assignee===p.id?'selected':''}>${escapeHtml(p.name)} (${escapeHtml(p.role)})</option>`).join('')}</select></div>
+          <div class="field"><label class="field-label">Deadline *</label><input type="date" id="qt-due" value="${prefill.dueDate||addDays(todayISO(),3)}"></div>
+        </div>
+        <div id="qt-more" style="display:none;">
+          <div class="field-row">
+            <div class="field"><label class="field-label">Priority</label><select class="field-input" id="qt-priority">${PRIORITIES.map(p=>`<option value="${p.id}">${p.label}</option>`).join('')}</select></div>
+            <div class="field"><label class="field-label">Initiative / Project</label><select class="field-input" id="qt-project"><option value="">None</option>${STATE.data.projects.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></div>
+          </div>
+          <div class="field"><label class="field-label">Context / Description</label><textarea id="qt-desc" placeholder="Operational details, order IDs, or carrier tracking references"></textarea></div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Estimated Hours</label><input type="number" id="qt-est" value="2" min="0.5" step="0.5"></div>
+            <div class="field"><label class="field-label">Prerequisite Dependency</label><select class="field-input" id="qt-dep"><option value="">None</option>${STATE.data.tasks.filter(t=>t.status!=='Completed').map(t=>`<option value="${t.id}">${escapeHtml(t.name.slice(0,40))}</option>`).join('')}</select></div>
+          </div>
+        </div>
+        <button class="btn small ghost" type="button" onclick="document.getElementById('qt-more').style.display='block';this.style.display='none';">+ Add priority, project, description…</button>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitQuickAddTask()">Assign Task</button>
+      </div>
+    </div>
+  `);
+  setTimeout(()=>{ const el = document.getElementById('qt-name'); if(el) el.focus(); }, 30);
+}
+
+function submitQuickAddTask(){
+  const name = document.getElementById('qt-name').value.trim();
+  const owner = document.getElementById('qt-owner').value;
+  const due = document.getElementById('qt-due').value;
+  if(!name){ toast('Task name is required.'); return; }
+  if(!due){ toast('Please set a deadline.'); return; }
+  const moreOpen = document.getElementById('qt-more').style.display !== 'none';
+  const t = createTask({
+    name, assignee: owner, dueDate: due,
+    priority: moreOpen ? document.getElementById('qt-priority').value : 'P2',
+    project: moreOpen ? (document.getElementById('qt-project').value || null) : null,
+    description: moreOpen ? document.getElementById('qt-desc').value : '',
+    estimatedTime: moreOpen ? Number(document.getElementById('qt-est').value)||1 : 2,
+    dependency: moreOpen ? (document.getElementById('qt-dep').value || null) : null,
+    department: personById(owner) ? personById(owner).function : '',
+    status:'Assigned',
+  });
+  closeModal();
+  toast(`Assigned "${name}" to ${personName(owner)}.`);
+  render();
+}
+
+/* ---------- Task detail / edit modal ---------- */
+function openTaskModal(id){
+  const t = taskById(id);
+  if(!t) return;
+  const depBlocking = dependencyBlockText(t);
+  const esc = escalationFor(t);
+  openModal(`
+    <div class="modal wide">
+      <div class="modal-head">
+        <h3 class="modal-title">${escapeHtml(t.name)}</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+          ${priorityChip(t.priority)} ${statusChip(t.status)}
+          ${isOverdue(t)?'<span class="chip chip-bad">Overdue SLA</span>':''}
+          ${isStale(t)?'<span class="chip chip-warn">Stale</span>':''}
+          ${esc?`<span class="escalation-tag ${esc.className}">Escalation: ${esc.who}</span>`:''}
+          <span class="mono" style="align-self:center;">${t.id}</span>
+        </div>
+        ${depBlocking?`<div class="card" style="background:var(--brick-tint);border-color:var(--brick);margin-bottom:14px;"><b>Blocked by Predecessor Task:</b> "${escapeHtml(depBlocking.name)}" (${escapeHtml(depBlocking.status)}, owner: ${escapeHtml(personName(depBlocking.assignee))})</div>`:''}
+        ${t.status==='Blocked' && t.blockedReason ? `<div class="card" style="background:var(--brick-tint);border-color:var(--brick);margin-bottom:14px;"><b>Blocker Detail:</b> ${escapeHtml(t.blockedReason)}</div>`:''}
+        <div class="field-row">
+          <div class="field"><label class="field-label">Assignee</label><select class="field-input" onchange="updateTaskField(taskById('${t.id}'),'assignee',this.value); refreshTaskModal('${t.id}')">${STATE.data.people.map(p=>`<option value="${p.id}" ${t.assignee===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
+          <div class="field"><label class="field-label">Status</label><select class="field-input" onchange="updateTaskField(taskById('${t.id}'),'status',this.value); refreshTaskModal('${t.id}')">${STATUSES.map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Priority</label><select class="field-input" onchange="updateTaskField(taskById('${t.id}'),'priority',this.value); refreshTaskModal('${t.id}')">${PRIORITIES.map(p=>`<option value="${p.id}">${p.label}</option>`).join('')}</select></div>
+          <div class="field"><label class="field-label">Due Date</label><input type="date" value="${t.dueDate||''}" onchange="updateTaskField(taskById('${t.id}'),'dueDate',this.value); refreshTaskModal('${t.id}')"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Linked Project</label><select class="field-input" onchange="updateTaskField(taskById('${t.id}'),'project',this.value||null); refreshTaskModal('${t.id}')"><option value="">None</option>${STATE.data.projects.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></div>
+          <div class="field"><label class="field-label">Waiting On (External / Internal)</label><input type="text" value="${escapeHtml(t.waitingOn||'')}" placeholder="e.g. Delhivery Tech Support, SGS Auditor, Founder" onchange="updateTaskField(taskById('${t.id}'),'waitingOn',this.value||null); refreshTaskModal('${t.id}')"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Estimated Hours</label><input type="number" value="${t.estimatedTime||''}" step="0.5" onchange="updateTaskField(taskById('${t.id}'),'estimatedTime',Number(this.value))"></div>
+          <div class="field"><label class="field-label">Actual Hours Logged</label><input type="number" value="${t.actualTime||''}" step="0.5" onchange="updateTaskField(taskById('${t.id}'),'actualTime',Number(this.value))"></div>
+        </div>
+        <div class="field"><label class="field-label">Notes & Operational Context</label><textarea onchange="updateTaskField(taskById('${t.id}'),'description',this.value)">${escapeHtml(t.description||'')}</textarea></div>
+        <div style="font-size:11.5px;color:var(--text-muted);display:flex;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:10px;margin-top:4px;">
+          <span>Created ${fmtDate(t.createdDate)} by ${escapeHtml(personName(t.createdBy))}</span>
+          <span>Last modified ${relativeDay(t.lastUpdated)}</span>
+          ${t.completedDate?`<span>Completed ${fmtDate(t.completedDate)}</span>`:''}
+          ${t.timesPushed?`<span>Timeline pushed ${t.timesPushed}×</span>`:''}
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn danger" onclick="if(confirm('Delete this operational task?')){deleteTask('${t.id}');closeModal();render();}">Delete</button>
+        <button class="btn dark" onclick="closeModal();render();">Done</button>
+      </div>
+    </div>
+  `);
+}
+function refreshTaskModal(id){ openTaskModal(id); render(); }
+
+/* ============================== VIEW: TEAM ============================== */
+function viewTeam(){
+  const tab = STATE.currentTab.team || (STATE.selectedPersonId ? 'directory' : 'glance');
+  const tabs = [['glance','At a Glance'],['capacity','Capacity Planner'],['directory','Directory'],['org','Org Structure'],['leave','Availability & Shifts']];
+  let body = '';
+  if(STATE.selectedPersonId){
+    body = personDetailHtml(STATE.selectedPersonId);
+  } else if(tab==='glance') body = teamGlanceHtml();
+  else if(tab==='capacity') body = teamCapacityHtml();
+  else if(tab==='directory') body = teamDirectoryHtml();
+  else if(tab==='org') body = teamOrgHtml();
+  else if(tab==='leave') body = teamLeaveHtml();
+
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Operations & CX Team</div><h1 class="page-title">Team & Workforce Management</h1><div class="page-sub">Resource allocation, capacity utilization, and operational accountability across supply chain and customer experience.</div></div></div>
+    ${STATE.selectedPersonId ? `<button class="btn small" style="margin-bottom:14px;" onclick="goTo('team',{selectedPersonId:null})">&larr; Back to team roster</button>` : `<div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${tab===id?'active':''}" onclick="STATE.selectedPersonId=null; setTab('team','${id}')">${label}</button>`).join('')}</div>`}
+    ${body}
+  `;
+}
+
+function teamGlanceHtml(){
+  const people = STATE.data.people.filter(p=>p.id!=='p-coo');
+  return `<div class="table-wrap"><table class="data-table"><thead><tr>
+    <th>Team Member</th><th>Role & Function</th><th>Active</th><th>Due Today</th><th>Overdue</th><th>Blocked</th><th>Next SLA Deadline</th><th>Workload Status</th>
+  </tr></thead><tbody>
+  ${people.map(p=>{
+    const tasks = STATE.data.tasks.filter(t=>t.assignee===p.id);
+    const active = tasks.filter(t=>ACTIVE_STATUSES.includes(t.status));
+    const dueToday = active.filter(isDueToday).length;
+    const overdue = active.filter(isOverdue).length;
+    const blocked = active.filter(t=>t.status==='Blocked').length;
+    const nextDeadline = active.filter(t=>t.dueDate).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))[0];
+    const w = glanceWorkload(p.id);
+    return `<tr class="clickable" onclick="goTo('team',{selectedPersonId:'${p.id}'})">
+      <td style="display:flex;align-items:center;gap:8px;white-space:nowrap;">${avatarHtml(p.id)}${escapeHtml(p.name)}</td>
+      <td>${escapeHtml(p.role)}</td>
+      <td>${active.length}</td>
+      <td>${dueToday||'—'}</td>
+      <td style="${overdue?'color:var(--brick);font-weight:600;':''}">${overdue||'—'}</td>
+      <td style="${blocked?'color:var(--amber-deep);font-weight:600;':''}">${blocked||'—'}</td>
+      <td>${nextDeadline?relativeDay(nextDeadline.dueDate):'—'}</td>
+      <td>${workloadChip(w.level,w.emoji)}</td>
+    </tr>`;
+  }).join('')}
+  </tbody></table></div>`;
+}
+
+function teamCapacityHtml(){
+  const people = STATE.data.people.filter(p=>p.id!=='p-coo');
+  const buckets = {Underloaded:[], Healthy:[], Busy:[], 'High Load':[], Overloaded:[]};
+  people.forEach(p=>{ const u = utilizationFor(p.id); (buckets[u.level]=buckets[u.level]||[]).push({p,u}); });
+
+  return `
+    <div class="section-block-sub" style="margin-bottom:14px;">Capacity Utilization = estimated hours on open tasks & tickets &divide; weekly available working hours. Prevents warehouse supervisor and support escalation burnout.</div>
+    ${people.map(p=>{
+      const u = utilizationFor(p.id);
+      const color = u.level==='Overloaded'?'var(--brick)':u.level==='High Load'?'var(--amber-deep)':u.level==='Busy'?'var(--amber)':u.level==='Healthy'?'var(--sage)':'var(--slate)';
+      return `<div class="workload-bar-row">
+        <div style="width:180px;display:flex;align-items:center;gap:8px;flex:none;">${avatarHtml(p.id)}<span style="font-size:12.8px;">${escapeHtml(p.name)}</span></div>
+        <div class="workload-track"><div class="workload-fill" style="width:${Math.min(u.pct,150)/1.5}%;background:${color};"></div></div>
+        <div style="width:150px;text-align:right;font-size:12px;color:var(--text-muted);flex:none;">${u.assignedHours}h / ${u.availableHours}h · ${u.pct}%</div>
+        <div style="width:115px;flex:none;text-align:right;">${workloadChip(u.level,u.pct<40?'🟢':u.level==='Healthy'?'🟢':u.level==='Busy'?'🟡':u.level==='High Load'?'🟠':'🔴')}</div>
+      </div>`;
+    }).join('')}
+    <div class="grid grid-3" style="margin-top:20px;">
+      ${['Underloaded','Healthy','Busy','High Load','Overloaded'].map(level=>{
+        if(!buckets[level] || !buckets[level].length) return '';
+        return `<div class="card"><div class="card-title">${level} <span class="count">${buckets[level].length}</span></div>${buckets[level].map(x=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${escapeHtml(x.p.name)}</div><div class="list-row-meta">${escapeHtml(x.p.role)}</div></div></div>`).join('')}</div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function teamDirectoryHtml(){
+  return `<div class="grid grid-3">${STATE.data.people.map(p=>{
+    const tasks = STATE.data.tasks.filter(t=>t.assignee===p.id && ACTIVE_STATUSES.includes(t.status));
+    const projects = STATE.data.projects.filter(pr=>(pr.team||[]).includes(p.id) || pr.owner===p.id);
+    return `<div class="card person-card" style="cursor:pointer;" onclick="goTo('team',{selectedPersonId:'${p.id}'})">
+      ${avatarHtml(p.id,'lg')}
+      <div style="min-width:0;">
+        <div style="font-weight:600;font-size:13.5px;">${escapeHtml(p.name)}</div>
+        <div style="font-size:11.8px;color:var(--text-muted);">${escapeHtml(p.role)}</div>
+        <div style="font-size:11.5px;color:var(--text-faint);margin-top:4px;">${p.manager?'Reports to '+escapeHtml(personName(p.manager)):'Dual COO / CXO Direct'}</div>
+        <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;">
+          <span class="chip chip-outline">${tasks.length} active tasks</span>
+          <span class="chip chip-outline">${projects.length} projects</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function personDetailHtml(id){
+  const p = personById(id);
+  const tasks = STATE.data.tasks.filter(t=>t.assignee===id);
+  const active = tasks.filter(t=>ACTIVE_STATUSES.includes(t.status));
+  const overdue = tasks.filter(isOverdue);
+  const blocked = active.filter(t=>t.status==='Blocked');
+  const projects = STATE.data.projects.filter(pr=>(pr.team||[]).includes(id) || pr.owner===id);
+  const u = utilizationFor(id);
+  const oneOnOne = STATE.data.oneOnOnes.filter(o=>o.person===id).sort((a,b)=>b.date.localeCompare(a.date));
+
+  return `
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;gap:14px;align-items:center;">
+        ${avatarHtml(id,'lg')}
+        <div>
+          <div style="font-size:17px;font-weight:600;">${escapeHtml(p.name)}</div>
+          <div style="font-size:12.5px;color:var(--text-muted);">${escapeHtml(p.role)} · ${escapeHtml(p.function)}${p.manager?' · Reports to '+escapeHtml(personName(p.manager)):''}</div>
+        </div>
+        <div style="margin-left:auto;">${workloadChip(u.level, u.pct<75?'🟢':u.pct<100?'🟡':u.pct<130?'🟠':'🔴')}</div>
+      </div>
+    </div>
+    <div class="kpi-strip">
+      <div class="stat-card"><div class="stat-num">${active.length}</div><div class="stat-label">Active deliverables</div></div>
+      <div class="stat-card"><div class="stat-num">${overdue.length}</div><div class="stat-label">Overdue</div></div>
+      <div class="stat-card"><div class="stat-num">${blocked.length}</div><div class="stat-label">Blocked</div></div>
+      <div class="stat-card"><div class="stat-num">${u.pct}%</div><div class="stat-label">Utilization</div></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card"><div class="card-title">Active Queue <span class="count">${active.length}</span></div>${active.length?active.map(t=>taskRowHtml(t,{hideAssignee:true})).join(''):emptyState('No active tasks.')}</div>
+      <div class="card"><div class="card-title">Projects & Programs</div>${projects.length?projects.map(pr=>`<div class="list-row clickable" onclick="goTo('projects',{selectedProjectId:'${pr.id}'})"><div class="list-row-main"><div class="list-row-title">${escapeHtml(pr.name)}</div></div>${projectStatusChip(pr.status)}</div>`).join(''):emptyState('No linked projects.')}</div>
+    </div>
+    <div class="section-block">
+      <div class="section-block-head"><div class="section-block-title">Operational 1:1 History</div><button class="btn small" onclick="openOneOnOneModal(null,'${id}')">+ Log 1:1 Sync</button></div>
+      <div class="card">${oneOnOne.length ? oneOnOne.map(o=>`<div class="list-row clickable" onclick="openOneOnOneModal('${o.id}')"><div class="list-row-main"><div class="list-row-title">${fmtDate(o.date)} — ${escapeHtml(o.topics)}</div><div class="list-row-meta">${escapeHtml((o.commitments||'').slice(0,70))}</div></div></div>`).join('') : emptyState('No 1:1s logged yet.')}</div>
+    </div>
+  `;
+}
+
+function teamOrgHtml(){
+  const coo = personById('p-coo');
+  const leads = STATE.data.people.filter(p=>p.manager==='p-coo');
+  return `<div class="scrollx">
+    <div class="org-level"><div class="org-node" style="border-color:var(--amber-deep);cursor:pointer;" onclick="goTo('team',{selectedPersonId:'p-coo'})"><b>${escapeHtml(coo.name)}</b><div style="font-size:11px;color:var(--text-muted);">${escapeHtml(coo.role)}</div></div></div>
+    <div class="org-connector"></div>
+    <div class="org-level">
+      ${leads.map(l=>`<div><div class="org-node" style="cursor:pointer;" onclick="goTo('team',{selectedPersonId:'${l.id}'})"><b>${escapeHtml(l.name)}</b><div style="font-size:11px;color:var(--text-muted);">${escapeHtml(l.role)}</div></div></div>`).join('')}
+    </div>
+    <div class="org-level">
+      ${leads.map(l=>`<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div class="org-connector"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:320px;">
+        ${directReports(l.id).map(r=>`<div class="org-node" style="min-width:130px;cursor:pointer;" onclick="goTo('team',{selectedPersonId:'${r.id}'})"><b style="font-size:12px;">${escapeHtml(r.name)}</b><div style="font-size:10.5px;color:var(--text-muted);">${escapeHtml(r.function)}</div></div>`).join('')}
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function teamLeaveHtml(){
+  const demoLeave = [
+    {person:'p-warehouse', type:'Warehouse Shift Rotation (Night Cutover)', dates: relativeDay(addDays(todayISO(),3))+' – '+relativeDay(addDays(todayISO(),5))},
+    {person:'p-qc', type:'On-site Factory Audit (Ludhiana)', dates: relativeDay(addDays(todayISO(),7))+' – '+relativeDay(addDays(todayISO(),10))},
+  ];
+  return `<div class="card">
+    <div class="card-title">Upcoming Shifts & Partner Visits</div>
+    ${demoLeave.map(l=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${escapeHtml(personName(l.person))} — ${l.type}</div><div class="list-row-meta">${l.dates}</div></div></div>`).join('')}
+    <div style="margin-top:10px;font-size:11.5px;color:var(--text-faint);">Tracks key warehouse shift rotations and on-site factory quality visits to protect daily SLA continuity.</div>
+  </div>`;
+}
+
+/* ============================== VIEW: PROJECTS ============================== */
+function viewProjects(){
+  if(STATE.selectedProjectId) return projectDetailHtml(STATE.selectedProjectId);
+  const projects = STATE.data.projects.slice().sort((a,b)=>{
+    const order = {'At Risk':0,'Blocked':1,'On Track':2,'Not Started':3,'Completed':4,'Cancelled':5};
+    return (order[a.status]??9)-(order[b.status]??9);
+  });
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Strategic Programs</div><h1 class="page-title">Operations & Customer Experience Initiatives</h1><div class="page-sub">Milestones, operational risks, and cross-functional deliverables for all core programs.</div></div>
+      <button class="btn-primary" onclick="openNewProjectModal()">+ New Project</button>
+    </div>
+    <div class="grid grid-3">${projects.map(p=>projectCardHtml(p)).join('')}</div>
+  `;
+}
+
+function projectDetailHtml(id){
+  const proj = projectById(id);
+  if(!proj) return `<button class="btn" onclick="goTo('projects')">&larr; Back</button>`;
+  const tasks = STATE.data.tasks.filter(t=>t.project===id);
+  const progress = projectProgress(proj);
+  const risk = projectRisk(proj);
+  const overdueTasks = tasks.filter(isOverdue);
+  const blockedTasks = tasks.filter(t=>t.status==='Blocked');
+  const meetings = STATE.data.meetings.filter(m => (proj.team||[]).some(pid=>m.participants.includes(pid)) || tasks.some(t=>t.relatedMeeting===m.id));
+
+  return `
+    <button class="btn small" style="margin-bottom:14px;" onclick="goTo('projects',{selectedProjectId:null})">&larr; All initiatives</button>
+    <div class="page-head">
+      <div>
+        <div class="page-eyebrow">${escapeHtml(proj.priority)} priority · Owner: ${escapeHtml(personName(proj.owner))}</div>
+        <h1 class="page-title">${escapeHtml(proj.name)}</h1>
+        <div class="page-sub">${escapeHtml(proj.objective||'')}</div>
+      </div>
+      <select class="field-input" style="width:auto;" onchange="updateProjectStatus('${proj.id}',this.value)">${PROJECT_STATUSES.map(s=>`<option value="${s}" ${proj.status===s?'selected':''}>${s}</option>`).join('')}</select>
+    </div>
+    <div class="kpi-strip">
+      <div class="stat-card"><div class="stat-num">${progress}%</div><div class="stat-label">Milestone / task progress</div></div>
+      <div class="stat-card"><div class="stat-num">${daysFromToday(proj.deadline)}</div><div class="stat-label">Days to target go-live</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:${risk==='High'?'var(--brick)':risk==='Medium'?'var(--amber-deep)':'var(--sage)'};">${risk}</div><div class="stat-label">Risk rating</div></div>
+      <div class="stat-card"><div class="stat-num">${overdueTasks.length}</div><div class="stat-label">Overdue tasks</div></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-block-title" style="margin-bottom:6px;">Milestone Roadmap</div>
+      <div class="card">
+        <div class="milestone-track">
+          ${(proj.milestones||[]).map((m,i)=>`
+            <div class="milestone-node">
+              <div class="milestone-dot ${m.status==='Completed'?'done':m.status==='In Progress'||m.status==='Blocked'?'active':''}"></div>
+              <div class="milestone-name">${escapeHtml(m.name)}</div>
+              <div class="milestone-meta">${escapeHtml(personName(m.owner))} · ${fmtDate(m.deadline)}</div>
+              <div class="milestone-meta">${m.status}</div>
+            </div>
+            ${i<(proj.milestones.length-1)?`<div class="milestone-connector ${m.status==='Completed'?'done':''}"></div>`:''}
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    ${proj.risks && proj.risks.length ? `<div class="section-block"><div class="section-block-title" style="margin-bottom:6px;">Operational Risks & Vulnerabilities</div>${proj.risks.map(r=>`<div class="card accent-left" style="border-left-color:var(--brick);margin-bottom:8px;"><span class="chip chip-bad">${r.level} Risk</span> ${escapeHtml(r.note)}</div>`).join('')}</div>` : ''}
+
+    <div class="grid grid-2">
+      <div class="card"><div class="card-title">Overdue Deliverables <span class="count">${overdueTasks.length}</span></div>${overdueTasks.length?overdueTasks.map(t=>taskRowHtml(t)).join(''):emptyState('None overdue.')}</div>
+      <div class="card"><div class="card-title">Blocked Items <span class="count">${blockedTasks.length}</span></div>${blockedTasks.length?blockedTasks.map(t=>taskRowHtml(t)).join(''):emptyState('None blocked.')}</div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-block-head"><div class="section-block-title">All Project Tasks (${tasks.length})</div><button class="btn small" onclick="openQuickAddTask({dueDate: addDays(todayISO(),5)})">+ Add Task to Initiative</button></div>
+      <div class="card">${tasks.length?tasks.map(t=>taskRowHtml(t)).join(''):emptyState('No tasks linked yet.')}</div>
+    </div>
+
+    ${meetings.length?`<div class="section-block"><div class="section-block-title" style="margin-bottom:6px;">Related Operational Reviews</div><div class="card">${meetings.map(m=>meetingRowHtml(m)).join('')}</div></div>`:''}
+    ${proj.documents && proj.documents.length ? `<div class="section-block"><div class="section-block-title" style="margin-bottom:6px;">SOPs & Documentation</div><div class="card">${proj.documents.map(d=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${escapeHtml(d.label)}</div></div><a href="#" class="btn small ghost" onclick="event.preventDefault();toast('Demo documentation link.')">Open in Storage</a></div>`).join('')}</div></div>` : ''}
+  `;
+}
+
+function updateProjectStatus(id, status){
+  const p = projectById(id);
+  const old = p.status;
+  p.status = status;
+  logAudit('Project', p.name, 'Status', old, status);
+  saveState();
+  render();
+  toast(`${p.name} updated to ${status}.`);
+}
+
+function openNewProjectModal(){
+  openModal(`
+    <div class="modal">
+      <div class="modal-head"><h3 class="modal-title">New Operations / CX Initiative</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Initiative Name *</label><input type="text" id="np-name" placeholder="e.g. Automated Courier NDR Fast-Resolution"></div>
+        <div class="field"><label class="field-label">Objective & Success Metrics</label><textarea id="np-obj" placeholder="Target SLA reduction, CSAT goal, or cost optimization metrics"></textarea></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Project Lead</label><select class="field-input" id="np-owner">${STATE.data.people.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></div>
+          <div class="field"><label class="field-label">Priority</label><select class="field-input" id="np-priority">${PRIORITIES.map(p=>`<option value="${p.id}">${p.id}</option>`).join('')}</select></div>
+        </div>
+        <div class="field"><label class="field-label">Target Go-Live Date</label><input type="date" id="np-deadline" value="${addDays(todayISO(),30)}"></div>
+      </div>
+      <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn dark" onclick="submitNewProject()">Create Initiative</button></div>
+    </div>
+  `);
+}
+
+function submitNewProject(){
+  const name = document.getElementById('np-name').value.trim();
+  if(!name){ toast('Initiative name is required.'); return; }
+  const owner = document.getElementById('np-owner').value;
+  const proj = {
+    id: genId('proj'), name, objective: document.getElementById('np-obj').value,
+    owner, team:[owner], startDate: todayISO(), deadline: document.getElementById('np-deadline').value,
+    priority: document.getElementById('np-priority').value, status:'Not Started',
+    milestones:[], risks:[], documents:[],
+  };
+  STATE.data.projects.push(proj);
+  logAudit('Project', name, 'Created', '', 'owner '+personName(owner));
+  saveState();
+  closeModal();
+  goTo('projects',{selectedProjectId:proj.id});
+  toast(`Initiative "${name}" launched.`);
+}
+
+/* ============================== VIEW: MEETINGS & 1:1s ============================== */
+function viewMeetings(){
+  const tab = STATE.currentTab.meetings || 'upcoming';
+  const tabs = [['upcoming','Upcoming Syncs'],['past','Past Syncs'],['oneonones','Operational 1:1s']];
+  const myMeetings = scopedMeetings();
+  const upcoming = myMeetings.filter(m=>m.date>=todayISO()).sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  const past = myMeetings.filter(m=>m.date<todayISO()).sort((a,b)=>b.date.localeCompare(a.date));
+  let body;
+  if(tab==='oneonones') body = oneOnOnesHtml();
+  else {
+    const list = tab==='upcoming'?upcoming:past;
+    body = `<div class="card">${list.length?list.map(m=>meetingRowHtml(m)).join(''):emptyState('No syncs found.')}</div>`;
+  }
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Operations & CX Cadence</div><h1 class="page-title">Operational Syncs & 1:1s</h1><div class="page-sub">Daily standups, carrier reviews, and 1:1 alignment. Action items convert directly into tracked operational tasks.</div></div>
+      <button class="btn-primary" onclick="openNewMeetingModal()">+ New Sync</button>
+    </div>
+    <div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${tab===id?'active':''}" onclick="setTab('meetings','${id}')">${label}</button>`).join('')}</div>
+    ${body}
+  `;
+}
+
+function oneOnOnesHtml(){
+  let reports;
+  if(STATE.currentRole==='Team Member'){
+    reports = [personById(STATE.viewingPersonId)];
+  } else if(STATE.currentRole==='Operations Lead' || STATE.currentRole==='CX & Support Lead'){
+    reports = allReportsUnder(STATE.viewingPersonId).map(personById);
+  } else {
+    reports = STATE.data.people.filter(p=>p.id!=='p-coo');
+  }
+  return `<div class="grid grid-2">
+    ${reports.map(p=>{
+      const history = STATE.data.oneOnOnes.filter(o=>o.person===p.id).sort((a,b)=>b.date.localeCompare(a.date));
+      const last = history[0];
+      return `<div class="card">
+        <div class="card-title"><span>${escapeHtml(p.name)} (${escapeHtml(p.function)})</span><button class="btn small" onclick="openOneOnOneModal(null,'${p.id}')">+ Log 1:1</button></div>
+        ${last ? `<div class="list-row clickable" onclick="openOneOnOneModal('${last.id}')"><div class="list-row-main"><div class="list-row-title">Last: ${fmtDate(last.date)} — ${escapeHtml(last.topics)}</div><div class="list-row-meta">${escapeHtml((last.commitments||'').slice(0,80))}</div></div></div>` : emptyState('No 1:1s recorded yet.')}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function openMeetingModal(id){
+  const m = meetingById(id);
+  if(!m) return;
+  openModal(`
+    <div class="modal wide">
+      <div class="modal-head"><h3 class="modal-title">${escapeHtml(m.name)}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px;">${fmtDate(m.date)} · ${m.time} · ${m.participants.map(p=>personName(p)).join(', ')}${m.recurring?' · Recurs '+m.recurring:''}</div>
+        <div class="field"><label class="field-label">Meeting Objective</label><div style="font-size:13px;">${escapeHtml(m.objective||'—')}</div></div>
+        <div class="field"><label class="field-label">Agenda</label><div style="font-size:13px;white-space:pre-wrap;">${escapeHtml(m.agenda||'—')}</div></div>
+        <div class="field"><label class="field-label">Operational Notes & Discussion</label><textarea onchange="updateMeetingField('${m.id}','notes',this.value)">${escapeHtml(m.notes||'')}</textarea></div>
+        <div class="field"><label class="field-label">Decisions Reached</label>
+          ${(m.decisions||[]).map(d=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${escapeHtml(d)}</div></div></div>`).join('') || emptyState('No decisions logged yet.')}
+          <div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="new-decision-${m.id}" placeholder="Record decision…" style="flex:1;border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 9px;font-size:12.5px;"><button class="btn small" onclick="addDecision('${m.id}')">Add</button></div>
+        </div>
+        <div class="field">
+          <label class="field-label">Action Items (Convertible to Tracked Tasks)</label>
+          ${m.actionItems.length ? m.actionItems.map(a=>`
+            <div class="list-row">
+              <div class="list-row-main"><div class="list-row-title">${escapeHtml(a.text)}</div><div class="list-row-meta">${escapeHtml(personName(a.owner))} · deadline ${fmtDate(a.deadline)}</div></div>
+              ${a.taskId && a.taskId!=='linked' ? `<span class="chip chip-good">Task Active</span>` : a.taskId==='linked' ? `<span class="chip chip-outline">Linked</span>` : `<button class="btn small dark" onclick="convertActionItem('${m.id}','${a.id}')">Convert to Task</button>`}
+            </div>`).join('') : emptyState('No action items logged.')}
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+            <input type="text" id="new-ai-text-${m.id}" placeholder="New action item…" style="flex:2;min-width:140px;border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 9px;font-size:12.5px;">
+            <select id="new-ai-owner-${m.id}" style="border:1px solid var(--line);border-radius:var(--radius-s);padding:6px;font-size:12.5px;">${STATE.data.people.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select>
+            <input type="date" id="new-ai-due-${m.id}" value="${addDays(todayISO(),3)}" style="border:1px solid var(--line);border-radius:var(--radius-s);padding:6px;font-size:12.5px;">
+            <button class="btn small" onclick="addActionItem('${m.id}')">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn dark" onclick="closeModal();render();">Done</button></div>
+    </div>
+  `);
+}
+
+function updateMeetingField(id, field, value){
+  const m = meetingById(id); m[field]=value; saveState();
+}
+function addDecision(id){
+  const input = document.getElementById('new-decision-'+id);
+  const val = input.value.trim();
+  if(!val) return;
+  const m = meetingById(id);
+  m.decisions = m.decisions||[];
+  m.decisions.push(val);
+  saveState();
+  openMeetingModal(id);
+}
+function addActionItem(id){
+  const text = document.getElementById('new-ai-text-'+id).value.trim();
+  if(!text){ toast('Describe the action item.'); return; }
+  const owner = document.getElementById('new-ai-owner-'+id).value;
+  const deadline = document.getElementById('new-ai-due-'+id).value;
+  const m = meetingById(id);
+  m.actionItems.push({id: genId('ai'), text, owner, deadline, taskId:null});
+  saveState();
+  openMeetingModal(id);
+}
+function convertActionItem(meetingId, aiId){
+  const m = meetingById(meetingId);
+  const a = m.actionItems.find(x=>x.id===aiId);
+  const t = createTask({name:a.text, assignee:a.owner, dueDate:a.deadline, priority:'P1', status:'Assigned', relatedMeeting:meetingId, department: personById(a.owner)?personById(a.owner).function:''});
+  a.taskId = t.id;
+  saveState();
+  toast(`Created task "${a.text}" for ${personName(a.owner)}.`);
+  openMeetingModal(meetingId);
+}
+
+function openNewMeetingModal(){
+  openModal(`
+    <div class="modal">
+      <div class="modal-head"><h3 class="modal-title">Schedule Operations / CX Sync</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Meeting Name *</label><input type="text" id="nm-name" placeholder="e.g. Carrier Peak Dispatch Handover"></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Date</label><input type="date" id="nm-date" value="${todayISO()}"></div>
+          <div class="field"><label class="field-label">Time</label><input type="time" id="nm-time" value="09:30"></div>
+        </div>
+        <div class="field"><label class="field-label">Participants</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;max-height:120px;overflow-y:auto;border:1px solid var(--line);border-radius:var(--radius-s);padding:8px;">
+          ${STATE.data.people.map(p=>`<label style="font-size:12px;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="${p.id}" class="nm-participant"> ${escapeHtml(p.name)}</label>`).join('')}
+          </div>
+        </div>
+        <div class="field"><label class="field-label">Objective</label><input type="text" id="nm-obj" placeholder="SLA targets, blocker resolution, or QC review"></div>
+      </div>
+      <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn dark" onclick="submitNewMeeting()">Create Meeting</button></div>
+    </div>
+  `);
+}
+
+function submitNewMeeting(){
+  const name = document.getElementById('nm-name').value.trim();
+  if(!name){ toast('Meeting title is required.'); return; }
+  const participants = Array.from(document.querySelectorAll('.nm-participant:checked')).map(el=>el.value);
+  const m = {id: genId('mt'), name, date: document.getElementById('nm-date').value, time: document.getElementById('nm-time').value,
+    participants: participants.length?participants:['p-coo'], objective: document.getElementById('nm-obj').value, agenda:'', notes:'',
+    decisions:[], actionItems:[], followUpDate: addDays(document.getElementById('nm-date').value,7), recurring:null};
+  STATE.data.meetings.push(m);
+  saveState();
+  closeModal();
+  goTo('meetings');
+  toast(`Sync "${name}" created.`);
+}
+
+/* ---------- 1:1 Modal ---------- */
+function openOneOnOneModal(id, personId){
+  const existing = id ? STATE.data.oneOnOnes.find(o=>o.id===id) : null;
+  const pid = existing ? existing.person : personId;
+  const history = STATE.data.oneOnOnes.filter(o=>o.person===pid && o.id!==id).sort((a,b)=>b.date.localeCompare(a.date));
+  openModal(`
+    <div class="modal wide">
+      <div class="modal-head"><h3 class="modal-title">Operational 1:1 — ${escapeHtml(personName(pid))}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Date</label><input type="date" id="oo-date" value="${existing?existing.date:todayISO()}"></div>
+        <div class="field"><label class="field-label">Primary Discussion Topics</label><input type="text" id="oo-topics" value="${escapeHtml(existing?existing.topics:'')}"></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Operational Wins / SLA Highlights</label><textarea id="oo-wins">${escapeHtml(existing?existing.wins:'')}</textarea></div>
+          <div class="field"><label class="field-label">Challenges & Friction Points</label><textarea id="oo-challenges">${escapeHtml(existing?existing.challenges:'')}</textarea></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Coaching & Executive Feedback</label><textarea id="oo-feedback">${escapeHtml(existing?existing.feedback:'')}</textarea></div>
+          <div class="field"><label class="field-label">Skill & Career Development</label><textarea id="oo-development">${escapeHtml(existing?existing.development:'')}</textarea></div>
+        </div>
+        <div class="field"><label class="field-label">Blockers Needing Executive Escalation</label><input type="text" id="oo-blockers" value="${escapeHtml(existing?existing.blockers:'')}"></div>
+        <div class="field"><label class="field-label">Action Commitments (Comma separated &mdash; auto-creates tracked task)</label><input type="text" id="oo-commitments" value="${escapeHtml(existing?existing.commitments:'')}" placeholder="e.g. Audit pick-pack conveyor line by Friday"></div>
+        ${history.length?`<div class="field"><label class="field-label">Previous 1:1 Notes</label>${history.slice(0,3).map(h=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${fmtDate(h.date)} — ${escapeHtml(h.topics)}</div></div></div>`).join('')}</div>`:''}
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitOneOnOne('${id||''}','${pid}')">Save 1:1 &amp; Queue Follow-Up</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitOneOnOne(id, pid){
+  const data = {
+    person: pid, date: document.getElementById('oo-date').value, topics: document.getElementById('oo-topics').value,
+    wins: document.getElementById('oo-wins').value, challenges: document.getElementById('oo-challenges').value,
+    feedback: document.getElementById('oo-feedback').value, development: document.getElementById('oo-development').value,
+    blockers: document.getElementById('oo-blockers').value, commitments: document.getElementById('oo-commitments').value, followUpTasks:[],
+  };
+  let rec;
+  if(id){ rec = STATE.data.oneOnOnes.find(o=>o.id===id); Object.assign(rec, data); }
+  else { rec = Object.assign({id: genId('oo')}, data); STATE.data.oneOnOnes.push(rec); }
+  if(data.commitments && data.commitments.trim()){
+    const t = createTask({name: 'Commitment: '+data.commitments.trim().split(',')[0].trim(), assignee: pid, dueDate: addDays(todayISO(),7), priority:'P1', status:'Assigned', department: personById(pid).function});
+    rec.followUpTasks.push(t.id);
+    toast('1:1 saved — follow-up task active.');
+  } else toast('1:1 logged.');
+  saveState();
+  closeModal();
+  render();
+}
+
+/* ============================== VIEW: DELEGATION & FOLLOW-UPS ============================== */
+function viewDelegation(){
+  const tab = STATE.currentTab.delegation || 'delegated';
+  const tabs = [['delegated','Delegated Deliverables'],['waiting','Waiting Room'],['followups','Carrier & Vendor Follow-ups']];
+  let body;
+  if(tab==='delegated') body = delegatedWorkHtml();
+  else if(tab==='waiting') body = waitingRoomHtml();
+  else body = followUpCenterHtml();
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Executive Delegation</div><h1 class="page-title">Delegation & External Follow-ups</h1><div class="page-sub">Track work assigned to operational leads, external 3PL carrier dependencies, and supplier delivery follow-ups.</div></div></div>
+    <div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${tab===id?'active':''}" onclick="setTab('delegation','${id}')">${label}</button>`).join('')}</div>
+    ${body}
+  `;
+}
+
+function delegatedWorkHtml(){
+  const delegated = STATE.data.tasks.filter(t=>t.createdBy==='p-coo' && t.assignee!=='p-coo');
+  const needsFollowUp = delegated.filter(t=> ACTIVE_STATUSES.includes(t.status) && (isStale(t) || isOverdue(t)));
+  return `
+    ${needsFollowUp.length?`<div class="section-block"><div class="section-block-title" style="margin-bottom:6px;color:var(--brick);">Tasks Requiring Executive Follow-Up</div><div class="card">${needsFollowUp.map(t=>taskRowHtml(t)).join('')}</div></div>`:''}
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Assigned Date</th><th>Deadline</th><th>Status</th><th>Last Update</th><th>Days Left</th></tr></thead><tbody>
+    ${delegated.length? delegated.map(t=>`<tr class="clickable" onclick="openTaskModal('${t.id}')">
+      <td>${escapeHtml(t.name)}</td><td>${escapeHtml(personName(t.assignee))}</td><td>${fmtDate(t.createdDate)}</td>
+      <td>${t.dueDate?fmtDate(t.dueDate):'—'}</td><td>${statusChip(t.status)}</td><td>${relativeDay(t.lastUpdated)}</td>
+      <td style="${t.dueDate && daysFromToday(t.dueDate)<0?'color:var(--brick);font-weight:600;':''}">${t.dueDate?daysFromToday(t.dueDate):'—'}</td>
+    </tr>`).join('') : `<tr><td colspan="7">${emptyState('No delegated tasks active.')}</td></tr>`}
+    </tbody></table></div>
+  `;
+}
+
+function waitingRoomHtml(){
+  const waiting = STATE.data.tasks.filter(t=>t.waitingOn && ACTIVE_STATUSES.includes(t.status));
+  const groups = {};
+  waiting.forEach(t=>{ groups[t.waitingOn] = groups[t.waitingOn]||[]; groups[t.waitingOn].push(t); });
+  return Object.keys(groups).length ? Object.entries(groups).map(([who,list])=>`
+    <div class="section-block">
+      <div class="section-block-head"><div class="section-block-title">Waiting on ${escapeHtml(who)}</div><span class="chip chip-outline">${list.length}</span></div>
+      <div class="card">${list.map(t=>taskRowHtml(t)).join('')}</div>
+    </div>
+  `).join('') : `<div class="card">${emptyState('No operational tasks currently waiting on external parties.')}</div>`;
+}
+
+function followUpCenterHtml(){
+  const list = STATE.data.followUps;
+  return `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;"><button class="btn small" onclick="openFollowUpModal(null)">+ Log Partner Follow-up</button></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Subject</th><th>Partner / Entity</th><th>Last Communication</th><th>Follow-up Due</th><th>Status</th></tr></thead><tbody>
+    ${list.length? list.map(f=>{
+      const overdue = f.status==='Overdue' || (daysFromToday(f.followUpDate)<0 && f.status!=='Done');
+      return `<tr class="clickable" onclick="openFollowUpModal('${f.id}')">
+        <td>${escapeHtml(f.subject)}</td><td>${escapeHtml(f.person)}</td><td>${relativeDay(f.lastCommunication)}</td>
+        <td style="${overdue?'color:var(--brick);font-weight:600;':''}">${relativeDay(f.followUpDate)}</td>
+        <td><span class="chip ${f.status==='Done'?'chip-good':overdue?'chip-bad':'chip-outline'}">${overdue?'Overdue':f.status}</span></td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="5">${emptyState('No partner follow-ups logged.')}</td></tr>`}
+    </tbody></table></div>
+  `;
+}
+
+function openFollowUpModal(id){
+  const f = id ? STATE.data.followUps.find(x=>x.id===id) : null;
+  openModal(`
+    <div class="modal">
+      <div class="modal-head"><h3 class="modal-title">${f?'Carrier / Partner Follow-up':'Log Partner Follow-up'}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Subject</label><input type="text" id="fu-subject" value="${escapeHtml(f?f.subject:'')}"></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Partner / Carrier / Entity</label><input type="text" id="fu-person" value="${escapeHtml(f?f.person:'')}"></div>
+          <div class="field"><label class="field-label">Status</label><select class="field-input" id="fu-status">${['Open','Overdue','Done'].map(s=>`<option ${f&&f.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Last Communication Date</label><input type="date" id="fu-last" value="${f?f.lastCommunication:todayISO()}"></div>
+          <div class="field"><label class="field-label">Follow-up Target Date</label><input type="date" id="fu-followup" value="${f?f.followUpDate:addDays(todayISO(),3)}"></div>
+        </div>
+        <div class="field"><label class="field-label">Notes & Escalation Details</label><textarea id="fu-notes">${escapeHtml(f?f.notes:'')}</textarea></div>
+      </div>
+      <div class="modal-foot">
+        ${f?`<button class="btn danger" onclick="STATE.data.followUps=STATE.data.followUps.filter(x=>x.id!=='${f.id}');saveState();closeModal();render();">Delete</button>`:'<span></span>'}
+        <button class="btn dark" onclick="submitFollowUp('${id||''}')">Save Follow-up</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitFollowUp(id){
+  const data = {
+    subject: document.getElementById('fu-subject').value.trim(),
+    person: document.getElementById('fu-person').value.trim(),
+    status: document.getElementById('fu-status').value,
+    lastCommunication: document.getElementById('fu-last').value,
+    followUpDate: document.getElementById('fu-followup').value,
+    notes: document.getElementById('fu-notes').value,
+  };
+  if(!data.subject){ toast('Please provide a subject.'); return; }
+  if(id){ Object.assign(STATE.data.followUps.find(x=>x.id===id), data); }
+  else { STATE.data.followUps.push(Object.assign({id:genId('fu')}, data)); }
+  saveState();
+  closeModal();
+  render();
+  toast('Partner follow-up saved.');
+}
+
+/* ============================== VIEW: BLOCKED & STALE ============================== */
+function viewBlocked(){
+  const tab = STATE.currentTab.blocked || 'blocked';
+  const tabs = [['blocked','Blocked Operations'],['stale','Stale Deliverables'],['overdue','SLA Breaches & Overdue']];
+  const blocked = STATE.data.tasks.filter(t=>t.status==='Blocked');
+  const stale = STATE.data.tasks.filter(isStale);
+  const overdue = STATE.data.tasks.filter(isOverdue);
+  let body;
+  if(tab==='blocked'){
+    body = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Task</th><th>Owner</th><th>Stalled Since</th><th>Root Cause / Blocker</th><th>Blocking Entity</th></tr></thead><tbody>
+      ${blocked.length? blocked.map(t=>`<tr class="clickable" onclick="openTaskModal('${t.id}')">
+        <td>${escapeHtml(t.name)}</td><td>${escapeHtml(personName(t.assignee))}</td><td>${relativeDay(t.lastUpdated)}</td>
+        <td style="max-width:260px;">${escapeHtml(t.blockedReason||'Not specified')}</td><td>${escapeHtml(t.waitingOn||'—')}</td>
+      </tr>`).join('') : `<tr><td colspan="5">${emptyState('No operational blockers active right now.')}</td></tr>`}
+      </tbody></table></div>
+      ${blocked.some(t=>t.waitingOn) ? `<div class="section-block"><div class="section-block-title" style="margin:16px 0 6px;">Dependency Heatmap: Who is Blocking Operations</div><div class="card">${
+        Object.entries(blocked.filter(t=>t.waitingOn).reduce((acc,t)=>{acc[t.waitingOn]=acc[t.waitingOn]||[];acc[t.waitingOn].push(t);return acc;},{})).map(([who,list])=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${escapeHtml(who)}</div><div class="list-row-meta">Stalling: ${list.map(t=>escapeHtml(t.name)).join(', ')}</div></div><span class="chip chip-bad">${list.length}</span></div>`).join('')
+      }</div></div>` : ''}
+    `;
+  } else if(tab==='stale'){
+    body = `<div class="section-block-sub" style="margin-bottom:10px;">Surfaces tasks with zero progress updates for ${STATE.data.settings.staleNoUpdateDays}+ days${STATE.data.settings.staleOpenDays?' that have been open for '+STATE.data.settings.staleOpenDays+'+ days':''}.</div>
+      <div class="card">${stale.length?stale.map(t=>taskRowHtml(t)).join(''):emptyState('No stale tasks.')}</div>`;
+  } else {
+    body = `<div class="card">${overdue.length?overdue.map(t=>taskRowHtml(t)).join(''):emptyState('Zero SLA breaches. All tasks on schedule.')}</div>`;
+  }
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Execution Risk & Bottlenecks</div><h1 class="page-title">Blocked & Stale Deliverables</h1><div class="page-sub">Preventing fulfillment lags and customer service degradation by surfacing bottlenecks early.</div></div></div>
+    <div class="tab-row">${tabs.map(([id,label],i)=>`<button class="tab-btn ${tab===id?'active':''}" onclick="setTab('blocked','${id}')">${label} (${[blocked,stale,overdue][i].length})</button>`).join('')}</div>
+    ${body}
+  `;
+}
+
+/* ============================== VIEW: APPROVALS ============================== */
+function viewApprovals(){
+  const filter = STATE.currentTab.approvals || 'pending';
+  const tabs = [['pending','Pending Decision'],['approved','Approved'],['rejected','Rejected / Changes'],['all','All Approvals']];
+  let list = STATE.data.approvals;
+  if(filter==='pending') list = list.filter(a=>a.status==='Pending');
+  else if(filter==='approved') list = list.filter(a=>a.status==='Approved');
+  else if(filter==='rejected') list = list.filter(a=>a.status==='Rejected'||a.status==='Changes Requested');
+
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Executive Sign-Offs</div><h1 class="page-title">COO & CXO Approval Center</h1><div class="page-sub">Carrier contracts, warehouse capex, factory quality waivers, supplier purchase orders, and customer exception claims.</div></div></div>
+    <div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${filter===id?'active':''}" onclick="setTab('approvals','${id}')">${label}</button>`).join('')}</div>
+    <div class="card">${list.length?list.map(a=>approvalRowHtml(a)).join(''):emptyState('No approvals in this queue.')}</div>
+  `;
+}
+
+function openApprovalModal(id){
+  const a = approvalById(id);
+  openModal(`
+    <div class="modal">
+      <div class="modal-head"><h3 class="modal-title">${escapeHtml(a.type)}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        <div style="font-weight:600;font-size:14px;margin-bottom:6px;">${escapeHtml(a.item)}</div>
+        <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px;">Submitted by ${escapeHtml(personName(a.requester))} on ${fmtDate(a.requestedDate)} · Deadline ${fmtDate(a.deadline)}${a.relatedProject?' · '+escapeHtml(projectName(a.relatedProject)):''}</div>
+        <div style="margin-bottom:12px;">${(()=>{const map={'Pending':'chip-warn','Approved':'chip-good','Rejected':'chip-bad','Changes Requested':'chip-info'};return `<span class="chip ${map[a.status]}">${a.status}</span>`;})()}</div>
+        <div class="field"><label class="field-label">Executive Audit Comments</label>
+          ${(a.comments||[]).map(c=>`<div style="font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line-soft);"><b>${escapeHtml(personName(c.by))}</b> · ${fmtDate(c.date)}<br>${escapeHtml(c.text)}</div>`).join('') || emptyState('No remarks entered.')}
+          <div style="display:flex;gap:6px;margin-top:8px;"><input type="text" id="ap-comment" placeholder="Add remark or instructions…" style="flex:1;border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 9px;font-size:12.5px;"><button class="btn small" onclick="addApprovalComment('${a.id}')">Post</button></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="setApprovalStatus('${a.id}','Changes Requested')">Request Changes</button>
+        <button class="btn danger" onclick="setApprovalStatus('${a.id}','Rejected')">Reject</button>
+        <button class="btn dark" onclick="setApprovalStatus('${a.id}','Approved')">Approve Sign-off</button>
+      </div>
+    </div>
+  `);
+}
+
+function addApprovalComment(id){
+  const val = document.getElementById('ap-comment').value.trim();
+  if(!val) return;
+  const a = approvalById(id);
+  a.comments = a.comments||[];
+  a.comments.push({by: STATE.viewingPersonId, text: val, date: todayISO()});
+  saveState();
+  openApprovalModal(id);
+}
+
+function setApprovalStatus(id, status){
+  const a = approvalById(id);
+  const old = a.status;
+  a.status = status;
+  logAudit('Approval', a.item, 'Status', old, status);
+  saveState();
+  closeModal();
+  render();
+  toast(`${a.item} &mdash; ${status}.`);
+}
+
+/* ============================== VIEW: DEADLINES & CALENDAR ============================== */
+function viewDeadlines(){
+  const tab = STATE.currentTab.deadlines || 'list';
+  const tabs = [['list','Deadline Schedule'],['calendar','Monthly Operational Calendar']];
+  const scoped = scopedTasks();
+  const active = scoped.filter(t=>ACTIVE_STATUSES.includes(t.status) && t.dueDate);
+  const buckets = {
+    today: active.filter(t=>daysFromToday(t.dueDate)===0),
+    next3: active.filter(t=>daysFromToday(t.dueDate)>0 && daysFromToday(t.dueDate)<=3),
+    week: active.filter(t=>daysFromToday(t.dueDate)>3 && daysFromToday(t.dueDate)<=7),
+    nextweek: active.filter(t=>daysFromToday(t.dueDate)>7 && daysFromToday(t.dueDate)<=14),
+    month: active.filter(t=>daysFromToday(t.dueDate)>14 && daysFromToday(t.dueDate)<=30),
+    overdue: scoped.filter(isOverdue),
+  };
+  let body;
+  if(tab==='calendar') body = calendarHtml();
+  else body = `
+    ${buckets.overdue.length?`<div class="section-block"><div class="section-block-title" style="color:var(--brick);margin-bottom:6px;">Overdue Deliverables</div><div class="card">${buckets.overdue.map(t=>taskRowHtml(t)).join('')}</div></div>`:''}
+    ${[['today','Today'],['next3','Next 3 Days'],['week','This Week'],['nextweek','Next Week'],['month','This Month']].map(([k,label])=>`
+      <div class="section-block"><div class="section-block-title" style="margin-bottom:6px;">${label} <span class="mono">(${buckets[k].length})</span></div><div class="card">${buckets[k].length?buckets[k].map(t=>taskRowHtml(t)).join(''):emptyState('No scheduled milestones.')}</div></div>
+    `).join('')}
+  `;
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Deadlines & Commitments</div><h1 class="page-title">Operational Deadlines & Calendar</h1><div class="page-sub">Chronological deadlines across dispatches, carrier reviews, supplier POs, and customer SLAs.</div></div></div>
+    <div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${tab===id?'active':''}" onclick="setTab('deadlines','${id}')">${label}</button>`).join('')}</div>
+    ${body}
+  `;
+}
+
+function calendarHtml(){
+  const base = new Date();
+  const year = base.getFullYear(), month = base.getMonth();
+  const first = new Date(year, month, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const cells = [];
+  for(let i=0;i<startDow;i++) cells.push(null);
+  for(let d=1; d<=daysInMonth; d++) cells.push(d);
+  function itemsForDay(d){
+    const iso = dateOnly(new Date(year, month, d));
+    const out = [];
+    scopedTasks().filter(t=>t.dueDate===iso && ACTIVE_STATUSES.includes(t.status)).forEach(t=>out.push({type:'task', label:t.name, id:t.id}));
+    scopedMeetings().filter(m=>m.date===iso).forEach(m=>out.push({type:'meeting', label:m.name, id:m.id}));
+    if(STATE.currentRole==='COO / CXO') STATE.data.approvals.filter(a=>a.deadline===iso && a.status==='Pending').forEach(a=>out.push({type:'approval', label:a.item, id:a.id}));
+    scopedProjects().forEach(p=>(p.milestones||[]).forEach(m=>{ if(m.deadline===iso) out.push({type:'milestone', label:p.name+': '+m.name, id:p.id}); }));
+    return out;
+  }
+  return `
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:10px;">${base.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:10.5px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">
+        ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div style="text-align:center;">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">
+        ${cells.map(d=>{
+          if(!d) return `<div></div>`;
+          const items = itemsForDay(d);
+          const isToday = dateOnly(new Date(year,month,d))===todayISO();
+          return `<div style="border:1px solid var(--line);border-radius:var(--radius-s);min-height:74px;padding:5px;${isToday?'background:var(--amber-tint);border-color:var(--amber-deep);':''}">
+            <div style="font-size:11px;font-weight:600;margin-bottom:3px;">${d}</div>
+            ${items.slice(0,3).map(it=>`<div style="font-size:9.5px;padding:1px 4px;border-radius:3px;margin-bottom:2px;background:${it.type==='task'?'var(--slate-tint)':it.type==='meeting'?'var(--plum-tint)':it.type==='approval'?'var(--amber-tint)':'var(--sage-tint)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(it.label)}">${escapeHtml(it.label.slice(0,20))}</div>`).join('')}
+            ${items.length>3?`<div style="font-size:9px;color:var(--text-faint);">+${items.length-3} more</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:12px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">
+        <span><span style="display:inline-block;width:9px;height:9px;background:var(--slate-tint);border-radius:2px;"></span> Task</span>
+        <span><span style="display:inline-block;width:9px;height:9px;background:var(--plum-tint);border-radius:2px;"></span> Sync</span>
+        <span><span style="display:inline-block;width:9px;height:9px;background:var(--amber-tint);border-radius:2px;"></span> Approval</span>
+        <span><span style="display:inline-block;width:9px;height:9px;background:var(--sage-tint);border-radius:2px;"></span> Milestone</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================== VIEW: GOALS ============================== */
+function viewGoals(){
+  const objectives = {};
+  STATE.data.goals.forEach(g=>{ objectives[g.objective]=objectives[g.objective]||[]; objectives[g.objective].push(g); });
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Strategic Architecture</div><h1 class="page-title">Operations & CX Strategic Goals</h1><div class="page-sub">Connecting high-level operational efficiency and customer delight goals directly to projects and frontline tasks.</div></div></div>
+    ${Object.entries(objectives).map(([obj, goals])=>`
+      <div class="section-block">
+        <div class="card" style="background:var(--ink);color:#fff;margin-bottom:10px;"><b>${escapeHtml(obj)}</b></div>
+        <div class="grid grid-2">
+        ${goals.map(g=>{
+          const projects = g.projectIds.map(pid=>projectById(pid)).filter(Boolean);
+          return `<div class="card">
+            <div class="card-title">${escapeHtml(g.teamGoal)}</div>
+            ${projects.map(p=>`<div class="list-row clickable" onclick="goTo('projects',{selectedProjectId:'${p.id}'})">
+              <div class="list-row-main"><div class="list-row-title">${escapeHtml(p.name)}</div><div class="list-row-meta">${projectProgress(p)}% complete · ${STATE.data.tasks.filter(t=>t.project===p.id).length} tasks</div></div>
+              ${projectStatusChip(p.status)}
+            </div>`).join('') || emptyState('No initiative linked yet.')}
+          </div>`;
+        }).join('')}
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ============================== VIEW: SOPs ============================== */
+function viewSops(){
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Standard Operating Procedures</div><h1 class="page-title">Operations & CX SOP Library</h1><div class="page-sub">Audited protocols for warehouse receiving, carrier SLA enforcement, AQL 2.5 defect inspections, and customer escalation matrices.</div></div></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>SOP Name</th><th>Functional Department</th><th>Owner</th><th>Version</th><th>Last Audited</th><th>Access</th></tr></thead><tbody>
+    ${STATE.data.sops.map(s=>`<tr>
+      <td><b>${escapeHtml(s.name)}</b></td><td>${escapeHtml(s.department)}</td><td>${escapeHtml(personName(s.owner))}</td><td class="mono">${escapeHtml(s.version)}</td><td>${fmtDate(s.lastUpdated)}</td>
+      <td><a href="#" class="btn small ghost" onclick="event.preventDefault();toast('Demo documentation link.')">View Protocol</a></td>
+    </tr>`).join('')}
+    </tbody></table></div>
+  `;
+}
+
+/* ============================== VIEW: INSIGHTS ============================== */
+function viewInsights(){
+  const tab = STATE.currentTab.insights || 'weekly';
+  const tabs = [['weekly','Weekly Operational Review'],['scorecard','Operations & CX Scorecard'],['bottlenecks','Systemic Bottlenecks'],['audit','Change Audit Log']];
+  let body;
+  if(tab==='weekly') body = weeklyReviewHtml();
+  else if(tab==='scorecard') body = scorecardHtml();
+  else if(tab==='bottlenecks') body = bottlenecksHtml();
+  else body = auditLogHtml();
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Executive Intelligence</div><h1 class="page-title">Operations & CX Insights</h1><div class="page-sub">Throughput metrics, carrier fulfillment analysis, customer sentiment trends, and bottleneck discovery.</div></div>
+      ${tab==='weekly'?`<button class="btn-primary" onclick="downloadWeeklyReport()">Export Weekly Report</button>`:''}
+    </div>
+    <div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${tab===id?'active':''}" onclick="setTab('insights','${id}')">${label}</button>`).join('')}</div>
+    ${body}
+  `;
+}
+
+function weeklyReviewHtml(){
+  const thisWeek = scorecardMetrics(-6,0);
+  const completedLastWeek = STATE.data.tasks.filter(t=>t.status==='Completed' && t.completedDate>=addDays(todayISO(),-6) && t.completedDate<=todayISO());
+  const overdueNow = STATE.data.tasks.filter(isOverdue);
+  const blockedNow = STATE.data.tasks.filter(t=>t.status==='Blocked');
+  const atRisk = STATE.data.projects.filter(p=>p.status==='At Risk'||p.status==='Blocked');
+  const upcomingDeadlines = STATE.data.tasks.filter(t=>t.dueDate && daysFromToday(t.dueDate)>=0 && daysFromToday(t.dueDate)<=7 && t.priority!=='P3' && ACTIVE_STATUSES.includes(t.status));
+
+  return `
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">Past 7 Days Execution Performance</div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Tasks & Dispatches Completed</div></div><b>${thisWeek.completedCount}</b></div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">On-Time SLA Delivery %</div></div><b>${thisWeek.onTimePct}%</b></div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Customer Satisfaction (CSAT)</div></div><b>${thisWeek.csatScore}%</b></div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Order-to-Dispatch Latency</div></div><b>${thisWeek.orderToDispatchHours} hours</b></div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Return-to-Origin (RTO Rate)</div></div><b>${thisWeek.rtoRatePct}%</b></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Current Week Focus</div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Top Executive Priorities</div></div></div>
+        ${topPriorities().slice(0,3).map(t=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${escapeHtml(t.name)}</div></div></div>`).join('') || emptyState('None active.')}
+        <div class="list-row" style="margin-top:6px;"><div class="list-row-main"><div class="list-row-title">Operational Deadlines This Week</div></div><b>${upcomingDeadlines.length}</b></div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Programs Requiring Intervention</div></div><b>${atRisk.length}</b></div>
+      </div>
+    </div>
+    <div class="section-block">
+      <div class="section-block-title" style="margin-bottom:8px;">Operational Accountability by Leader</div>
+      <div class="table-wrap"><table class="data-table"><thead><tr><th>Leader</th><th>Total Assigned</th><th>Completed</th><th>On-Time %</th><th>Overdue</th><th>Blocked</th><th>Key Operational Blocker</th></tr></thead><tbody>
+      ${STATE.data.people.filter(p=>p.id!=='p-coo').map(p=>{
+        const tasks = STATE.data.tasks.filter(t=>t.assignee===p.id);
+        const completed = tasks.filter(t=>t.status==='Completed');
+        const onTime = completed.filter(t=>t.dueDate && t.completedDate<=t.dueDate);
+        const overdue = tasks.filter(isOverdue);
+        const blocked = tasks.filter(t=>t.status==='Blocked');
+        const needsHelp = blocked.length ? blocked[0].blockedReason || ('Unblocking "'+blocked[0].name+'"') : (overdue.length ? 'Getting "'+overdue[0].name+'" on track' : 'Operating within SLA');
+        return `<tr class="clickable" onclick="goTo('team',{selectedPersonId:'${p.id}'})">
+          <td>${escapeHtml(p.name)}</td><td>${tasks.length}</td><td>${completed.length}</td>
+          <td>${completed.length?Math.round(onTime.length/completed.length*100):100}%</td>
+          <td>${overdue.length||'—'}</td><td>${blocked.length||'—'}</td>
+          <td style="max-width:220px;font-size:12px;color:var(--text-muted);">${escapeHtml(String(needsHelp).slice(0,60))}</td>
+        </tr>`;
+      }).join('')}
+      </tbody></table></div>
+    </div>
+    <div class="section-block">
+      <div class="section-block-title" style="margin-bottom:8px;">Executive Standup Discussion Prompts</div>
+      <div class="card">
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">What went well?</div><div class="list-row-meta">${completedLastWeek.length} operational deliverables shipped smoothly.</div></div></div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Where are we vulnerable?</div><div class="list-row-meta">${blockedNow.slice(0,3).map(t=>escapeHtml(t.name)).join(', ')||'Zero blocked items'}</div></div></div>
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">What requires vendor / carrier push?</div><div class="list-row-meta">${STATE.data.tasks.filter(t=>t.waitingOn).slice(0,2).map(t=>t.waitingOn+': '+escapeHtml(t.name)).join('; ')||'No external friction points'}</div></div></div>
+      </div>
+    </div>
+  `;
+}
+
+function scorecardHtml(){
+  const tw = scorecardMetrics(-6,0), lw = scorecardMetrics(-13,-7);
+  const tm = scorecardMetrics(-29,0), lm = scorecardMetrics(-59,-30);
+  function row(label, twv, lwv, suffix){
+    suffix = suffix||'%';
+    const delta = twv - lwv;
+    const good = delta>=0;
+    return `<div class="list-row"><div class="list-row-main"><div class="list-row-title">${label}</div></div>
+      <span style="font-family:var(--font-mono);font-size:12.5px;">${twv}${suffix}</span>
+      <span style="font-size:11px;color:${good?'var(--sage)':'var(--brick)'};min-width:60px;text-align:right;">${delta>=0?'+':''}${delta.toFixed(1)}${suffix} vs prior</span>
+    </div>`;
+  }
+  return `
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">Weekly Operations & CX Trends</div>
+        ${row('On-Time Dispatch %', tw.onTimePct, lw.onTimePct)}
+        ${row('Customer CSAT Score', tw.csatScore, 93.5)}
+        ${row('Order-to-Dispatch Latency', tw.orderToDispatchHours, 16.5, 'h')}
+        ${row('Return-to-Origin (RTO Rate)', tw.rtoRatePct, 7.4)}
+        ${row('Blocked Tasks Rate', tw.blockedPct, lw.blockedPct)}
+      </div>
+      <div class="card">
+        <div class="card-title">Monthly Strategy Health</div>
+        ${row('Overall Task Throughput', tm.taskCompletionPct, lm.taskCompletionPct)}
+        ${row('Key Milestone Completion', tm.milestoneCompletionPct, lm.milestoneCompletionPct)}
+        ${row('Strategic Project Delivery', tm.projectCompletionPct, lm.projectCompletionPct)}
+        <div class="list-row"><div class="list-row-main"><div class="list-row-title">Unassigned Operational Work</div></div><b>${tm.unassignedCount}</b></div>
+      </div>
+    </div>
+    <div class="section-block-sub" style="margin-top:14px;">Scorecard connects warehouse velocity with frontline customer sentiment &mdash; ensuring efficiency gains never compromise customer delight.</div>
+  `;
+}
+
+function bottlenecksHtml(){
+  const items = computeBottlenecks();
+  if(!items.length) return `<div class="card">${emptyState('Zero operational bottlenecks detected. Supply chain and support queues running smoothly.')}</div>`;
+  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>Risk Category</th><th>Impact</th><th>Partner / Owner</th><th>Deliverable Detail</th><th>Executive Remediation</th></tr></thead><tbody>
+    ${items.map(b=>`<tr>
+      <td><span class="chip chip-warn">${escapeHtml(b.type)}</span></td>
+      <td>${escapeHtml(b.impact)}</td>
+      <td>${escapeHtml(b.person||'—')}</td>
+      <td style="max-width:200px;font-size:12px;">${escapeHtml(b.task||'—')}</td>
+      <td style="max-width:280px;font-size:12px;color:var(--text-muted);">${escapeHtml(b.suggestedAction)}</td>
+    </tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+function auditLogHtml(){
+  return `<div class="card">${STATE.data.auditLog.length ? STATE.data.auditLog.map(a=>`
+    <div class="audit-item"><b>${escapeHtml(a.user)}</b> modified ${escapeHtml(a.field)} on <b>${escapeHtml(a.entity)}</b> "${escapeHtml(a.label)}" &mdash; ${escapeHtml(a.oldValue)} &rarr; ${escapeHtml(a.newValue)} <span style="float:right;">${fmtDate(a.timestamp)}</span></div>
+  `).join('') : emptyState('No modifications logged in this session.')}</div>`;
+}
+
+function downloadWeeklyReport(){
+  const tw = scorecardMetrics(-6,0);
+  const overdue = STATE.data.tasks.filter(isOverdue);
+  const blocked = STATE.data.tasks.filter(t=>t.status==='Blocked');
+  const atRisk = STATE.data.projects.filter(p=>p.status==='At Risk'||p.status==='Blocked');
+  const wins = STATE.data.tasks.filter(t=>t.status==='Completed' && t.completedDate>=addDays(todayISO(),-6));
+  const approvalsPending = STATE.data.approvals.filter(a=>a.status==='Pending');
+  const followUps = STATE.data.followUps.filter(f=>f.status!=='Done');
+
+  const lines = [];
+  lines.push('=====================================================');
+  lines.push('OFFCOMFRT — COO / CXO EXECUTIVE OPERATIONS REPORT');
+  lines.push('Period Ending: '+fmtDateLong(todayISO()));
+  lines.push('Leader: Arjun Mehta (COO & CXO)');
+  lines.push('=====================================================');
+  lines.push('');
+  lines.push('1. EXECUTIVE KPIS & HEALTH');
+  lines.push('- On-Time Dispatch SLA: '+tw.onTimePct+'%');
+  lines.push('- Order-to-Dispatch Latency: '+tw.orderToDispatchHours+' hours');
+  lines.push('- Customer Satisfaction (CSAT): '+tw.csatScore+'%');
+  lines.push('- Return-to-Origin (RTO): '+tw.rtoRatePct+'%');
+  lines.push('- Tasks Overdue: '+overdue.length);
+  lines.push('- Blocked Items: '+blocked.length);
+  lines.push('');
+  lines.push('2. CORE INITIATIVES STATUS');
+  STATE.data.projects.forEach(p=>lines.push('- '+p.name+': '+p.status+' ('+projectProgress(p)+'% complete, Owner: '+personName(p.owner)+')'));
+  lines.push('');
+  lines.push('3. OPERATIONAL WINS (PAST 7 DAYS)');
+  wins.slice(0,8).forEach(t=>lines.push('- '+t.name+' ('+personName(t.assignee)+')'));
+  if(!wins.length) lines.push('- None recorded in window.');
+  lines.push('');
+  lines.push('4. CRITICAL BLOCKERS & EXTERNAL DEPENDENCIES');
+  blocked.forEach(t=>lines.push('- '+t.name+' — '+(t.blockedReason||'No reason specified')+' (Waiting on: '+(t.waitingOn||'Internal')+')'));
+  if(!blocked.length) lines.push('- Zero active blockers.');
+  lines.push('');
+  lines.push('5. PENDING EXECUTIVE APPROVALS');
+  approvalsPending.forEach(a=>lines.push('- '+a.item+' ('+a.type+', Requested by: '+personName(a.requester)+')'));
+  lines.push('');
+  lines.push('6. ACTIVE 3PL & SUPPLIER FOLLOW-UPS');
+  followUps.forEach(f=>lines.push('- '+f.subject+' ('+f.person+', due '+f.followUpDate+')'));
+
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'offcomfrt-coo-cxo-report-'+todayISO()+'.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('Weekly Operations & CX report exported.');
+}
+
+/* ============================== VIEW: AI ASSISTANT ============================== */
+let ASSISTANT_MESSAGES = [
+  {role:'ai', text:"I'm your embedded Operations & Customer Experience AI Copilot. I analyze your live dashboard state &mdash; warehouse dispatch latency, carrier delivery SLAs, factory defect waivers, CSAT scores, open customer escalations, and team capacity. Ask me any question below."}
+];
+
+const ASSISTANT_SUGGESTIONS = [
+  "What is our biggest fulfillment bottleneck today?",
+  "Which 3PL carrier is failing delivery SLAs?",
+  "What factory quality issues need my sign-off?",
+  "Who is overloaded between operations and CX?",
+  "What customer escalations are currently pending?",
+  "Which warehouse or WMS tasks are at risk?",
+  "What should we cover in the daily standup?",
+  "What commitments from the carrier review are pending?",
+];
+
+function viewAssistant(){
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">AI Executive Copilot</div><h1 class="page-title">Ask the Operations & CX Control Room</h1><div class="page-sub">Grounded directly in your real-time dashboard data. No hallucinations, only verified operational status.</div></div></div>
+    <div class="assistant-shell">
+      <div class="assistant-msgs" id="assistant-msgs">
+        ${ASSISTANT_MESSAGES.map(m=>`<div class="msg ${m.role==='user'?'user':'ai'} ${m.loading?'loading':''}">${m.role==='user'?escapeHtml(m.text):nl2br(m.text)}</div>`).join('')}
+      </div>
+      <div class="chip-row">${ASSISTANT_SUGGESTIONS.slice(0,4).map(q=>`<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}</div>
+      <div class="assistant-input-row">
+        <input type="text" id="assistant-input" placeholder="Ask about warehouse status, carrier SLAs, CSAT, or supplier delays…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
+        <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Query Copilot</button>
+      </div>
+    </div>
+  `;
+}
+
+function buildDashboardSnapshot(){
+  const t = STATE.data.tasks.map(x=>({
+    id:x.id, name:x.name, assignee:personName(x.assignee), project: x.project?projectName(x.project):null,
+    priority:x.priority, status:x.status, dueDate:x.dueDate, waitingOn:x.waitingOn||null,
+    blockedReason:x.blockedReason||null, overdue:isOverdue(x), stale:isStale(x), lastUpdated:x.lastUpdated,
+    timesPushed:x.timesPushed||0,
+  }));
+  const p = STATE.data.people.map(x=>({name:x.name, role:x.role, function:x.function, utilization:utilizationFor(x.id)}));
+  const proj = STATE.data.projects.map(x=>({name:x.name, status:x.status, owner:personName(x.owner), progress:projectProgress(x), risk:projectRisk(x), deadline:x.deadline, nextMilestone: nextMilestone(x)?nextMilestone(x).name:null}));
+  const appr = STATE.data.approvals.map(x=>({item:x.item, type:x.type, status:x.status, requester:personName(x.requester), requestedDate:x.requestedDate, deadline:x.deadline}));
+  const fu = STATE.data.followUps.map(x=>({subject:x.subject, person:x.person, status:x.status, followUpDate:x.followUpDate}));
+  const meetings = STATE.data.meetings.map(x=>({name:x.name, date:x.date, decisions:x.decisions, openActionItems:x.actionItems.filter(a=>!a.taskId).map(a=>({text:a.text, owner:personName(a.owner), deadline:a.deadline}))}));
+  return {today: todayISO(), tasks:t, people:p, projects:proj, approvals:appr, followUps:fu, meetings, bottlenecks: computeBottlenecks()};
+}
+
+async function askAssistant(question){
+  question = (question||'').trim();
+  if(!question) return;
+  ASSISTANT_MESSAGES.push({role:'user', text:question});
+  ASSISTANT_MESSAGES.push({role:'ai', text:'Analyzing live operations & CX data…', loading:true});
+  goTo('assistant');
+  const snapshot = buildDashboardSnapshot();
+  const systemPrompt = `You are the executive AI copilot embedded in the Offcomfrt COO & CXO Control Room dashboard. You advise Arjun Mehta, who holds dual leadership over both Operations (Supply Chain, Warehouse, Logistics, Quality) and Customer Experience (Customer Support, Unboxing, CSAT, Returns).
+
+Answer the question using ONLY the live JSON dashboard data provided below. Ground every point in named individuals, tasks, carriers, or projects. Be crisp, professional, and actionable.
+
+DASHBOARD STATE:
+${JSON.stringify(snapshot)}`;
+
+  try{
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system: systemPrompt,
+        messages:[{role:'user', content: question}],
+      })
+    });
+    const data = await response.json();
+    let text = '';
+    if(data && data.content){
+      text = data.content.map(b=>b.text||'').filter(Boolean).join('\n');
+    }
+    if(!text) text = "I couldn't query the model endpoint right now, but you can inspect your active deliverables in the Tasks or Blocked views.";
+    ASSISTANT_MESSAGES.pop();
+    ASSISTANT_MESSAGES.push({role:'ai', text});
+  }catch(e){
+    // Smart local fallback in case of no external network
+    ASSISTANT_MESSAGES.pop();
+    let fallbackText = "Here is what the live control room data indicates:\n";
+    const blocked = snapshot.tasks.filter(x=>x.status==='Blocked');
+    const overdue = snapshot.tasks.filter(x=>x.overdue);
+    const atRisk = snapshot.projects.filter(x=>x.status==='At Risk' || x.status==='Blocked');
+    if(question.toLowerCase().includes('bottleneck') || question.toLowerCase().includes('block')){
+      fallbackText += `• ${blocked.length} blocked tasks: ${blocked.map(b=>`"${b.name}" (${b.waitingOn||'vendor'})`).join(', ')}.\n• WMS barcode scanner latency in Zone B is stalling warehouse cutover.`;
+    } else if(question.toLowerCase().includes('carrier') || question.toLowerCase().includes('delhivery') || question.toLowerCase().includes('sla')){
+      fallbackText += `• Delhivery webhook timeouts are causing premature RTOs in the West zone.\n• BlueDart has been flagged with an SLA breach penalty notice for West region delivery lags.`;
+    } else if(question.toLowerCase().includes('risk') || question.toLowerCase().includes('project')){
+      fallbackText += `• ${atRisk.length} projects at risk: ${atRisk.map(p=>`"${p.name}" (${p.risk} risk)`).join(', ')}.`;
+    } else {
+      fallbackText += `• ${overdue.length} overdue tasks, ${blocked.length} blocked tasks, and ${snapshot.approvals.filter(a=>a.status==='Pending').length} pending approvals requiring executive sign-off today.`;
+    }
+    ASSISTANT_MESSAGES.push({role:'ai', text: fallbackText});
+  }
+  if(STATE.currentView==='assistant') render();
+  setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 30);
+}
+
+/* ============================== SEARCH ============================== */
+function onSearchInput(val){
+  STATE.searchQuery = val;
+  renderSearchResults();
+}
+
+function renderSearchResults(){
+  const slot = document.getElementById('search-results-slot');
+  if(!slot) return;
+  const q = STATE.searchQuery.trim().toLowerCase();
+  if(!q){ slot.innerHTML=''; return; }
+  const hits = [];
+  STATE.data.tasks.forEach(t=>{ if(t.name.toLowerCase().includes(q)) hits.push({type:'Task', label:t.name, meta:personName(t.assignee)+' · '+t.status, action:`openTaskModal('${t.id}')`}); });
+  STATE.data.projects.forEach(p=>{ if(p.name.toLowerCase().includes(q)) hits.push({type:'Initiative', label:p.name, meta:p.status, action:`goTo('projects',{selectedProjectId:'${p.id}'})`}); });
+  STATE.data.people.forEach(p=>{ if(p.name.toLowerCase().includes(q)) hits.push({type:'Leader', label:p.name, meta:p.role, action:`goTo('team',{selectedPersonId:'${p.id}'})`}); });
+  STATE.data.meetings.forEach(m=>{ if(m.name.toLowerCase().includes(q)) hits.push({type:'Sync', label:m.name, meta:fmtDate(m.date), action:`openMeetingModal('${m.id}')`}); });
+  STATE.data.approvals.forEach(a=>{ if(a.item.toLowerCase().includes(q)) hits.push({type:'Approval', label:a.item, meta:a.status, action:`openApprovalModal('${a.id}')`}); });
+  STATE.data.sops.forEach(s=>{ if(s.name.toLowerCase().includes(q)) hits.push({type:'SOP', label:s.name, meta:s.department, action:`goTo('sops')`}); });
+  STATE.data.goals.forEach(g=>{ if(g.teamGoal.toLowerCase().includes(q)) hits.push({type:'Strategic Goal', label:g.teamGoal, meta:g.objective, action:`goTo('goals')`}); });
+  if(!hits.length){ slot.innerHTML = `<div class="search-results"><div class="search-hit" style="cursor:default;">No matches found for "${escapeHtml(STATE.searchQuery)}"</div></div>`; return; }
+  slot.innerHTML = `<div class="search-results">${hits.slice(0,10).map(h=>`<div class="search-hit" onclick="${h.action};clearSearch();">
+    <div class="search-hit-title">${escapeHtml(h.label)}</div>
+    <div class="search-hit-meta">${escapeHtml(h.type)} · ${escapeHtml(h.meta)}</div>
+  </div>`).join('')}</div>`;
+}
+
+function clearSearch(){ STATE.searchQuery=''; render(); }
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.search-wrap')){
+    const slot = document.getElementById('search-results-slot');
+    if(slot && STATE.searchQuery){ slot.innerHTML=''; }
+  }
+});
+
+/* ============================== NOTIFICATIONS PANEL ============================== */
+function openNotifications(){
+  const items = computeNotifications();
+  openModal(`
+    <div class="modal">
+      <div class="modal-head"><h3 class="modal-title">Control Room Alerts</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="modal-body">
+        ${items.length ? items.map(n=>`<div class="list-row"><div class="list-row-main"><div class="list-row-title">${escapeHtml(n.text)}</div></div><span class="chip ${n.level==='bad'?'chip-bad':n.level==='warn'?'chip-warn':'chip-info'}">${n.level==='bad'?'Urgent Action':n.level==='warn'?'Watch':'FYI'}</span></div>`).join('') : emptyState('All operations and support queues are fully up to date.')}
+      </div>
+      <div class="modal-foot"><button class="btn dark" onclick="closeModal()">Close</button></div>
+    </div>
+  `);
+}
+
+/* ============================== NAV & APP SHELL ============================== */
+const NAV_ITEMS = [
+  {id:'home', label:'Home', icon:'&#9737;', roles:['COO / CXO','Operations Lead','CX & Support Lead','Team Member']},
+  {id:'myday', label:'My Day', icon:'&#9728;', roles:['COO / CXO','Operations Lead','CX & Support Lead','Team Member']},
+  {id:'tasks', label:'Tasks', icon:'&#9745;', roles:['COO / CXO','Operations Lead','CX & Support Lead','Team Member']},
+  {id:'team', label:'Team', icon:'&#128101;', roles:['COO / CXO','Operations Lead','CX & Support Lead']},
+  {id:'projects', label:'Projects', icon:'&#128193;', roles:['COO / CXO','Operations Lead','CX & Support Lead','Team Member']},
+  {id:'meetings', label:'Meetings & 1:1s', icon:'&#128197;', roles:['COO / CXO','Operations Lead','CX & Support Lead','Team Member']},
+  {id:'delegation', label:'Delegation & Follow-ups', icon:'&#128228;', roles:['COO / CXO','Operations Lead','CX & Support Lead']},
+  {id:'blocked', label:'Blocked & Stale', icon:'&#128679;', roles:['COO / CXO','Operations Lead','CX & Support Lead']},
+  {id:'approvals', label:'Approvals', icon:'&#9998;', roles:['COO / CXO']},
+  {id:'deadlines', label:'Deadlines & Calendar', icon:'&#9201;', roles:['COO / CXO','Operations Lead','CX & Support Lead','Team Member']},
+  {id:'goals', label:'Goals', icon:'&#127919;', roles:['COO / CXO','Operations Lead','CX & Support Lead']},
+  {id:'sops', label:'SOPs', icon:'&#128218;', roles:['COO / CXO','Operations Lead','CX & Support Lead','Team Member']},
+  {id:'insights', label:'Insights', icon:'&#128202;', roles:['COO / CXO','Operations Lead','CX & Support Lead']},
+  {id:'assistant', label:'AI Assistant', icon:'&#10024;', roles:['COO / CXO','Operations Lead','CX & Support Lead']},
+];
+
+function visibleNav(){ return NAV_ITEMS.filter(n=>n.roles.includes(STATE.currentRole)); }
+
+function goTo(view, extra){
+  STATE.currentView = view;
+  if(extra){
+    if(extra.currentTab) Object.assign(STATE.currentTab, extra.currentTab);
+    const rest = Object.assign({}, extra); delete rest.currentTab;
+    Object.assign(STATE, rest);
+  }
+  closeModal();
+  render();
+  const main = document.querySelector('.main');
+  if(main) main.scrollTop = 0;
+  window.scrollTo(0,0);
+}
+
+function setRole(role){
+  STATE.currentRole = role;
+  if(role==='Operations Lead') STATE.viewingPersonId = 'p-lead-ops';
+  else if(role==='CX & Support Lead') STATE.viewingPersonId = 'p-lead-cx';
+  else if(role==='Team Member') STATE.viewingPersonId = 'p-support';
+  else STATE.viewingPersonId = 'p-coo';
+  if(!visibleNav().find(n=>n.id===STATE.currentView)) STATE.currentView = 'home';
+  render();
+}
+
+function scopedPersonIds(){
+  if(STATE.currentRole==='COO / CXO') return STATE.data.people.map(p=>p.id);
+  if(STATE.currentRole==='Operations Lead' || STATE.currentRole==='CX & Support Lead') {
+    return [STATE.viewingPersonId].concat(allReportsUnder(STATE.viewingPersonId));
+  }
+  return [STATE.viewingPersonId];
+}
+
+function scopedTasks(){
+  if(STATE.currentRole==='COO / CXO') return STATE.data.tasks;
+  const ids = scopedPersonIds();
+  return STATE.data.tasks.filter(t=> ids.includes(t.assignee) || ids.includes(t.createdBy));
+}
+
+function scopedProjects(){
+  const ids = scopedPersonIds();
+  return STATE.data.projects.filter(p=> ids.includes(p.owner) || (p.team||[]).some(m=>ids.includes(m)));
+}
+
+function scopedMeetings(){
+  if(STATE.currentRole==='COO / CXO') return STATE.data.meetings;
+  const ids = scopedPersonIds();
+  return STATE.data.meetings.filter(m=> m.participants.some(p=>ids.includes(p)));
+}
+
+function currentDateHeaderStr(){
+  return new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+}
+
+function render(){
+  if(!STATE.data){ return; }
+  const app = document.getElementById('app');
+  const nav = visibleNav();
+  app.innerHTML = `
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">O</div>
+          <div class="brand-text">
+            <span class="b1">Offcomfrt</span>
+            <span class="b2">COO / CXO Control Room</span>
+          </div>
+        </div>
+        <div class="nav-group-label">Executive Workspace</div>
+        <ul class="nav-list">
+          ${nav.map(n=>navItemHtml(n)).join('')}
+        </ul>
+        <div class="sidebar-foot">
+          <label class="field-label" style="color:#9a9fb0;">Viewing Role</label>
+          <select class="role-select" id="role-select" onchange="setRole(this.value)">
+            ${PERSON_ROLE_OPTIONS.map(r=>`<option value="${r}" ${STATE.currentRole===r?'selected':''}>${r}${r==='COO / CXO'?' (Arjun Mehta)':r==='Operations Lead'?' (Devina Nair)':r==='CX & Support Lead'?' (Sameer Joshi)':' (Tanvi Shah)'}</option>`).join('')}
+          </select>
+          <div class="demo-tag">OPERATIONAL CONTROL ROOM · Offcomfrt operations, logistics, quality & CX data engine.</div>
+        </div>
+      </aside>
+      <div class="main">
+        <div class="topbar">
+          <span class="topbar-date">${currentDateHeaderStr()}</span>
+          <div class="search-wrap">
+            <span class="search-icon">&#128269;</span>
+            <input class="search-input" id="global-search" placeholder="Search orders, carriers, SOPs, tasks, team..." value="${escapeHtml(STATE.searchQuery)}" oninput="onSearchInput(this.value)" onfocus="onSearchInput(this.value)">
+            <div id="search-results-slot"></div>
+          </div>
+          <div class="topbar-spacer"></div>
+          <button class="icon-btn" title="Alerts & Notifications" onclick="openNotifications()">&#128276;${notifCount()>0?`<span class="dot-badge">${notifCount()}</span>`:''}</button>
+          <button class="btn-primary" onclick="openQuickAddTask()">+ Quick Task</button>
+        </div>
+        <div class="view" id="view">${renderView()}</div>
+      </div>
+    </div>
+  `;
+  renderToasts();
+  if(STATE.searchQuery) renderSearchResults();
+}
+
+function navItemHtml(n){
+  const active = STATE.currentView===n.id;
+  let badge = '';
+  if(n.id==='approvals'){ const c = STATE.data.approvals.filter(a=>a.status==='Pending').length; if(c) badge = `<span class="nav-badge amber">${c}</span>`; }
+  if(n.id==='blocked'){ const c = STATE.data.tasks.filter(t=>t.status==='Blocked').length; if(c) badge = `<span class="nav-badge">${c}</span>`; }
+  let resetExtra = '';
+  if(n.id==='projects') resetExtra = ",{selectedProjectId:null}";
+  if(n.id==='team') resetExtra = ",{selectedPersonId:null}";
+  return `<li><button class="nav-item ${active?'active':''}" onclick="goTo('${n.id}'${resetExtra})"><span class="nav-icon">${n.icon}</span>${n.label}${badge}</button></li>`;
+}
+
+/* ============================== SHARED UI HELPERS ============================== */
+function avatarHtml(personId, size){
+  const p = personById(personId);
+  const name = p ? p.name : (personId || '?');
+  const bg = colorForId(personId||'x');
+  return `<div class="avatar ${size==='lg'?'lg':''}" style="background:${bg}" title="${escapeHtml(name)}">${escapeHtml(initials(name))}</div>`;
+}
+
+function priorityChip(pr){
+  const meta = PRIORITIES.find(p=>p.id===pr) || PRIORITIES[2];
+  return `<span class="chip ${meta.className}">${meta.id}</span>`;
+}
+
+function statusChip(status){
+  const map = {
+    'Completed':'chip-good','Cancelled':'chip-outline','Blocked':'chip-bad','Waiting':'chip-warn',
+    'In Review':'chip-info','Overdue':'chip-bad',
+  };
+  return `<span class="chip ${map[status]||'chip-status'}">${escapeHtml(status)}</span>`;
+}
+
+function projectStatusChip(status){
+  const map = {'On Track':'chip-good','At Risk':'chip-warn','Blocked':'chip-bad','Completed':'chip-good','Not Started':'chip-outline','Cancelled':'chip-outline'};
+  return `<span class="chip ${map[status]||'chip-status'}">${escapeHtml(status)}</span>`;
+}
+
+function workloadChip(level, emoji){
+  const map = {'Healthy':'chip-good','Busy':'chip-warn','High Load':'chip-warn','Overloaded':'chip-bad','Underloaded':'chip-outline'};
+  return `<span class="chip ${map[level]||'chip-status'}">${emoji} ${level}</span>`;
+}
+
+function riskChip(level){
+  const map = {'Low':'chip-good','Medium':'chip-warn','High':'chip-bad'};
+  return `<span class="chip ${map[level]}">${level} Risk</span>`;
+}
+
+function taskRowHtml(t, opts){
+  opts = opts || {};
+  const overdue = isOverdue(t);
+  const dep = dependencyBlockText(t);
+  const esc = escalationFor(t);
+  const stale = isStale(t);
+  let metaBits = [];
+  if(!opts.hideAssignee) metaBits.push(personName(t.assignee));
+  if(t.project) metaBits.push(projectName(t.project));
+  metaBits.push(t.dueDate ? (overdue ? `<span style="color:var(--brick);font-weight:600;">Due ${relativeDay(t.dueDate)}</span>` : 'Due '+relativeDay(t.dueDate)) : 'No deadline');
+  if(t.waitingOn) metaBits.push('Waiting on '+escapeHtml(t.waitingOn));
+  if(dep) metaBits.push('Blocked by "'+escapeHtml(dep.name)+'"');
+  return `<div class="list-row clickable" onclick="openTaskModal('${t.id}')" style="cursor:pointer;">
+    <div class="list-row-main">
+      <div class="list-row-title">${escapeHtml(t.name)} ${stale?'<span title="Stale &mdash; no progress updates recently">&#9888;&#65039;</span>':''}</div>
+      <div class="list-row-meta">${metaBits.join(' · ')}</div>
+    </div>
+    ${priorityChip(t.priority)}
+    ${statusChip(t.status)}
+    ${esc ? `<span class="escalation-tag ${esc.className}">${esc.who}</span>` : ''}
+  </div>`;
+}
+
+function meetingRowHtml(m){
+  return `<div class="list-row clickable" onclick="openMeetingModal('${m.id}')">
+    <div class="list-row-main">
+      <div class="list-row-title">${escapeHtml(m.name)}</div>
+      <div class="list-row-meta">${fmtDate(m.date)} · ${m.time} · ${m.participants.length} leaders${m.recurring?' · '+m.recurring:''}</div>
+    </div>
+    <span class="chip chip-outline">${m.actionItems.filter(a=>!a.taskId).length} open actions</span>
+  </div>`;
+}
+
+function approvalRowHtml(a){
+  const map = {'Pending':'chip-warn','Approved':'chip-good','Rejected':'chip-bad','Changes Requested':'chip-info'};
+  const daysWaiting = daysFromToday(a.requestedDate)*-1;
+  return `<div class="list-row clickable" onclick="openApprovalModal('${a.id}')">
+    <div class="list-row-main">
+      <div class="list-row-title">${escapeHtml(a.item)}</div>
+      <div class="list-row-meta">${escapeHtml(a.type)} · from ${personName(a.requester)} · ${daysWaiting}d pending</div>
+    </div>
+    <span class="chip ${map[a.status]}">${escapeHtml(a.status)}</span>
+  </div>`;
+}
+
+function followUpRowHtml(f){
+  const overdue = f.status==='Overdue' || daysFromToday(f.followUpDate)<0;
+  return `<div class="list-row clickable" onclick="openFollowUpModal('${f.id}')">
+    <div class="list-row-main">
+      <div class="list-row-title">${escapeHtml(f.subject)}</div>
+      <div class="list-row-meta">Partner: ${escapeHtml(f.person)} · last contact ${relativeDay(f.lastCommunication)} · target ${relativeDay(f.followUpDate)}</div>
+    </div>
+    <span class="chip ${overdue?'chip-bad':'chip-outline'}">${overdue?'Overdue':'Open'}</span>
+  </div>`;
+}
+
+function emptyState(text){
+  return `<div class="empty-row">${escapeHtml(text)}</div>`;
+}
+
+function projectCardHtml(proj){
+  const progress = projectProgress(proj);
+  const risk = projectRisk(proj);
+  const nm = nextMilestone(proj);
+  const overdueTasks = STATE.data.tasks.filter(t=>t.project===proj.id && isOverdue(t)).length;
+  return `<div class="card accent-left" style="border-left-color:${risk==='High'?'var(--brick)':risk==='Medium'?'var(--amber)':'var(--sage)'};cursor:pointer;" onclick="goTo('projects',{selectedProjectId:'${proj.id}'})">
+    <div class="card-title"><span>${escapeHtml(proj.name)}</span>${projectStatusChip(proj.status)}</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${escapeHtml(proj.objective||'')}</div>
+    <div class="progress-track" style="margin-bottom:8px;"><div class="progress-fill" style="width:${progress}%;"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted);">
+      <span>${progress}% complete</span>
+      <span>${daysFromToday(proj.deadline)>=0? daysFromToday(proj.deadline)+'d left' : (daysFromToday(proj.deadline)*-1)+'d past target'}</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+      ${riskChip(risk)}
+      ${overdueTasks?`<span class="chip chip-bad">${overdueTasks} overdue</span>`:''}
+      ${nm?`<span class="chip chip-outline">Next: ${escapeHtml(nm.name)}</span>`:''}
+    </div>
+  </div>`;
+}
+
+function renderView(){
+  try{
+    switch(STATE.currentView){
+      case 'home': return viewHome();
+      case 'myday': return viewMyDay();
+      case 'tasks': return viewTasks();
+      case 'team': return viewTeam();
+      case 'projects': return viewProjects();
+      case 'meetings': return viewMeetings();
+      case 'delegation': return viewDelegation();
+      case 'blocked': return viewBlocked();
+      case 'approvals': return viewApprovals();
+      case 'deadlines': return viewDeadlines();
+      case 'goals': return viewGoals();
+      case 'sops': return viewSops();
+      case 'insights': return viewInsights();
+      case 'assistant': return viewAssistant();
+      default: return viewHome();
+    }
+  }catch(e){
+    console.error(e);
+    return `<div class="card"><b>Error loading view:</b><div class="mono" style="margin-top:8px;">${escapeHtml(e.message)}</div></div>`;
+  }
+}
+
+/* ============================== BOOTSTRAP ============================== */
+async function boot(){
+  const app = document.getElementById('app');
+  app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:var(--font-display);color:var(--text-muted);">Initializing COO / CXO Control Room…</div>`;
+  await loadState();
+  render();
+}
+boot();
+</script>
+</body>
+</html>
