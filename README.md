@@ -4,10 +4,15 @@ An executive control room dashboard tailored for a leader simultaneously managin
 
 ---
 
-## Features
+## Key Features
 
-- **Profile & Brand Customization**: Click **"Edit Profile"** in the topbar or the Brand header in the sidebar to change your name, executive role title, company/brand name, and capacity.
-- **Team Management**: Add new team members, edit existing members' names, titles, departments, and managers, or remove members in the **Team** view.
+- **Google Drive as a Database (Cloud Sync)**:
+  - Connect your personal Google Drive to store, sync, and persist your entire dashboard state (`coo_cxo_database.json`) automatically across all devices.
+  - Free, private, and zero Google Cloud Console / billing setup required.
+- **Profile & Brand Customization**:
+  - Click **"Edit Profile"** in the topbar or the Brand header in the sidebar to customize your name, executive title, company/brand name, and working hours.
+- **Team Management**:
+  - Add new team members, edit existing members' names, titles, departments, and reporting managers, or remove members in the **Team** view.
 - **14 Core Executive Views**:
   1. **Home**: Executive priority, top P0/P1 tasks, real-time KPI strip, friction matrix, today's standups, team capacity, and at-risk programs.
   2. **My Day**: Personal execution queue.
@@ -23,47 +28,40 @@ An executive control room dashboard tailored for a leader simultaneously managin
   12. **SOPs**: Operational SOP library.
   13. **Insights**: Weekly Execution Review, Scorecard, Systemic Bottlenecks, Audit Log, and 1-click text report exporter.
   14. **AI Assistant**: Grounded AI query interface analyzing the live JSON state.
-- **Local Persistence**: Works offline and persists all changes in browser storage automatically.
+- **Local Persistence & Offline First**: Works offline and persists all changes in browser storage automatically when disconnected.
 
 ---
 
-## How to Push to GitHub
+## Connecting Google Drive as Your Database (2 Minutes)
 
-1. Open your terminal in this project folder:
-   ```bash
-   cd "/Users/apple/Library/CloudStorage/OneDrive-SharedLibraries-ONEDRIVE/CXO:COO Dboard"
-   ```
+1. Open your dashboard and click the **"☁️ Drive DB"** button in the top navigation bar.
+2. In the modal, copy the provided Google Apps Script code (also available in [`google-drive-database-script.gs`](google-drive-database-script.gs)).
+3. Go to [script.google.com](https://script.google.com/home/start) (or in Google Drive: click **New + &rarr; More &rarr; Google Apps Script**).
+4. Name the project `Offcomfrt Database`, erase the default code, and paste the script.
+5. Click **Deploy** (top right) &rarr; **New deployment**:
+   - Click the ⚙️ icon &rarr; select **Web app**.
+   - Set **Execute as**: `Me`
+   - Set **Who has access**: `Anyone`
+6. Click **Deploy**, authorize permissions with your Google account, and copy the **Web app URL**.
+7. Paste your Web App URL into the dashboard modal and click **"Save & Connect"**.
 
-2. Create a new repository on [GitHub](https://github.com/new) (e.g. `coo-cxo-control-room`).
-
-3. Link and push your code to your GitHub repository:
-   ```bash
-   git remote add origin https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME.git
-   git branch -M main
-   git push -u origin main
-   ```
+From then on, all changes (tasks, people, approvals, settings) will automatically sync to `coo_cxo_database.json` in your Google Drive!
 
 ---
 
-## How to Deploy on Render (Free)
+## Deployment on Render (Free)
 
 ### Option A: Static Site (Recommended & Fastest)
 1. Log in to [Render](https://dashboard.render.com/).
 2. Click **New +** &rarr; **Static Site**.
-3. Connect your GitHub repository.
-4. Set the settings:
-   - **Name**: `coo-cxo-control-room`
-   - **Branch**: `main`
-   - **Build Command**: *(leave empty)*
+3. Select your GitHub repository: `maxtern-pytes/coo-cxo-control-room`.
+4. Leave settings as default:
+   - **Build Command**: *(empty)*
    - **Publish Directory**: `.` *(or `./`)*
 5. Click **Create Static Site**.
-6. Render will build and give you a live URL (e.g. `https://coo-cxo-control-room.onrender.com`) in seconds!
 
 ### Option B: Web Service (Node.js)
-1. Log in to [Render](https://dashboard.render.com/).
-2. Click **New +** &rarr; **Web Service**.
-3. Connect your GitHub repository.
-4. Render will auto-detect Node.js:
-   - **Build Command**: `npm install` (or leave empty)
-   - **Start Command**: `node server.js`
-5. Click **Create Web Service**.
+1. In Render, select **New +** &rarr; **Web Service**.
+2. Connect the repository.
+3. Set **Start Command**: `node server.js`.
+4. Click **Create Web Service**.

@@ -110,6 +110,21 @@ button:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--amber-dee
 .search-hit-title{font-size:13px;font-weight:600;}
 .search-hit-meta{font-size:11px;color:var(--text-muted);}
 .topbar-spacer{flex:1;}
+.gdrive-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--paper-raised);border:1px solid var(--line);
+  border-radius:20px;padding:3px 10px 3px 6px;font-size:12px;font-weight:600;
+  cursor:pointer;color:var(--text);transition:border-color 0.15s ease;
+}
+.gdrive-btn:hover{border-color:var(--amber-deep);background:var(--paper-sunken);}
+.gdrive-badge{font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;}
+.gdrive-badge.connected{background:var(--sage-tint);color:var(--sage);}
+.gdrive-badge.disconnected{background:var(--line-soft);color:var(--text-muted);}
+.gdrive-badge.syncing{background:var(--amber-tint);color:var(--amber-deep);}
+.code-block-box{background:var(--ink);color:#e9e7e0;border-radius:var(--radius-s);padding:12px 14px;font-family:var(--font-mono);font-size:11.5px;line-height:1.45;overflow-x:auto;position:relative;margin:10px 0;}
+.copy-code-btn{position:absolute;top:8px;right:8px;background:var(--ink-soft);color:#fff;border:1px solid var(--ink-line);border-radius:var(--radius-s);padding:4px 8px;font-size:11px;cursor:pointer;}
+.copy-code-btn:hover{background:var(--amber-deep);}
+
 .profile-btn{
   display:inline-flex;align-items:center;gap:7px;
   background:var(--paper-raised);border:1px solid var(--line);
@@ -653,6 +668,126 @@ function allReportsUnder(personId){
 }
 
 /* Safe Storage Engine */
+
+/* ==================== GOOGLE DRIVE DATABASE INTEGRATION ==================== */
+const GDRIVE_CONFIG_KEY = 'offcomfrt-gdrive-config-v1';
+let _gdriveSyncing = false;
+
+function getGDriveConfig(){
+  try{
+    const val = localStorage.getItem(GDRIVE_CONFIG_KEY);
+    return val ? JSON.parse(val) : { url: '', autoSync: true, lastSync: null };
+  }catch(e){ return { url: '', autoSync: true, lastSync: null }; }
+}
+
+function saveGDriveConfig(cfg){
+  try{ localStorage.setItem(GDRIVE_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){}
+}
+
+function isGDriveConnected(){
+  const cfg = getGDriveConfig();
+  return Boolean(cfg.url && cfg.url.startsWith('http'));
+}
+
+async function syncWithGDrive(options){
+  options = options || {};
+  const cfg = getGDriveConfig();
+  if(!cfg.url) return false;
+
+  _gdriveSyncing = true;
+  updateGDriveUI();
+
+  try{
+    if(options.pull){
+      // Fetch latest JSON database from Google Drive
+      const resp = await fetch(cfg.url, { method: 'GET' });
+      if(!resp.ok) throw new Error('HTTP ' + resp.status);
+      const remoteData = await resp.json();
+      if(remoteData && remoteData.people && remoteData.tasks){
+        STATE.data = remoteData;
+        cfg.lastSync = new Date().toISOString();
+        saveGDriveConfig(cfg);
+        await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
+        toast('Pulled latest database from Google Drive!');
+        render();
+      } else {
+        toast('Google Drive database is currently empty or initialized.');
+      }
+    } else {
+      // Push local database to Google Drive
+      const payload = JSON.stringify(STATE.data);
+      // Using text/plain avoids CORS preflight failures on Google Apps Script
+      await fetch(cfg.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: payload
+      });
+      cfg.lastSync = new Date().toISOString();
+      saveGDriveConfig(cfg);
+      if(options.notify) toast('Database synced with Google Drive!');
+    }
+  }catch(e){
+    console.warn('Google Drive Sync Notice:', e);
+    if(options.notify) toast('Google Drive sync notice: ' + (e.message || 'Check network / URL permissions'));
+  }finally{
+    _gdriveSyncing = false;
+    updateGDriveUI();
+  }
+}
+
+function updateGDriveUI(){
+  const btn = document.getElementById('gdrive-status-badge');
+  if(!btn) return;
+  const connected = isGDriveConnected();
+  if(_gdriveSyncing){
+    btn.className = 'gdrive-badge syncing';
+    btn.textContent = 'Syncing...';
+  } else if(connected){
+    btn.className = 'gdrive-badge connected';
+    btn.textContent = 'Synced';
+  } else {
+    btn.className = 'gdrive-badge disconnected';
+    btn.textContent = 'Connect';
+  }
+}
+
+const GDRIVE_APPS_SCRIPT_TEMPLATE = `// =========================================================================
+// OFFCOMFRT — GOOGLE DRIVE DATABASE SCRIPT
+// Free, zero-setup Google Drive JSON database for your Control Room.
+// =========================================================================
+
+var DATABASE_FILE = "coo_cxo_database.json";
+
+function doGet(e) {
+  var files = DriveApp.getFilesByName(DATABASE_FILE);
+  if (files.hasNext()) {
+    var file = files.next();
+    var content = file.getBlob().getDataAsString("UTF-8");
+    return ContentService.createTextOutput(content)
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ status: "empty" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var data = e.postData.contents;
+  var files = DriveApp.getFilesByName(DATABASE_FILE);
+  var file;
+  if (files.hasNext()) {
+    file = files.next();
+    file.setContent(data);
+  } else {
+    file = DriveApp.createFile(DATABASE_FILE, data, MimeType.PLAIN_TEXT);
+  }
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "success",
+    timestamp: new Date().toISOString(),
+    fileId: file.getId()
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+`;
+
 const StorageEngine = {
   async get(key){
     if(window.storage && typeof window.storage.get === 'function'){
@@ -673,9 +808,32 @@ const StorageEngine = {
 
 async function loadState(){
   try{
+    // 1. Try local storage first for instant render
     const res = await StorageEngine.get(STORAGE_KEY);
     if(res && res.value){
       STATE.data = JSON.parse(res.value);
+    }
+
+    // 2. Check if Google Drive database is connected
+    const gcfg = getGDriveConfig();
+    if(gcfg.url && gcfg.autoSync){
+      try{
+        const gresp = await fetch(gcfg.url, { method: 'GET' });
+        if(gresp.ok){
+          const gdata = await gresp.json();
+          if(gdata && gdata.people && gdata.tasks){
+            STATE.data = gdata;
+            await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
+            gcfg.lastSync = new Date().toISOString();
+            saveGDriveConfig(gcfg);
+          }
+        }
+      }catch(err){
+        console.log('Using local cached database (offline / Drive unreached)');
+      }
+    }
+
+    if(STATE.data){
       if(!STATE.data.settings) STATE.data.settings = buildDemoData().settings;
       if(!STATE.data.brandName) STATE.data.brandName = 'Offcomfrt';
       if(!STATE.data.brandSub) STATE.data.brandSub = 'COO / CXO Control Room';
@@ -698,9 +856,14 @@ function saveState(){
     _saveTimer = setTimeout(async ()=>{
       try{
         await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
+        // Asynchronously sync with Google Drive if connected
+        const gcfg = getGDriveConfig();
+        if(gcfg.url && gcfg.autoSync){
+          syncWithGDrive({ notify: false });
+        }
       }catch(e){}
       resolve();
-    }, 200);
+    }, 250);
   });
 }
 
@@ -1636,6 +1799,172 @@ function deletePerson(id){
   closeModal();
   goTo('team');
   toast(`Removed ${p.name} from the team.`);
+}
+
+
+/* ==================== GOOGLE DRIVE MODAL & UI CONTROLLERS ==================== */
+function openGDriveModal(){
+  const cfg = getGDriveConfig();
+  const connected = isGDriveConnected();
+  const lastSyncStr = cfg.lastSync ? fmtDateLong(cfg.lastSync.slice(0,10)) + ' at ' + new Date(cfg.lastSync).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Never';
+
+  openModal(`
+    <div class="modal wide">
+      <div class="modal-head">
+        <h3 class="modal-title">&#9729;&#65039; Google Drive Database Connection</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Status Banner -->
+        <div class="card" style="margin-bottom:16px;background:${connected?'var(--sage-tint)':'var(--paper-sunken)'};border-color:${connected?'var(--sage)':'var(--line)'};">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div>
+              <div style="font-weight:700;font-size:14px;color:${connected?'var(--sage)':'var(--text)'};">
+                ${connected ? '&#9989; Connected to Google Drive' : '&#9898; Not Connected (Using Local Browser Storage)'}
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+                ${connected ? `Database File: <b>coo_cxo_database.json</b> &bull; Last Synced: <b>${lastSyncStr}</b>` : 'Connect Google Drive below to sync all tasks, team members, approvals, and metrics across devices.'}
+              </div>
+            </div>
+            ${connected ? `
+              <div style="display:flex;gap:6px;">
+                <button class="btn small dark" onclick="syncWithGDrive({pull:true, notify:true})">&#8595; Pull from Drive</button>
+                <button class="btn small dark" onclick="syncWithGDrive({notify:true})">&#8593; Push to Drive</button>
+                <button class="btn small danger" onclick="disconnectGDrive()">Disconnect</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- How It Works & Setup Guide -->
+        <div class="section-block">
+          <div class="section-block-title" style="margin-bottom:6px;">How to Connect Your Google Drive (100% Free &amp; Private)</div>
+          <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5;margin-bottom:12px;">
+            You can turn your personal Google Drive into a private cloud database using a free <b>Google Apps Script</b> Web App. No Google Cloud Console, no API keys, and no billing required.
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:12.5px;">
+            <div style="background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 14px;">
+              <b>Step 1:</b> Open <a href="https://script.google.com/home/start" target="_blank" style="color:var(--slate);text-decoration:underline;font-weight:600;">script.google.com</a> (or in Google Drive: click <b>New + &rarr; More &rarr; Google Apps Script</b>).
+            </div>
+
+            <div style="background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 14px;">
+              <b>Step 2:</b> Name your script <b>"Offcomfrt Database"</b>, erase the default code, and paste this script:
+              <div class="code-block-box">
+                <button class="copy-code-btn" onclick="copyGDriveScript(this)">&#128203; Copy Script</button>
+                <pre style="margin:0;"><code>${escapeHtml(GDRIVE_APPS_SCRIPT_TEMPLATE)}</code></pre>
+              </div>
+            </div>
+
+            <div style="background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 14px;">
+              <b>Step 3:</b> Click <b>Deploy</b> (top right) &rarr; <b>New deployment</b> &rarr; Click the ⚙️ icon &rarr; Select <b>Web app</b>.<br>
+              &bull; Set <b>Execute as</b>: <code>Me (your Google email)</code><br>
+              &bull; Set <b>Who has access</b>: <code>Anyone</code><br>
+              &bull; Click <b>Deploy</b> &rarr; Authorize access &rarr; Copy the <b>Web app URL</b>.
+            </div>
+
+            <div style="background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-s);padding:12px 14px;">
+              <b>Step 4:</b> Paste your Web App URL here:
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <input type="text" id="gdrive-input-url" value="${escapeHtml(cfg.url||'')}" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1;border:1px solid var(--line);border-radius:var(--radius-s);padding:8px 12px;font-size:12.5px;font-family:var(--font-mono);">
+                <button class="btn dark" onclick="submitConnectGDrive()">Save &amp; Connect</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual Backup / Restore Section -->
+        <div class="section-block" style="border-top:1px solid var(--line);padding-top:14px;margin-top:16px;">
+          <div class="section-block-title" style="margin-bottom:6px;">Manual JSON Backup &amp; Restore</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">You can also download a copy of the database JSON directly to save in your Google Drive folder manually, or restore from a previous file.</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn small" onclick="exportDatabaseFile()">&#128190; Download coo_cxo_database.json</button>
+            <label class="btn small" style="cursor:pointer;">
+              &#128194; Restore from JSON File
+              <input type="file" id="gdrive-file-restore" accept=".json" style="display:none;" onchange="importDatabaseFile(this)">
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn dark" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `);
+}
+
+function copyGDriveScript(btn){
+  navigator.clipboard.writeText(GDRIVE_APPS_SCRIPT_TEMPLATE).then(()=>{
+    const old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(()=>{ btn.textContent = old; }, 2000);
+    toast('Google Apps Script copied to clipboard!');
+  }).catch(()=>{
+    toast('Please select and copy the code manually.');
+  });
+}
+
+async function submitConnectGDrive(){
+  const url = document.getElementById('gdrive-input-url').value.trim();
+  if(!url){ toast('Please enter your Google Apps Script Web App URL.'); return; }
+  if(!url.startsWith('https://script.google.com')){
+    toast('URL should start with https://script.google.com/macros/s/...');
+    return;
+  }
+  const cfg = getGDriveConfig();
+  cfg.url = url;
+  cfg.autoSync = true;
+  saveGDriveConfig(cfg);
+  toast('Verifying and syncing with Google Drive...');
+  await syncWithGDrive({ notify: true });
+  closeModal();
+  render();
+}
+
+function disconnectGDrive(){
+  if(!confirm('Disconnect Google Drive database? Your data will remain safely in your local browser.')) return;
+  const cfg = getGDriveConfig();
+  cfg.url = '';
+  saveGDriveConfig(cfg);
+  toast('Google Drive disconnected.');
+  closeModal();
+  render();
+}
+
+function exportDatabaseFile(){
+  const blob = new Blob([JSON.stringify(STATE.data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'coo_cxo_database.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('Downloaded coo_cxo_database.json');
+}
+
+function importDatabaseFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(e){
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(parsed && parsed.people && parsed.tasks){
+        STATE.data = parsed;
+        await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
+        toast('Database restored successfully from file!');
+        closeModal();
+        render();
+      } else {
+        toast('Invalid database JSON file format.');
+      }
+    }catch(err){
+      toast('Error parsing JSON file.');
+    }
+  };
+  reader.readAsText(file);
 }
 
 function viewTeam(){
@@ -2876,6 +3205,11 @@ function render(){
             <div id="search-results-slot"></div>
           </div>
           <div class="topbar-spacer"></div>
+          <button class="gdrive-btn" onclick="openGDriveModal()" title="Google Drive Database Sync & Backup">
+            <span style="font-size:13px;">&#9729;&#65039;</span>
+            <span>Drive DB</span>
+            <span class="gdrive-badge ${isGDriveConnected()?'connected':'disconnected'}" id="gdrive-status-badge">${isGDriveConnected()?'Synced':'Connect'}</span>
+          </button>
           <button class="profile-btn" onclick="openEditProfileModal()" title="Edit Your Profile & Brand">
             ${avatarHtml('p-coo')}
             <span>${escapeHtml(personName('p-coo').split(' ')[0])}</span>
