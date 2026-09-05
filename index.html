@@ -98,9 +98,9 @@ button:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--amber-dee
 .nav-badge{margin-left:auto;background:var(--brick);color:#fff;font-size:10px;font-weight:600;border-radius:10px;padding:1px 6px;min-width:16px;text-align:center;}
 .nav-badge.amber{background:var(--amber);color:#2a1c00;}
 
-.sidebar-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--ink-line);}
-.role-select{width:100%;background:var(--ink-soft);color:#e9e7e0;border:1px solid var(--ink-line);border-radius:var(--radius-s);padding:7px 8px;font-size:12px;font-family:var(--font-body);}
-.demo-tag{font-size:10px;color:#7d8299;margin-top:8px;line-height:1.45;}
+.personal-cockpit-card{background:var(--ink-soft);border:1px solid var(--ink-line);border-radius:var(--radius-s);padding:10px 12px;cursor:pointer;transition:all 0.18s ease;}
+.personal-cockpit-card:hover{background:#1f1f23;border-color:#3f3f46;}
+.personal-cockpit-sub{margin-top:8px;font-size:10.5px;color:#71717a;line-height:1.35;border-top:1px solid var(--ink-line);padding-top:8px;}
 
 .main{min-width:0;display:flex;flex-direction:column;}
 .topbar{
@@ -364,8 +364,7 @@ button:focus-visible, [tabindex]:focus-visible{outline:2px solid #09090b;outline
 .nav-badge{background:#27272a;color:#ffffff;border:1px solid #3f3f46;border-radius:10px;font-size:10px;font-weight:600;padding:1px 6px;}
 .nav-badge.amber{background:#27272a;color:#ffffff;border:1px solid #3f3f46;}
 
-.role-select{background:#18181b;color:#e4e4e7;border:1px solid #27272a;border-radius:8px;}
-.sidebar-foot{border-top:1px solid #27272a;}
+.sidebar-foot{border-top:1px solid #27272a;margin-top:auto;padding-top:14px;}
 
 .topbar{background:#ffffff;border-bottom:1px solid var(--line);padding:12px 24px;}
 .search-input{background:#ffffff;border:1px solid var(--line);border-radius:8px;color:#09090b;font-size:13px;}
@@ -825,6 +824,28 @@ button:active {
   .hero-card {
     padding: 16px;
   }
+}
+
+
+.personal-cockpit-card {
+  background: var(--ink-soft);
+  border: 1px solid var(--ink-line);
+  border-radius: var(--radius-s);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.personal-cockpit-card:hover {
+  background: #1f1f23;
+  border-color: #3f3f46;
+}
+.personal-cockpit-sub {
+  margin-top: 8px;
+  font-size: 10.5px;
+  color: #71717a;
+  line-height: 1.35;
+  border-top: 1px solid var(--ink-line);
+  padding-top: 8px;
 }
 
 </style>
@@ -3221,16 +3242,17 @@ function viewDelegation(){
 }
 
 function delegatedWorkHtml(){
-  const delegated = STATE.data.tasks.filter(t=>t.createdBy==='p-coo' && t.assignee!=='p-coo');
+  const delegated = STATE.data.tasks.filter(t=> t.assignee && t.assignee !== 'p-coo');
   const needsFollowUp = delegated.filter(t=> ACTIVE_STATUSES.includes(t.status) && (isStale(t) || isOverdue(t)));
   return `
-    ${needsFollowUp.length?`<div class="section-block"><div class="section-block-title" style="margin-bottom:6px;color:var(--brick);">Tasks Requiring Executive Follow-Up</div><div class="card">${needsFollowUp.map(t=>taskRowHtml(t)).join('')}</div></div>`:''}
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Assigned Date</th><th>Deadline</th><th>Status</th><th>Last Update</th><th>Days Left</th></tr></thead><tbody>
+    ${needsFollowUp.length?`<div class="section-block"><div class="section-block-title" style="margin-bottom:6px;color:var(--brick);">Deliverables Requiring Executive Follow-Up (${needsFollowUp.length})</div><div class="card">${needsFollowUp.map(t=>taskRowHtml(t)).join('')}</div></div>`:''}
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Task</th><th>Assignee</th><th>Assigned Date</th><th>Deadline</th><th>Status</th><th>Last Update</th><th>Days Left</th><th>Action</th></tr></thead><tbody>
     ${delegated.length? delegated.map(t=>`<tr class="clickable" onclick="openTaskModal('${t.id}')">
-      <td>${escapeHtml(t.name)}</td><td>${escapeHtml(personName(t.assignee))}</td><td>${fmtDate(t.createdDate)}</td>
+      <td><b>${escapeHtml(t.name)}</b></td><td>${avatarHtml(t.assignee)} ${escapeHtml(personName(t.assignee))}</td><td>${fmtDate(t.createdDate)}</td>
       <td>${t.dueDate?fmtDate(t.dueDate):'—'}</td><td>${statusChip(t.status)}</td><td>${relativeDay(t.lastUpdated)}</td>
       <td style="${t.dueDate && daysFromToday(t.dueDate)<0?'color:var(--brick);font-weight:600;':''}">${t.dueDate?daysFromToday(t.dueDate):'—'}</td>
-    </tr>`).join('') : `<tr><td colspan="7">${emptyState('No delegated tasks active.')}</td></tr>`}
+      <td><button class="btn small ghost" onclick="event.stopPropagation();openTaskModal('${t.id}')">Follow Up</button></td>
+    </tr>`).join('') : `<tr><td colspan="8">${emptyState('No tasks currently assigned to team members. Use "+ Quick Task" to delegate.')}</td></tr>`}
     </tbody></table></div>
   `;
 }
@@ -4701,6 +4723,56 @@ function getConversationalFallback(question, snapshot){
   const cfg = getAiConfig();
   const hasKey = Boolean(cfg.apiKey);
 
+    // Dedicated Handler: Team Deliverables & Follow-ups
+  if(qlow.includes('follow-up') || qlow.includes('follow up') || qlow.includes('followup') || qlow.includes('who to follow up') || qlow.includes('delegat')){
+    const teamTasks = (STATE.data && STATE.data.tasks) ? STATE.data.tasks.filter(t => t.assignee && t.assignee !== 'p-coo' && ACTIVE_STATUSES.includes(t.status)) : [];
+    const overdue = teamTasks.filter(isOverdue);
+    const dueToday = teamTasks.filter(isDueToday);
+    const blocked = teamTasks.filter(t => t.status === 'Blocked');
+
+    if(teamTasks.length === 0){
+      return `Right now, you don't have any active deliverables assigned to your team. All tasks are clear!\n\nWant to delegate a new operational task to ${sampleAssignee} or anyone on the team? Just let me know (e.g. *"Create task: Check return packaging for ${sampleAssignee} by Friday"*).`;
+    }
+
+    let report = `Here is your executive team follow-up breakdown:\n\n`;
+    if(overdue.length > 0){
+      report += `🚨 **Urgent Follow-ups (Overdue):**\n`;
+      overdue.forEach(t => {
+        report += `• **${personName(t.assignee)}** owes **"${t.name}"** (Due ${relativeDay(t.dueDate)})\n`;
+      });
+      report += `\n`;
+    }
+    if(blocked.length > 0){
+      report += `⚠️ **Blocked Deliverables:**\n`;
+      blocked.forEach(t => {
+        report += `• **${personName(t.assignee)}** is blocked on **"${t.name}"**${t.waitingOn ? ` (Waiting on ${t.waitingOn})` : ''}\n`;
+      });
+      report += `\n`;
+    }
+    if(dueToday.length > 0){
+      report += `📅 **Due Today:**\n`;
+      dueToday.forEach(t => {
+        report += `• **${personName(t.assignee)}** — "${t.name}"\n`;
+      });
+      report += `\n`;
+    }
+    const onTrack = teamTasks.filter(t => !isOverdue(t) && !isDueToday(t) && t.status !== 'Blocked');
+    if(onTrack.length > 0){
+      report += `✅ **On Track (${onTrack.length} deliverables):**\n`;
+      onTrack.slice(0, 4).forEach(t => {
+        report += `• **${personName(t.assignee)}**: "${t.name}" (Due ${t.dueDate ? relativeDay(t.dueDate) : 'Planned'})\n`;
+      });
+    }
+
+    report += `\nWould you like me to log a partner follow-up, set a reminder, or adjust any of these tasks?`;
+    return report;
+  }
+
+  // Personal Dashboard Identity
+  if(/who\s*uses\s*this|is\s*this.*?(for\s*my\s*team|only\s*for\s*me|personal|shared)|can\s*my\s*team|team\s*(log\s*in|access|opening|open|see|use)|only\s*for\s*me/i.test(qlow)){
+    return `This control room is built **strictly for you as the COO / CXO**.\n\nYour team members (${teamListStr}) do not log in or access this dashboard. You use it as your personal executive cockpit to:\n1. **Assign deliverables** across supply chain, warehouse, QA, and CX.\n2. **Track team progress & deadlines** without chasing people manually.\n3. **Follow up on stalled or blocked items** in your 1:1s or team syncs.\n\nEverything here is private to you and syncs across your own devices (phone, laptop, tablet).`;
+  }
+
   // 1. AI Identity & Model Questions (Common Sense)
   if(/which\s*ai|what\s*ai|who\s*are\s*you|what\s*model|are\s*you\s*(gemini|gpt|ai|a\s*bot|human|real)|tell\s*me\s*about\s*yourself|what\s*are\s*you/i.test(qlow)){
     if(hasKey){
@@ -4915,6 +4987,15 @@ function submitAIConfig(){
   toast(apiKey ? 'Google Gemini AI connected & synced across all devices!' : 'AI settings saved (using built-in engine).');
 }
 
+
+function sendSuggestionChip(btn){
+  if(!btn) return;
+  const prompt = btn.getAttribute('data-prompt') || btn.textContent.trim();
+  if(prompt){
+    askAssistant(prompt);
+  }
+}
+
 function renderAIChatView(){
   const cfg = getAiConfig();
   const hasKey = Boolean(cfg.apiKey);
@@ -4978,13 +5059,13 @@ function renderAIChatView(){
         <!-- Interactive Suggestion Chips (Buddy Style) -->
         <div class="chip-row">
           ${[
+            "What team follow-ups are due today?",
             "What should we focus on today?",
             "How can we cut down fake delivery attempts?",
             "Help me think through warehouse packing speed",
-            `Create task: Audit dispatch scans for ${getSampleAssignee()}`,
-            "Verify order #1001",
+            `Create task: Audit dispatch scans for ${getSampleAssignee()} by Friday`,
             "How should we dispute carrier weight discrepancies?"
-          ].map(q => `<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}
+          ].map(q => `<button type="button" class="suggest-chip" data-prompt="${escapeHtml(q)}" onclick="sendSuggestionChip(this)">${escapeHtml(q)}</button>`).join('')}
         </div>
 
         <!-- Input row locked at very bottom -->
@@ -5287,8 +5368,12 @@ async function askAssistant(question){
     attachments: attachments
   });
 
-  goTo('assistant');
-  setAITab('chat');
+  if(FLOATING_BUDDY_OPEN){
+    renderFloatingBuddyMsgs();
+  } else {
+    goTo('assistant');
+    setAITab('chat');
+  }
   render();
   setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 30);
 
@@ -5348,6 +5433,11 @@ async function askAssistant(question){
     const teamListStr = activeTeam.length ? activeTeam.join(', ') : 'Operations Lead, CX & Support Lead';
 
     const systemPrompt = `You are ${leaderFullName}'s executive operations & CX buddy and trusted partner in the ${currentBrand} Control Room. 
+
+CONTEXT & USER'S WORKFLOW:
+- IMPORTANT: This dashboard is exclusively for ${leaderFullName} (COO / CXO). Team members (${teamListStr}) DO NOT log in or open this dashboard.
+- ${leaderFullName} uses this control room as their personal executive cockpit to track operations, delegate/assign tasks to team members, monitor deadlines, and follow up with them directly.
+- All tasks assigned to team members are deliverables that ${leaderFullName} tracks and follows up on.
 
 TONE & BEHAVIOR:
 - Address the user warmly as ${leaderFirst !== 'there' ? leaderFirst : 'Leader'}.
@@ -6130,7 +6220,7 @@ const NAV_ITEMS = [
   {id:'assistant', label:'AI Assistant', icon:'&#10024;', roles:['COO / CXO','Operations Lead','CX & Support Lead']},
 ];
 
-function visibleNav(){ return NAV_ITEMS.filter(n=>n.roles.includes(STATE.currentRole)); }
+function visibleNav(){ return NAV_ITEMS; }
 
 function goTo(view, extra){
   closeMobileSidebar();
@@ -6148,38 +6238,25 @@ function goTo(view, extra){
 }
 
 function setRole(role){
-  STATE.currentRole = role;
-  if(role==='Operations Lead') STATE.viewingPersonId = 'p-lead-ops';
-  else if(role==='CX & Support Lead') STATE.viewingPersonId = 'p-lead-cx';
-  else if(role==='Team Member') STATE.viewingPersonId = 'p-support';
-  else STATE.viewingPersonId = 'p-coo';
-  if(!visibleNav().find(n=>n.id===STATE.currentView)) STATE.currentView = 'home';
+  STATE.currentRole = 'COO / CXO';
+  STATE.viewingPersonId = 'p-coo';
   render();
 }
 
 function scopedPersonIds(){
-  if(STATE.currentRole==='COO / CXO') return STATE.data.people.map(p=>p.id);
-  if(STATE.currentRole==='Operations Lead' || STATE.currentRole==='CX & Support Lead') {
-    return [STATE.viewingPersonId].concat(allReportsUnder(STATE.viewingPersonId));
-  }
-  return [STATE.viewingPersonId];
+  return (STATE.data && STATE.data.people) ? STATE.data.people.map(p=>p.id) : [];
 }
 
 function scopedTasks(){
-  if(STATE.currentRole==='COO / CXO') return STATE.data.tasks;
-  const ids = scopedPersonIds();
-  return STATE.data.tasks.filter(t=> ids.includes(t.assignee) || ids.includes(t.createdBy));
+  return (STATE.data && STATE.data.tasks) ? STATE.data.tasks : [];
 }
 
 function scopedProjects(){
-  const ids = scopedPersonIds();
-  return STATE.data.projects.filter(p=> ids.includes(p.owner) || (p.team||[]).some(m=>ids.includes(m)));
+  return (STATE.data && STATE.data.projects) ? STATE.data.projects : [];
 }
 
 function scopedMeetings(){
-  if(STATE.currentRole==='COO / CXO') return STATE.data.meetings;
-  const ids = scopedPersonIds();
-  return STATE.data.meetings.filter(m=> m.participants.some(p=>ids.includes(p)));
+  return (STATE.data && STATE.data.meetings) ? STATE.data.meetings : [];
 }
 
 function currentDateHeaderStr(){
@@ -6236,11 +6313,18 @@ function render(){
           ${nav.map(n=>navItemHtml(n)).join('')}
         </ul>
         <div class="sidebar-foot">
-          <label class="field-label" style="color:#9a9fb0;">Viewing Role</label>
-          <select class="role-select" id="role-select" onchange="setRole(this.value)">
-            ${PERSON_ROLE_OPTIONS.map(r=>`<option value="${r}" ${STATE.currentRole===r?'selected':''}>${r}${r==='COO / CXO'?(' ('+personName('p-coo')+')'):r==='Operations Lead'?(' ('+personName('p-lead-ops')+')'):r==='CX & Support Lead'?(' ('+personName('p-lead-cx')+')'):(' ('+personName('p-support')+')')}</option>`).join('')}
-          </select>
-          <div class="demo-tag">OPERATIONAL CONTROL ROOM · ${escapeHtml(brandName())} operations, logistics, quality & CX data engine.</div>
+          <div class="personal-cockpit-card" onclick="openEditProfileModal()" style="cursor:pointer;" title="Click to customize your executive profile & brand">
+            <div style="display:flex;align-items:center;gap:9px;">
+              ${avatarHtml('p-coo')}
+              <div style="min-width:0;line-height:1.25;">
+                <div style="font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(personName('p-coo'))}</div>
+                <div style="font-size:10.5px;color:#a1a1aa;margin-top:2px;">Executive Cockpit &bull; Sole Owner</div>
+              </div>
+            </div>
+            <div class="personal-cockpit-sub">
+              &#128274; Personal Control Room &bull; Tracking team deliverables &amp; operational follow-ups.
+            </div>
+          </div>
         </div>
       </aside>
       <div class="main">
@@ -6317,6 +6401,11 @@ function render(){
       </div>
       <div class="floating-buddy-body" id="floating-buddy-msgs"></div>
       <div class="floating-buddy-dock">
+        <div class="chip-row" style="padding:8px 12px 0;background:#ffffff;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;">
+          <button type="button" class="suggest-chip" data-prompt="What team follow-ups are due today?" onclick="sendSuggestionChip(this)" style="font-size:11px;padding:3px 8px;white-space:nowrap;flex-shrink:0;">Team Follow-ups Due</button>
+          <button type="button" class="suggest-chip" data-prompt="What should we focus on today?" onclick="sendSuggestionChip(this)" style="font-size:11px;padding:3px 8px;white-space:nowrap;flex-shrink:0;">Focus Today</button>
+          <button type="button" class="suggest-chip" data-prompt="How can we cut down fake delivery attempts?" onclick="sendSuggestionChip(this)" style="font-size:11px;padding:3px 8px;white-space:nowrap;flex-shrink:0;">Fake Deliveries / NDR</button>
+        </div>
         <div class="assistant-input-row" style="padding:10px 12px;gap:6px;">
           <input type="text" id="floating-assistant-input" placeholder="Talk to your buddy or give command…" onkeydown="if(event.key==='Enter'){askAssistant(this.value); this.value='';}">
           <button class="btn dark small" onclick="const el=document.getElementById('floating-assistant-input'); askAssistant(el.value); el.value='';">Send</button>
