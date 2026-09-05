@@ -331,7 +331,7 @@ table.data-table{width:100%;border-collapse:collapse;font-size:12.8px;}
    Vanilla JS SPA. Supports local storage & fallback.
    ========================================================================= */
 
-const STORAGE_KEY = 'offcomfrt-coo-cxo-dashboard-v1';
+const STORAGE_KEY = 'offcomfrt-coo-cxo-dashboard-v2';
 
 /* ---------------------------- constants ---------------------------- */
 const DEPARTMENTS = [
@@ -422,326 +422,73 @@ function brandMark(){ return (brandName() || 'O').charAt(0).toUpperCase(); }
 
 function buildDemoData(){
   const today = todayISO();
-  const rel = (n) => addDays(today, n); // n days from today
 
   const people = [
-    {id:'p-coo', name:'Arjun Mehta', role:'Chief Operating & Experience Officer', function:'Executive Leadership', manager:null, joinDate:rel(-900), workingHours:45, contact:'arjun.mehta@offcomfrt.com'},
-    {id:'p-lead-ops', name:'Devina Nair', role:'Head of Operations & Supply Chain', function:'Fulfillment & Warehousing', manager:'p-coo', joinDate:rel(-720), workingHours:42, contact:'devina.nair@offcomfrt.com'},
-    {id:'p-lead-cx', name:'Sameer Joshi', role:'Head of Customer Experience & Support', function:'Customer Support & Ops', manager:'p-coo', joinDate:rel(-680), workingHours:42, contact:'sameer.joshi@offcomfrt.com'},
-    {id:'p-lead-qa', name:'Rajesh Pillai', role:'Quality & Sourcing Lead', function:'Quality Assurance (QA)', manager:'p-coo', joinDate:rel(-540), workingHours:42, contact:'rajesh.pillai@offcomfrt.com'},
-    {id:'p-logistics', name:'Karthik Raman', role:'Logistics & 3PL Carrier Manager', function:'Logistics & Carriers', manager:'p-lead-ops', joinDate:rel(-450), workingHours:40, contact:'karthik.raman@offcomfrt.com'},
-    {id:'p-warehouse', name:'Neha Chawla', role:'Warehouse & Inventory Operations Manager', function:'Fulfillment & Warehousing', manager:'p-lead-ops', joinDate:rel(-380), workingHours:40, contact:'neha.chawla@offcomfrt.com'},
-    {id:'p-support', name:'Tanvi Shah', role:'Customer Support & Escalations Manager', function:'Customer Support & Ops', manager:'p-lead-cx', joinDate:rel(-320), workingHours:40, contact:'tanvi.shah@offcomfrt.com'},
-    {id:'p-voc', name:'Ankit Verma', role:'CX Insights & VoC Specialist', function:'Post-Purchase CX', manager:'p-lead-cx', joinDate:rel(-280), workingHours:40, contact:'ankit.verma@offcomfrt.com'},
-    {id:'p-qc', name:'Farhan Qureshi', role:'Production & Quality Control Specialist', function:'Quality Assurance (QA)', manager:'p-lead-qa', joinDate:rel(-410), workingHours:40, contact:'farhan.qureshi@offcomfrt.com'},
-    {id:'p-sourcing', name:'Simran Kaur', role:'Vendor Procurement & Sourcing Specialist', function:'Supply Chain & Sourcing', manager:'p-lead-qa', joinDate:rel(-230), workingHours:40, contact:'simran.kaur@offcomfrt.com'},
+    {id:'p-coo', name:'Arjun Mehta', role:'Chief Operating & Experience Officer', function:'Executive Leadership', manager:null, joinDate:today, workingHours:45, contact:'arjun.mehta@offcomfrt.com'},
+    {id:'p-lead-ops', name:'Operations Lead', role:'Head of Operations & Supply Chain', function:'Fulfillment & Warehousing', manager:'p-coo', joinDate:today, workingHours:40, contact:'ops@offcomfrt.com'},
+    {id:'p-lead-cx', name:'CX & Support Lead', role:'Head of Customer Experience & Support', function:'Customer Support & Ops', manager:'p-coo', joinDate:today, workingHours:40, contact:'cx@offcomfrt.com'},
+    {id:'p-support', name:'Support Specialist', role:'Customer Support & Escalations', function:'Customer Support & Ops', manager:'p-lead-cx', joinDate:today, workingHours:40, contact:'support@offcomfrt.com'},
   ];
 
-  const projects = [
-    {id:'proj-wms', name:'WMS Cloud Migration & Barcode Dispatch', objective:'Migrate warehouse inventory & scanning to the cloud to compress order-to-dispatch latency from 36h to <12h ahead of Winter peak.', owner:'p-warehouse', team:['p-warehouse','p-lead-ops','p-logistics'], startDate:rel(-45), deadline:rel(16), priority:'P0', status:'At Risk',
-      milestones:[
-        {id:'m1', name:'Process audit & SKU mapping', owner:'p-warehouse', deadline:rel(-30), status:'Completed'},
-        {id:'m2', name:'Barcode scanner hardware setup', owner:'p-warehouse', deadline:rel(-12), status:'Completed'},
-        {id:'m3', name:'WMS API sync & pick-pack tests', owner:'p-warehouse', deadline:rel(4), status:'In Progress'},
-        {id:'m4', name:'Warehouse staff shift training', owner:'p-warehouse', deadline:rel(10), status:'Not Started'},
-        {id:'m5', name:'Full cutover & go-live', owner:'p-warehouse', deadline:rel(16), status:'Not Started'},
-      ],
-      risks:[{note:'Barcode scanner Wi-Fi latency spikes in Zone B; tech vendor firmware patch delayed.', level:'High'}],
-      documents:[{label:'WMS Cutover Protocol & SOP', url:'#'},{label:'Zone B Hardware Diagnostic Log', url:'#'}],
-    },
-    {id:'proj-peak', name:'Winter Peak Season Fulfillment Readiness', objective:'Lock in buffer raw material, secure 3PL carrier volume capacity (Delhivery/BlueDart), and staff temporary warehouse packing shifts for 4x scale.', owner:'p-lead-ops', team:['p-lead-ops','p-logistics','p-warehouse','p-sourcing'], startDate:rel(-30), deadline:rel(22), priority:'P0', status:'On Track',
-      milestones:[
-        {id:'m1', name:'Volume forecast & buffer inventory plan', owner:'p-lead-ops', deadline:rel(-15), status:'Completed'},
-        {id:'m2', name:'Carrier SLA contracts signed', owner:'p-logistics', deadline:rel(2), status:'In Progress'},
-        {id:'m3', name:'Seasonal pick-pack workforce onboarding', owner:'p-warehouse', deadline:rel(12), status:'Not Started'},
-        {id:'m4', name:'Peak volume dry run simulation', owner:'p-lead-ops', deadline:rel(22), status:'Not Started'},
-      ],
-      risks:[], documents:[{label:'Peak Capacity & Dispatch Model 2026', url:'#'}],
-    },
-    {id:'proj-cx', name:'Post-Purchase CX & Unboxing Revamp', objective:'Redesign eco-luxury packaging, launch proactive WhatsApp tracking notifications, and rollout a zero-friction self-serve exchange portal.', owner:'p-lead-cx', team:['p-lead-cx','p-voc','p-support'], startDate:rel(-40), deadline:rel(28), priority:'P1', status:'On Track',
-      milestones:[
-        {id:'m1', name:'Packaging sample drop tests & thermal checks', owner:'p-lead-cx', deadline:rel(-20), status:'Completed'},
-        {id:'m2', name:'WhatsApp automated tracking bot integration', owner:'p-voc', deadline:rel(-4), status:'Completed'},
-        {id:'m3', name:'Self-serve exchange & return portal QA', owner:'p-support', deadline:rel(8), status:'In Progress'},
-        {id:'m4', name:'Unboxing delight survey trigger rollout', owner:'p-voc', deadline:rel(28), status:'Not Started'},
-      ],
-      risks:[], documents:[{label:'Unboxing Specification & CX Guidelines', url:'#'}],
-    },
-    {id:'proj-qa', name:'Tier-1 Factory Quality Audit & AQL 2.5 Rollout', objective:'Standardize manufacturing defect tolerances (AQL 2.5) across 4 garment factories to drive product return rates below 1.5%.', owner:'p-lead-qa', team:['p-lead-qa','p-qc','p-sourcing'], startDate:rel(-25), deadline:rel(35), priority:'P1', status:'Blocked',
-      milestones:[
-        {id:'m1', name:'AQL 2.5 Quality Manual drafted', owner:'p-lead-qa', deadline:rel(-10), status:'Completed'},
-        {id:'m2', name:'Independent auditor commercial agreement', owner:'p-lead-qa', deadline:rel(1), status:'Blocked'},
-        {id:'m3', name:'On-site pre-shipment audit Ludhiana', owner:'p-qc', deadline:rel(18), status:'Not Started'},
-        {id:'m4', name:'Vendor quality scorecard go-live', owner:'p-sourcing', deadline:rel(35), status:'Not Started'},
-      ],
-      risks:[{note:'Third-party inspection agency contract stuck with Finance/Legal over liability clauses.', level:'High'}],
-      documents:[],
-    },
-    {id:'proj-support', name:'CSAT 95+ & Omnichannel SLA Overhaul', objective:'Upgrade support desk routing, establish VIP escalations concierge, and lower First Response Time (FRT) from 45 mins to <12 mins.', owner:'p-support', team:['p-support','p-lead-cx','p-voc'], startDate:rel(-20), deadline:rel(18), priority:'P1', status:'On Track',
-      milestones:[
-        {id:'m1', name:'Omnichannel helpdesk macro & SLA audit', owner:'p-support', deadline:rel(-8), status:'Completed'},
-        {id:'m2', name:'WhatsApp live agent routing & chatbot triage', owner:'p-support', deadline:rel(6), status:'In Progress'},
-        {id:'m3', name:'Tier-2 customer concession matrix training', owner:'p-support', deadline:rel(14), status:'Not Started'},
-        {id:'m4', name:'CSAT 95+ benchmarking go-live', owner:'p-voc', deadline:rel(18), status:'Not Started'},
-      ],
-      risks:[], documents:[],
-    },
-    {id:'proj-returns', name:'Reverse Logistics & RTO Reduction Taskforce', objective:'Cut Return-to-Origin (RTO) rate by 4.2% via AI address validation and reduce refund cycle time from 5 days to <24h.', owner:'p-logistics', team:['p-logistics','p-support','p-warehouse'], startDate:rel(-35), deadline:rel(14), priority:'P1', status:'At Risk',
-      milestones:[
-        {id:'m1', name:'Address hygiene verification API integration', owner:'p-logistics', deadline:rel(-14), status:'Completed'},
-        {id:'m2', name:'Courier NDR (Non-Delivery Report) fast-response protocol', owner:'p-logistics', deadline:rel(2), status:'In Progress'},
-        {id:'m3', name:'Automated QC-at-doorstep reverse pickups', owner:'p-warehouse', deadline:rel(14), status:'Not Started'},
-      ],
-      risks:[{note:'Delhivery NDR integration webhook failing on retry; causing premature RTOs in West zone.', level:'Medium'}],
-      documents:[],
-    },
-  ];
-
-  let tasks = [];
-  function T(o){
-    tasks.push(Object.assign({
-      id: genId('T'),
-      description:'', dependency:null, waitingOn:null, reviewer:null,
-      approvalRequired:false, relatedMeeting:null, notes:'', attachments:[],
-      createdDate: o.createdDate || rel(-10), lastUpdated: o.lastUpdated || o.createdDate || rel(-10),
-      completedDate: o.status==='Completed' ? (o.completedDate||o.lastUpdated||today) : null,
-      timesPushed:0, reassignCount:0, createdBy:'p-coo',
-    }, o));
-  }
-
-  // --- COO / CXO's Own Tasks (Arjun Mehta) ---
-  T({name:'Sign off on Delhivery peak season carrier SLA & freight contract', assignee:'p-coo', createdBy:'p-logistics', department:'Logistics & Carriers', project:'proj-peak', priority:'P0', status:'In Review', startDate:rel(-2), dueDate:rel(0), estimatedTime:1.5, actualTime:0.5, reviewer:'p-coo', approvalRequired:true, createdDate:rel(-3), lastUpdated:rel(-1)});
-  T({name:'Founder sync — Winter buffer inventory working capital & capex', assignee:'p-coo', createdBy:'p-coo', department:'Executive Leadership', project:null, priority:'P1', status:'Waiting', waitingOn:'Founder', startDate:rel(-6), dueDate:rel(1), estimatedTime:1.5, createdDate:rel(-6), lastUpdated:rel(-5)});
-  T({name:'Review WMS barcode scanner latency escalation with Tech Lead & Neha', assignee:'p-coo', createdBy:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-wms', priority:'P0', status:'Blocked', waitingOn:'Warehouse Tech Vendor', blockedReason:'Vendor firmware release 3.4.1 needed to eliminate 800ms packet drop on hand scanners.', startDate:rel(-4), dueDate:rel(-1), estimatedTime:1, createdDate:rel(-4), lastUpdated:rel(-1)});
-  T({name:'Executive customer escalation: Authorize bulk replacement for damaged batch #W26-B', assignee:'p-coo', createdBy:'p-support', department:'Customer Support & Ops', project:'proj-support', priority:'P0', status:'In Review', approvalRequired:true, startDate:rel(-1), dueDate:rel(0), estimatedTime:1, createdDate:rel(-1), lastUpdated:rel(0)});
-  T({name:'Prep Board Ops & CX deck: Order-to-dispatch latency, CSAT trends, & RTO %', assignee:'p-coo', createdBy:'p-coo', department:'Executive Leadership', project:null, priority:'P1', status:'In Progress', startDate:rel(-3), dueDate:rel(2), estimatedTime:3.5, actualTime:1.5, createdDate:rel(-3), lastUpdated:rel(-1)});
-  T({name:'1:1 prep — Devina Nair (Warehouse throughput & carrier capacity)', assignee:'p-coo', createdBy:'p-coo', department:'Fulfillment & Warehousing', project:'proj-peak', priority:'P2', status:'Planned', startDate:rel(0), dueDate:rel(0), estimatedTime:1, createdDate:rel(-1), lastUpdated:rel(-1)});
-  T({name:'Sign off on AQL 2.5 factory defect tolerance waiver for fleece lot #108', assignee:'p-coo', createdBy:'p-lead-qa', department:'Quality Assurance (QA)', project:'proj-qa', priority:'P0', status:'In Review', approvalRequired:true, startDate:rel(-2), dueDate:rel(1), estimatedTime:1, createdDate:rel(-2), lastUpdated:rel(0)});
-
-  // --- Operations & Supply Chain (Devina / Neha / Karthik) ---
-  T({name:'Lock in Delhivery 3PL peak capacity allocation (15k daily shipments)', assignee:'p-logistics', department:'Logistics & Carriers', project:'proj-peak', priority:'P0', status:'In Progress', startDate:rel(-5), dueDate:rel(2), estimatedTime:6, actualTime:4, createdDate:rel(-5), lastUpdated:rel(-1)});
-  T({name:'Send formal penalty notice to BlueDart for West zone SLA breach', assignee:'p-logistics', department:'Logistics & Carriers', project:null, priority:'P1', status:'In Progress', startDate:rel(-3), dueDate:rel(1), estimatedTime:2, actualTime:1, createdDate:rel(-3), lastUpdated:rel(-2)});
-  T({name:'WMS pick-pack scanning load test across 8 packing stations', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-wms', priority:'P0', status:'In Progress', startDate:rel(-4), dueDate:rel(3), estimatedTime:12, actualTime:6, createdDate:rel(-4), lastUpdated:rel(-1)});
-  T({name:'Warehouse seasonal shift staffing contract (30 temp associates)', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-peak', priority:'P1', status:'Waiting', waitingOn:'HR Agency', startDate:rel(-6), dueDate:rel(5), estimatedTime:4, createdDate:rel(-6), lastUpdated:rel(-5)});
-  T({name:'Daily dispatch cut-off audit — verify 98.2% same-day SLA handover', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:null, priority:'P2', status:'Completed', startDate:rel(-1), dueDate:rel(0), estimatedTime:1.5, actualTime:1.5, createdDate:rel(-1), lastUpdated:rel(0), completedDate:rel(0)});
-  T({name:'Inwarding & inspection of 4,500 units Winter sleepwear from Surat mill', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:'proj-peak', priority:'P1', status:'Completed', startDate:rel(-6), dueDate:rel(-2), estimatedTime:8, actualTime:8, createdDate:rel(-6), lastUpdated:rel(-2), completedDate:rel(-2)});
-  T({name:'Audit address validation API bounce rate on cash-on-delivery orders', assignee:'p-logistics', department:'Logistics & Carriers', project:'proj-returns', priority:'P2', status:'Completed', startDate:rel(-10), dueDate:rel(-6), estimatedTime:3, actualTime:3, createdDate:rel(-10), lastUpdated:rel(-6), completedDate:rel(-6)});
-  T({name:'Address courier NDR webhook timeout causing early RTOs', assignee:'p-logistics', department:'Logistics & Carriers', project:'proj-returns', priority:'P1', status:'Blocked', waitingOn:'Delhivery Tech Support', blockedReason:'Delhivery webhook endpoint failing under retry bursts; 140 packages auto-marked RTO falsely.', startDate:rel(-5), dueDate:rel(-1), estimatedTime:4, createdDate:rel(-5), lastUpdated:rel(-5)});
-  T({name:'Reconfigure fast-moving SKU bin layout in North warehouse hub', assignee:'p-warehouse', department:'Fulfillment & Warehousing', project:null, priority:'P3', status:'Inbox', dueDate:rel(14), estimatedTime:6, createdDate:rel(-2), lastUpdated:rel(-2)});
-
-  // --- Customer Experience & Support (Sameer / Tanvi / Ankit) ---
-  T({name:'Deploy automated WhatsApp dispatch & live courier tracking link', assignee:'p-voc', department:'Post-Purchase CX', project:'proj-cx', priority:'P1', status:'Completed', startDate:rel(-8), dueDate:rel(-3), estimatedTime:6, actualTime:5.5, createdDate:rel(-8), lastUpdated:rel(-3), completedDate:rel(-3)});
-  T({name:'Overhaul support ticket macros for damaged shipment compensation', assignee:'p-support', department:'Customer Support & Ops', project:'proj-support', priority:'P1', status:'In Progress', startDate:rel(-4), dueDate:rel(3), estimatedTime:4, actualTime:2, createdDate:rel(-4), lastUpdated:rel(-2)});
-  T({name:'Weekly CSAT & VoC sentiment analysis report (Week 35)', assignee:'p-voc', department:'Post-Purchase CX', project:null, priority:'P2', status:'Completed', startDate:rel(-7), dueDate:rel(-5), estimatedTime:3, actualTime:3, createdDate:rel(-7), lastUpdated:rel(-5), completedDate:rel(-5)});
-  T({name:'Triage VIP customer escalation regarding unstitched hemline on duvet set', assignee:'p-support', department:'Customer Support & Ops', project:'proj-support', priority:'P0', status:'In Progress', startDate:rel(-1), dueDate:rel(0), estimatedTime:1.5, actualTime:0.5, createdDate:rel(-1), lastUpdated:rel(0)});
-  T({name:'Implement self-serve sizing exchange portal to deflect return tickets', assignee:'p-support', department:'Post-Purchase CX', project:'proj-cx', priority:'P1', status:'In Progress', startDate:rel(-12), dueDate:rel(6), estimatedTime:14, actualTime:7, createdDate:rel(-12), lastUpdated:rel(-2)});
-  T({name:'Audit First Response Time (FRT) across WhatsApp and Email channels', assignee:'p-support', department:'Customer Support & Ops', project:null, priority:'P2', status:'Completed', startDate:rel(-14), dueDate:rel(-12), estimatedTime:2.5, actualTime:2.5, createdDate:rel(-14), lastUpdated:rel(-12), completedDate:rel(-12)});
-  T({name:'Root cause analysis on size-mismatch returns for Comfort Joggers v2', assignee:'p-voc', department:'Post-Purchase CX', project:'proj-returns', priority:'P2', status:'In Review', reviewer:'p-lead-cx', startDate:rel(-5), dueDate:rel(-1), estimatedTime:5, actualTime:5, createdDate:rel(-5), lastUpdated:rel(-1)});
-  T({name:'Design proactive SMS alerts for deliveries delayed by weather', assignee:'p-voc', department:'Post-Purchase CX', project:null, priority:'P3', status:'Inbox', dueDate:rel(12), estimatedTime:3, createdDate:rel(-1), lastUpdated:rel(-1)});
-
-  // --- Quality Assurance & Sourcing (Rajesh / Farhan / Simran) ---
-  T({name:'Fabric GSM & color fastness laboratory test for fleece lot #108', assignee:'p-qc', department:'Quality Assurance (QA)', project:'proj-qa', priority:'P0', status:'Completed', startDate:rel(-7), dueDate:rel(-3), estimatedTime:5, actualTime:6, createdDate:rel(-7), lastUpdated:rel(-3), completedDate:rel(-3)});
-  T({name:'Conduct on-site pre-shipment AQL 2.5 audit at Ludhiana factory', assignee:'p-qc', department:'Quality Assurance (QA)', project:'proj-qa', priority:'P0', status:'Blocked', waitingOn:'Ludhiana Mill Management', blockedReason:'Factory delayed sample line finishing; waiting for access to final carton packaging bay.', startDate:rel(-4), dueDate:rel(1), estimatedTime:8, actualTime:2, createdDate:rel(-4), lastUpdated:rel(-2)});
-  T({name:'Vendor quality performance scorecards for Q3 suppliers', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:null, priority:'P2', status:'In Progress', startDate:rel(-10), dueDate:rel(-2), estimatedTime:6, actualTime:2, createdDate:rel(-10), lastUpdated:rel(-7)});
-  T({name:'Expedite delivery of 25,000 custom unboxing mailer boxes', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:'proj-cx', priority:'P1', status:'Waiting', waitingOn:'EcoPackaging Ltd', startDate:rel(-8), dueDate:rel(4), estimatedTime:3, createdDate:rel(-8), lastUpdated:rel(-4)});
-  T({name:'Standardize packaging tape to tamper-evident reinforced paper tape', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:'proj-cx', priority:'P2', status:'Completed', startDate:rel(-15), dueDate:rel(-10), estimatedTime:3, actualTime:3, createdDate:rel(-15), lastUpdated:rel(-10), completedDate:rel(-10)});
-  T({name:'Raw fabric procurement advance PO for Q1 replenishment', assignee:'p-sourcing', department:'Supply Chain & Sourcing', project:'proj-peak', priority:'P1', status:'In Progress', startDate:rel(-3), dueDate:rel(3), estimatedTime:4, actualTime:2, createdDate:rel(-3), lastUpdated:rel(-1)});
-
-  // Task dependencies & historical delays
-  const byName = n => tasks.find(t=>t.name===n);
-  const wmsTest = byName('WMS pick-pack scanning load test across 8 packing stations');
-  const wmsEscalation = byName('Review WMS barcode scanner latency escalation with Tech Lead & Neha');
-  if(wmsTest && wmsEscalation) wmsTest.dependency = wmsEscalation.id;
-
-  const ndrTask = byName('Address courier NDR webhook timeout causing early RTOs');
-  if(ndrTask){ ndrTask.timesPushed = 3; }
-  const vendorScorecard = byName('Vendor quality performance scorecards for Q3 suppliers');
-  if(vendorScorecard){ vendorScorecard.timesPushed = 2; }
-  const rtoAnalysis = byName('Root cause analysis on size-mismatch returns for Comfort Joggers v2');
-  if(rtoAnalysis){ rtoAnalysis.timesPushed = 2; }
-
-  const meetings = [
-    {id:'mt-standup', name:'Daily Operations & CX Standup', date:today, time:'09:15', participants:['p-coo','p-lead-ops','p-lead-cx','p-lead-qa','p-logistics','p-warehouse','p-support'],
-      objective:'Align on daily dispatch cut-off, warehouse throughput, carrier SLAs, and open customer escalations.',
-      agenda:'1. Yesterday dispatch count vs same-day SLA\n2. Warehouse Zone B barcode scanner bug\n3. Delhivery West zone NDR failure\n4. VIP customer escalations\n5. Peak prep headcount check',
-      notes:'Zone B scanners still lagging 800ms. Delhivery API team promises webhook patch by 4 PM. Customer batch #W26-B replacement approval needed immediately.',
-      decisions:['Escalate scanner latency directly to vendor CEO. Authorize immediate replacement dispatch for batch #W26-B.'],
-      actionItems:[
-        {id:'ai1', text:'Sign vendor capex release for auxiliary Wi-Fi APs in Zone B', owner:'p-coo', deadline:rel(1), taskId:null},
-        {id:'ai2', text:'Send formal demand letter to Delhivery National Head regarding NDR failures', owner:'p-logistics', deadline:rel(1), taskId:null},
-      ], followUpDate:rel(1), recurring:'Daily'},
-    {id:'mt-carrier-review', name:'Weekly 3PL Carrier SLA & Freight Review', date:rel(2), time:'14:30', participants:['p-coo','p-lead-ops','p-logistics'],
-      objective:'Review delivery TAT, RTO %, and dispute non-delivery penalty waivers with Delhivery & BlueDart.',
-      agenda:'1. Carrier SLA scorecards by zone\n2. Peak capacity lock-in (15k/day)\n3. NDR resolution speed\n4. Freight invoice reconciliation',
-      notes:'', decisions:[], actionItems:[], followUpDate:rel(9), recurring:'Weekly'},
-    {id:'mt-1on1-devina', name:'1:1 — Devina Nair (Operations & Supply Chain)', date:today, time:'11:30', participants:['p-coo','p-lead-ops'],
-      objective:'Review warehouse automation milestone, buffer inventory status, and team capacity.',
-      agenda:'WMS cutover, shift scheduling, carrier negotiations, and personal leadership goals',
-      notes:'', decisions:[], actionItems:[], followUpDate:rel(14), recurring:'Bi-weekly'},
-    {id:'mt-1on1-sameer', name:'1:1 — Sameer Joshi (CX & Support)', date:rel(1), time:'16:00', participants:['p-coo','p-lead-cx'],
-      objective:'Review CSAT 95+ progress, return portal friction points, and support staffing.',
-      agenda:'Post-purchase unboxing feedback, sizing return reduction, WhatsApp bot deflection rates',
-      notes:'', decisions:[], actionItems:[], followUpDate:rel(15), recurring:'Bi-weekly'},
-    {id:'mt-qa-sync', name:'Tier-1 Factory Quality Review — Batch #108', date:rel(-4), time:'15:00', participants:['p-coo','p-lead-qa','p-qc','p-sourcing'],
-      objective:'Review fabric shrinkage and stitching deviation test results before production dispatch.',
-      agenda:'1. Lab test findings\n2. Tolerance threshold waiver\n3. Penalty clause application',
-      notes:'Lab report indicates 1.8% stitching variance on fleece lot #108. Functional integrity is safe. Penalty of 2.5% invoice deduction agreed.',
-      decisions:['Accept fleece lot #108 with 2.5% invoice deduction subject to COO approval.'],
-      actionItems:[
-        {id:'ai3', text:'Upload formal AQL waiver form for COO sign-off', owner:'p-lead-qa', deadline:rel(-1), taskId:'linked'},
-      ], followUpDate:rel(3), recurring:null},
-  ];
-
-  const approvals = [
-    {id:'ap-1', requester:'p-lead-qa', type:'Quality Defect Waiver', item:'AQL tolerance waiver for fleece lot #108 (1.8% stitching variance, 2.5% penalty)', requestedDate:rel(-2), deadline:rel(1), status:'Pending', comments:[], attachment:'#', relatedProject:'proj-qa'},
-    {id:'ap-2', requester:'p-logistics', type:'Carrier Contract Approval', item:'Delhivery Winter peak capacity agreement (15k daily shipments @ ₹68/kg base)', requestedDate:rel(-2), deadline:rel(0), status:'Pending', comments:[{by:'p-coo', text:'Ensure penalty clause for >48h transit breaches is capped at 15% invoice value.', date:rel(-1)}], attachment:'#', relatedProject:'proj-peak'},
-    {id:'ap-3', requester:'p-support', type:'Customer Concession Approval', item:'Bulk refund & replacement authorization for transit-damaged batch #W26-B (₹78,400)', requestedDate:rel(-1), deadline:rel(0), status:'Pending', comments:[], attachment:'#', relatedProject:'proj-support'},
-    {id:'ap-4', requester:'p-warehouse', type:'Warehouse Capex Approval', item:'Automated roller conveyor addition for packing line #2 (₹4.2L capex)', requestedDate:rel(-4), deadline:rel(-1), status:'Pending', comments:[{by:'p-coo', text:'Checking working capital allocation with Founder first.', date:rel(-2)}], attachment:'#', relatedProject:'proj-wms'},
-    {id:'ap-5', requester:'p-sourcing', type:'Supplier Purchase Order', item:'Advance PO #PO-8841 for Q1 replenishment yarn to Ludhiana Mills (₹18.5L)', requestedDate:rel(-3), deadline:rel(2), status:'Approved', comments:[{by:'p-coo', text:'Approved with 45-day credit terms confirmed.', date:rel(-1)}], attachment:'#', relatedProject:'proj-peak'},
-    {id:'ap-6', requester:'p-lead-cx', type:'CX Tool License', item:'WhatsApp conversational AI helpdesk plugin license renewal ($4,800/yr)', requestedDate:rel(-5), deadline:rel(3), status:'Changes Requested', comments:[{by:'p-coo', text:'Request 3 benchmark quotes from Haptik, Yellow.ai, and Gallabox before signing annual contract.', date:rel(-2)}], attachment:'#', relatedProject:'proj-cx'},
-  ];
-
-  const followUps = [
-    {id:'fu-1', subject:'Buffer inventory working capital approval', person:'Founder', lastCommunication:rel(-2), followUpDate:rel(1), status:'Open', notes:'Sent revised buffer ROI and peak cashflow model. Vital to disburse supplier advances by Friday.'},
-    {id:'fu-2', subject:'West zone delivery SLA breach & penalty resolution', person:'National Head, Delhivery', lastCommunication:rel(-1), followUpDate:rel(2), status:'Open', notes:'Carrier acknowledged webhook drop issue. Waiting on formal credit note calculation.'},
-    {id:'fu-3', subject:'Warehouse Zone B Wi-Fi & scanner firmware patch', person:'Warehouse Tech Vendor', lastCommunication:rel(-4), followUpDate:rel(0), status:'Overdue', notes:'No response in 4 days. Need firm cutover date or we roll back to wired hand terminals.'},
-    {id:'fu-4', subject:'Eco-mailer box sample delivery date', person:'EcoPackaging Ltd', lastCommunication:rel(-3), followUpDate:rel(3), status:'Open', notes:'Sample unboxing boxes passed drop test; awaiting final production run timeline.'},
-    {id:'fu-5', subject:'Independent factory audit agreement sign-off', person:'SGS Inspection Agency', lastCommunication:rel(-6), followUpDate:rel(1), status:'Open', notes:'Commercial terms agreed; waiting on Legal review of indemnification clause.'},
-  ];
-
-  const oneOnOnes = [
-    {id:'oo-1', person:'p-lead-ops', date:rel(-14), topics:'Warehouse throughput, carrier negotiations, peak staffing', wins:'Maintained 98.4% same-day order-to-dispatch rate during Flash Friday sale.', challenges:'Zone B scanner dropouts causing associate frustration and overtime hours.', feedback:'Great leadership under pressure — ensure Neha has air cover to fix tech glitches.', development:'Wants to lead end-to-end supply chain budget forecasting in FY27.', blockers:'IT vendor responsiveness on warehouse hardware.', commitments:'Arjun to escalate directly to vendor leadership. Devina to finalize seasonal staffing numbers by Friday.', followUpTasks:[]},
-    {id:'oo-2', person:'p-lead-cx', date:rel(-16), topics:'Post-purchase experience, CSAT recovery, sizing returns', wins:'WhatsApp dispatch tracking notification reduced "Where is my order?" (WISMO) tickets by 34%.', challenges:'Sizing returns on comfort joggers running at 5.8% — creating reverse pickup backlog.', feedback:'Love the proactive WhatsApp triggers. Let\'s make self-serve exchanges zero-touch.', development:'Interested in integrating predictive AI support routing.', blockers:'Reverse logistics courier pickup delays.', commitments:'Sameer to share sizing chart feedback with product design team. Arjun to push Delhivery on 24h reverse pickup SLA.', followUpTasks:[]},
-  ];
-
-  const goals = [
-    {id:'g-1', objective:'Zero-Defect & Predictable Operations', teamGoal:'Compress order-to-dispatch latency under 12 hours warehouse-wide', projectIds:['proj-wms','proj-peak']},
-    {id:'g-2', objective:'Zero-Defect & Predictable Operations', teamGoal:'Enforce AQL 2.5 defect tolerances across all Tier-1 garment manufacturing', projectIds:['proj-qa']},
-    {id:'g-3', objective:'World-Class Customer Experience (CX)', teamGoal:'Attain 95%+ CSAT and reduce customer ticket resolution time below 4 hours', projectIds:['proj-support','proj-cx']},
-    {id:'g-4', objective:'World-Class Customer Experience (CX)', teamGoal:'Build a friction-free unboxing, exchange, and delivery tracking journey', projectIds:['proj-cx']},
-    {id:'g-5', objective:'Supply Chain Agility & Unit Economics', teamGoal:'Reduce Return-to-Origin (RTO) rate by 4.2% and accelerate refunds to <24h', projectIds:['proj-returns']},
-  ];
-
-  const sops = [
-    {id:'sop-1', name:'Warehouse Inwarding & Barcode Tagging Protocol', department:'Fulfillment & Warehousing', owner:'p-warehouse', version:'v3.2', lastUpdated:rel(-35), link:'#', relatedTasks:['Inwarding & inspection of 4,500 units Winter sleepwear from Surat mill']},
-    {id:'sop-2', name:'Customer Escalation & Executive Concession Matrix', department:'Customer Support & Ops', owner:'p-support', version:'v2.0', lastUpdated:rel(-20), link:'#', relatedTasks:['Executive customer escalation: Authorize bulk replacement for damaged batch #W26-B']},
-    {id:'sop-3', name:'Defective Product Return & Quality Quarantine SOP', department:'Quality Assurance (QA)', owner:'p-qc', version:'v1.4', lastUpdated:rel(-45), link:'#', relatedTasks:['Fabric GSM & color fastness laboratory test for fleece lot #108']},
-    {id:'sop-4', name:'3PL Carrier SLA & Performance Penalty Enforcement Guide', department:'Logistics & Carriers', owner:'p-logistics', version:'v2.1', lastUpdated:rel(-60), link:'#', relatedTasks:['Send formal penalty notice to BlueDart for West zone SLA breach']},
-    {id:'sop-5', name:'Daily Dispatch Cut-off & Carrier Handover Protocol', department:'Fulfillment & Warehousing', owner:'p-warehouse', version:'v1.8', lastUpdated:rel(-18), link:'#', relatedTasks:['Daily dispatch cut-off audit — verify 98.2% same-day SLA handover']},
-    {id:'sop-6', name:'Tier-1 Factory AQL 2.5 Pre-Shipment Inspection Checklist', department:'Quality Assurance (QA)', owner:'p-lead-qa', version:'v1.0', lastUpdated:rel(-12), link:'#', relatedTasks:['Conduct on-site pre-shipment AQL 2.5 audit at Ludhiana factory']},
-  ];
-
-  const recurringTemplates = [
-    {id:'rec-1', name:'Daily dispatch cut-off audit — verify 98.2% same-day SLA handover', assignee:'p-warehouse', department:'Fulfillment & Warehousing', priority:'P2', frequency:'Daily', estimatedTime:1.5},
-    {id:'rec-2', name:'Weekly CSAT & VoC sentiment analysis report', assignee:'p-voc', department:'Post-Purchase CX', priority:'P2', frequency:'Weekly', dayOfWeek:'Monday', estimatedTime:3},
-    {id:'rec-3', name:'Weekly 3PL Carrier SLA & Freight Review', frequency:'Weekly', dayOfWeek:'Wednesday', type:'meeting'},
-    {id:'rec-4', name:'Monthly factory quality scorecard review', assignee:'p-lead-qa', department:'Quality Assurance (QA)', priority:'P2', frequency:'Monthly', estimatedTime:4},
-  ];
-
-  const auditLog = [
-    {id:genId('A'), timestamp:rel(-1), user:'Arjun Mehta', entity:'Approval', label:'Advance PO #PO-8841 for Q1 replenishment yarn', field:'Status', oldValue:'Pending', newValue:'Approved'},
-    {id:genId('A'), timestamp:rel(-2), user:'Arjun Mehta', entity:'Approval', label:'WhatsApp conversational AI helpdesk plugin license renewal', field:'Status', oldValue:'Pending', newValue:'Changes Requested'},
-    {id:genId('A'), timestamp:rel(-3), user:'Devina Nair', entity:'Project', label:'WMS Cloud Migration & Barcode Dispatch', field:'Status', oldValue:'On Track', newValue:'At Risk'},
-    {id:genId('A'), timestamp:rel(-5), user:'Karthik Raman', entity:'Task', label:'Address courier NDR webhook timeout causing early RTOs', field:'Status', oldValue:'In Progress', newValue:'Blocked'},
-    {id:genId('A'), timestamp:rel(-7), user:'Rajesh Pillai', entity:'Task', label:'Fabric GSM & color fastness laboratory test for fleece lot #108', field:'Status', oldValue:'In Progress', newValue:'Completed'},
-  ];
-
+  const projects = [];
+  const tasks = [];
+  const meetings = [];
+  const approvals = [];
+  const followUps = [];
+  const oneOnOnes = [];
+  const goals = [];
+  const sops = [];
+  const recurringTemplates = [];
+  const auditLog = [];
   const endOfDayLogs = [];
 
-  
   const platformIntegrations = {
     shopify: {
       name: 'Shopify Store',
       status: 'Connected',
-      lastSync: '12m ago',
-      ordersToday: 4820,
-      unfulfilledOrders: 110,
-      grossSales: '₹48,60,000',
-      aov: '₹2,420',
-      canceledOrders: 28,
+      lastSync: 'Just now',
+      ordersToday: 0,
+      unfulfilledOrders: 0,
+      grossSales: '₹0',
+      aov: '₹0',
+      canceledOrders: 0,
       currency: 'INR'
     },
     delhivery: {
       name: 'Delhivery One',
       status: 'Connected',
-      lastSync: '8m ago',
-      manifestedShipments: 3140,
-      inTransit: 2480,
-      deliveredToday: 520,
-      ndrAlerts: 140,
-      suspectFakeAttempts: 42,
-      slaCompliancePct: 94.2
+      lastSync: 'Just now',
+      manifestedShipments: 0,
+      inTransit: 0,
+      deliveredToday: 0,
+      ndrAlerts: 0,
+      suspectFakeAttempts: 0,
+      slaCompliancePct: 100
     },
     shiprocket: {
       name: 'Shiprocket Multi-Carrier',
       status: 'Connected',
-      lastSync: '15m ago',
-      manifestedShipments: 1570,
-      rtoRatePct: 6.2,
-      weightDiscrepancies: 320,
-      overchargeAmount: '₹38,400',
-      averageTatDays: 3.2
+      lastSync: 'Just now',
+      manifestedShipments: 0,
+      rtoRatePct: 0,
+      weightDiscrepancies: 0,
+      overchargeAmount: '₹0',
+      averageTatDays: 0
     },
     returnPanel: {
       name: 'Custom Return & Exchange Panel',
       status: 'Connected',
-      lastSync: '5m ago',
-      openExchangeRequests: 210,
-      pendingInwardQC: 84,
-      avgRefundHours: 18.4,
-      sizingIssuePct: 58.2,
-      defectiveIssuePct: 14.5
+      lastSync: 'Just now',
+      openExchangeRequests: 0,
+      pendingInwardQC: 0,
+      avgRefundHours: 0,
+      sizingIssuePct: 0,
+      defectiveIssuePct: 0
     }
   };
 
-  const platformDiscrepancies = [
-    {
-      id: 'disc-1',
-      platforms: ['Shopify', 'Delhivery One'],
-      title: 'Fulfillment Handover Latency Gap (110 Unmanifested Orders)',
-      severity: 'High',
-      detail: 'Shopify marked 4,820 orders as fulfilled with labels printed, but 3PL carrier manifest scans only confirm 4,710 packages physically handed over.',
-      impact: '110 customers are awaiting active transit tracking; high risk of WISMO (Where Is My Order) ticket surge within 24 hours.',
-      recommendedAction: 'Audit Packing Station 3 & dispatch bay buffer. Reconcile physical handover manifest with Delhivery route driver.',
-      assignedLead: 'p-warehouse',
-      status: 'Investigating'
-    },
-    {
-      id: 'disc-2',
-      platforms: ['Delhivery One', 'Customer Support Desk'],
-      title: 'Suspect Fake NDR (Non-Delivery) Attempts in West Zone (42 Shipments)',
-      severity: 'Critical',
-      detail: 'Delhivery One recorded 42 packages as "Customer Not Available / Door Locked", but Customer Support has confirmed WhatsApp verification from 34 of those customers stating no courier attempted delivery.',
-      impact: 'Carrier RTO penalty of ₹12,600 and risk of premature Return-To-Origin conversion.',
-      recommendedAction: 'Send automated WhatsApp delivery attempt proof to Delhivery Nodal Officer and dispute premature RTO conversion.',
-      assignedLead: 'p-logistics',
-      status: 'Escalated'
-    },
-    {
-      id: 'disc-3',
-      platforms: ['Shiprocket', 'Supply Chain (Packaging)'],
-      title: 'Carrier Volumetric Weight Slab Surcharge Discrepancy (₹38,400)',
-      severity: 'Medium',
-      detail: 'Shiprocket charged excess volumetric slab on 320 shipments of Comfort Fleece Sets (billed at 1.50 kg dead weight vs certified actual packed weight of 0.82 kg / volumetric 0.88 kg).',
-      impact: '₹38,400 unwarranted freight deductions on current cycle carrier statement.',
-      recommendedAction: 'Submit batch weight dispute in Shiprocket billing portal attaching certified calibration photos and packaging dimensions.',
-      assignedLead: 'p-logistics',
-      status: 'Dispute Queued'
-    },
-    {
-      id: 'disc-4',
-      platforms: ['Custom Return Panel', 'Fulfillment & Warehousing'],
-      title: 'Reverse Pickup Inwarding Lag in Zone C (84 Units)',
-      severity: 'Medium',
-      detail: 'Custom Return & Exchange panel shows 84 customer returned items marked delivered to the warehouse over 48 hours ago, but barcode scan has not been completed.',
-      impact: 'Customer replacement orders are blocked pending receipt verification; average exchange turnaround time degraded by 1.8 days.',
-      recommendedAction: 'Reallocate 2 pick-pack associates to clear Zone C reverse intake queue within 4 hours.',
-      assignedLead: 'p-warehouse',
-      status: 'In Progress'
-    }
-  ];
+  const platformDiscrepancies = [];
 
-  
   const platformRegistry = [
     {
       id: 'shopify',
@@ -749,8 +496,8 @@ function buildDemoData(){
       type: 'Storefront',
       authType: 'REST API',
       status: 'Connected',
-      endpoint: 'https://offcomfrt.myshopify.com/admin/api/2024-01',
-      token: 'shpat_90214_live_read',
+      endpoint: 'https://admin.shopify.com/store/offcomfrt/api',
+      token: '—',
       description: 'Customer orders, SKU catalog specifications, payment authorizations, and fulfillment labels',
       badgeColor: 'var(--sage)',
       isDefault: true
@@ -762,7 +509,7 @@ function buildDemoData(){
       authType: 'REST API',
       status: 'Connected',
       endpoint: 'https://track.delhivery.com/api/v1/packages/json/',
-      token: 'dlv_prod_read_token',
+      token: '—',
       description: 'Surface & Air Express logistics: physical hub scans, out-for-delivery, NDR attempt codes, and rider call logs',
       badgeColor: 'var(--amber)',
       isDefault: true
@@ -774,7 +521,7 @@ function buildDemoData(){
       authType: 'REST API',
       status: 'Connected',
       endpoint: 'https://apiv2.shiprocket.in/v1/external',
-      token: 'sr_auth_bearer_live',
+      token: '—',
       description: 'Multi-carrier routing engine, dead weight vs volumetric laser scans, and freight billing audits',
       badgeColor: 'var(--slate)',
       isDefault: true
@@ -793,387 +540,67 @@ function buildDemoData(){
     }
   ];
 
-  const returnRecords = [
-    {
-      orderId: '#10844',
-      returnId: 'RET-8821',
-      customer: 'Rohit Kulkarni',
-      phone: '+91 97654 33210',
-      sku: 'OC-JOG-BLK-M',
-      exchangeSku: 'OC-JOG-BLK-L',
-      reason: 'Size too tight around waist (Requested Size L)',
-      reverseCarrier: 'Delhivery Reverse Logistics',
-      reverseAwb: 'DEL-REV-4912',
-      initiatedDate: '2026-09-02 10:15:30',
-      carrierDeliveredDate: '2026-09-03 16:15:33',
-      warehouseQcDate: null,
-      status: 'Pending Inward QC (Lagging 42h)',
-      exchangeOrder: 'EXCH-9914 (On Hold)'
-    },
-    {
-      orderId: '#10839',
-      returnId: 'RET-8819',
-      customer: 'Ananya Roy',
-      phone: '+91 98310 99881',
-      sku: 'OC-PAJ-GRN-S',
-      exchangeSku: null,
-      reason: 'Fabric minor misweave on left sleeve',
-      reverseCarrier: 'Shiprocket Reverse',
-      reverseAwb: 'SR-REV-1044',
-      initiatedDate: '2026-08-31 14:20:00',
-      carrierDeliveredDate: '2026-09-02 11:30:00',
-      warehouseQcDate: '2026-09-02 14:10:00',
-      status: 'QC Passed — Refund Processed',
-      exchangeOrder: null
-    }
-  ];
+  const returnRecords = [];
+  const orders = [];
 
-  const orders = [
-    {
-      orderId: '#10842',
-      customer: 'Aarav Singhania',
-      phone: '+91 98201 44521',
-      address: 'Flat 402, Sea Green Apts, Worli Sea Face, Mumbai 400018',
-      item: 'Offcomfrt Ergonomic Cloud Lounger Set (Oatmeal, Size L)',
-      itemSku: 'OC-LOU-OAT-L',
-      itemWeightKg: 1.10,
-      amount: '₹3,499',
-      forwardCarrier: 'Delhivery One',
-      forwardAwb: 'DEL-908124',
-      relatedOrders: [],
-      timeline: [
-        {
-          timestamp: '2026-09-04 10:14:22',
-          platform: 'Shopify Storefront',
-          platformId: 'shopify',
-          badgeColor: 'var(--sage)',
-          type: 'order_created',
-          status: 'Verified',
-          headline: 'Customer Placed Order #10842',
-          detail: 'Online prepaid checkout via Razorpay (Payment ID: pay_OX891024). Cart: Cloud Lounger Set (Oatmeal, L). Amount: ₹3,499.00.',
-          panelData: { 'Payment Gateway': 'Razorpay', 'Txn ID': 'pay_OX891024', 'Status': 'Captured' }
-        },
-        {
-          timestamp: '2026-09-04 11:30:05',
-          platform: 'Shopify Storefront',
-          platformId: 'shopify',
-          badgeColor: 'var(--sage)',
-          type: 'fulfillment_created',
-          status: 'Verified',
-          headline: 'Fulfillment Label Generated in Shopify',
-          detail: 'Assigned to logistics partner Delhivery One. Forward AWB DEL-908124 generated and customer notified via email/SMS.',
-          panelData: { 'Fulfillment ID': 'ful_99014', 'Carrier': 'Delhivery One', 'AWB': 'DEL-908124' }
-        },
-        {
-          timestamp: '2026-09-04 13:45:10',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--amber)',
-          type: 'manifest_inward',
-          status: 'Verified',
-          headline: 'Physical Pickup & Hub Inward Scan',
-          detail: 'Package physically scanned into Delhivery Bhiwandi Sortation Hub. Certified Scale Weight recorded: 1.12 kg (matched product specification).',
-          panelData: { 'Hub': 'Bhiwandi Central Sortation', 'Scale Weight': '1.12 kg', 'Volumetric': '1.15 kg' }
-        },
-        {
-          timestamp: '2026-09-04 22:10:44',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--amber)',
-          type: 'transit_arrival',
-          status: 'Verified',
-          headline: 'Arrived at Destination Hub (Mumbai West)',
-          detail: 'Package unloaded and sorted at Mumbai West Delivery Centre (Hub DL-West-04). Assigned to Route Delivery Associate Raj Kumar.',
-          panelData: { 'Hub': 'Mumbai West DL-West-04', 'Bag ID': 'BAG-MUM-882' }
-        },
-        {
-          timestamp: '2026-09-05 09:15:00',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--amber)',
-          type: 'out_for_delivery',
-          status: 'Verified',
-          headline: 'Out for Delivery by Rider Raj Kumar',
-          detail: 'Rider dispatch run sheet initiated for Worli Route Sector 4. Estimated delivery window: 11:00 - 15:00.',
-          panelData: { 'Rider': 'Raj Kumar', 'Rider Phone': '+91 91234 56789', 'Run Sheet': 'DRS-90412' }
-        },
-        {
-          timestamp: '2026-09-05 14:20:18',
-          platform: 'Customer Support Desk',
-          platformId: 'custom_panel',
-          badgeColor: 'var(--plum)',
-          type: 'customer_inquiry',
-          status: 'Verified',
-          headline: 'Customer Contacted Support via WhatsApp',
-          detail: 'Customer Aarav Singhania messaged support: "Hi, tracking shows out for delivery today. Any ETA? I am home waiting."',
-          panelData: { 'Channel': 'WhatsApp Business API', 'Ticket': 'TKT-8841', 'Customer Waiting': 'Yes' }
-        },
-        {
-          timestamp: '2026-09-05 14:32:05',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--brick)',
-          type: 'ndr_event',
-          status: 'Discrepancy (Fake NDR)',
-          headline: 'NDR Logged: "Customer Unavailable / Door Locked"',
-          detail: 'Rider Raj Kumar marked delivery attempt failed with reason: "Customer Not Available / Door Locked". Carrier Telephony Log: 0 calls placed to customer. GPS location: 1.8km away from delivery address.',
-          panelData: { 'NDR Code': 'NDR-04', 'Rider Call Duration': '0 seconds (No Call)', 'GPS Match': 'Failed (1.8km off address)', 'RTO Risk': 'High' }
-        },
-        {
-          timestamp: '2026-09-05 14:35:40',
-          platform: 'Customer Support Desk',
-          platformId: 'custom_panel',
-          badgeColor: 'var(--brick)',
-          type: 'customer_complaint',
-          status: 'Discrepancy (Fake NDR Confirmation)',
-          headline: 'Customer Reported False NDR in Real Time',
-          detail: 'Customer sent second WhatsApp message: "I just got an SMS saying my door was locked! Nobody rang the bell or called me. I have been in my living room all afternoon!"',
-          panelData: { 'Verification Status': '100% Fake Attempt Confirmed', 'Customer Statement': 'Home all day, no doorbell or phone call' }
-        }
-      ],
-      verdict: {
-        status: 'Critical Fake NDR Incident',
-        summary: 'Verified Fake Non-Delivery Attempt by Delhivery rider Raj Kumar at 14:32:05. Rider GPS was 1.8km away from recipient address and telephony logs confirm 0 seconds call duration. Customer confirmed in real time via WhatsApp that they were actively waiting at home.',
-        financialImpact: '₹300 RTO return freight penalty if not stopped before automated RTO cutover tomorrow morning.',
-        recommendedAction: 'Logistics lead (Karthik Raman) to contact Delhivery DL-West-04 hub manager immediately with call log proof and mandate same-day reattempt.'
-      }
-    },
-    {
-      orderId: '#10843',
-      customer: 'Meera Deshmukh',
-      phone: '+91 98402 11984',
-      address: '44 Lake View Garden, Koramangala 4th Block, Bengaluru 560034',
-      item: 'Comfort Fleece Pullover (Heather Grey, Size M)',
-      itemSku: 'OC-FLE-GRY-M',
-      itemWeightKg: 0.82,
-      amount: '₹1,899',
-      forwardCarrier: 'Shiprocket',
-      forwardAwb: 'SR-773120',
-      relatedOrders: [],
-      timeline: [
-        {
-          timestamp: '2026-09-04 14:02:11',
-          platform: 'Shopify Storefront',
-          platformId: 'shopify',
-          badgeColor: 'var(--sage)',
-          type: 'order_created',
-          status: 'Verified',
-          headline: 'Customer Placed Order #10843',
-          detail: 'Checkout confirmed. Single SKU: Comfort Fleece Pullover. Catalog Spec: Dead weight 0.82 kg, Dimensions: 32x24x6cm (Volumetric weight: 0.88 kg).',
-          panelData: { 'Catalog Weight': '0.82 kg', 'Dimensions': '32 x 24 x 6 cm', 'Expected Slab': '1.0 kg' }
-        },
-        {
-          timestamp: '2026-09-04 15:10:00',
-          platform: 'Shopify Storefront',
-          platformId: 'shopify',
-          badgeColor: 'var(--sage)',
-          type: 'fulfillment_created',
-          status: 'Verified',
-          headline: 'Fulfilled via Shiprocket Integration',
-          detail: 'Manifested through Shiprocket API with Air Express courier allocation. AWB SR-773120 assigned.',
-          panelData: { 'AWB': 'SR-773120', 'Assigned Carrier': 'Shiprocket Air Express' }
-        },
-        {
-          timestamp: '2026-09-04 17:40:22',
-          platform: 'Warehouse Packing Station',
-          platformId: 'custom_panel',
-          badgeColor: 'var(--slate)',
-          type: 'dispatch_scan',
-          status: 'Verified',
-          headline: 'Warehouse Scale Scan: 0.84 kg',
-          detail: 'Packed in standard poly-mailer and weighed on certified packing bench scale #02. Actual dead weight recorded: 0.84 kg.',
-          panelData: { 'Bench Scale': 'Scale-02 (Calibrated)', 'Recorded Weight': '0.84 kg' }
-        },
-        {
-          timestamp: '2026-09-05 02:14:50',
-          platform: 'Shiprocket',
-          platformId: 'shiprocket',
-          badgeColor: 'var(--brick)',
-          type: 'weight_reconciliation',
-          status: 'Discrepancy (Overcharge)',
-          headline: 'Shiprocket Applied 2.0 kg Weight Slab',
-          detail: 'Shiprocket automated billing audit flagged shipment as 2.10 kg volumetric weight. Invoiced at ₹240.00 instead of 1.0 kg standard slab rate of ₹120.00.',
-          panelData: { 'Reported Weight': '2.10 kg (Faulty Laser Scan)', 'Actual Weight': '0.84 kg', 'Overcharge Amount': '₹120.00' }
-        },
-        {
-          timestamp: '2026-09-05 08:30:00',
-          platform: 'Shiprocket',
-          platformId: 'shiprocket',
-          badgeColor: 'var(--sage)',
-          type: 'in_transit',
-          status: 'Verified',
-          headline: 'Shipment In Transit to Bengaluru Hub',
-          detail: 'Cargo flight arrived at BLR Hub. Physical transit is on schedule, but commercial billing has unjustified ₹120 overcharge.',
-          panelData: { 'Current Hub': 'Bengaluru Airport Cargo Hub', 'Expected Delivery': 'Tomorrow 12:00' }
-        }
-      ],
-      verdict: {
-        status: 'Volumetric Weight Surcharge Discrepancy',
-        summary: 'Shiprocket automated invoice billed order #10843 in the 2.0 kg slab (claimed 2.10 kg) instead of 1.0 kg slab. Certified warehouse scale photo and catalog specifications prove actual packed weight is 0.84 kg.',
-        financialImpact: '₹120.00 freight overcharge on this shipment (₹38,400 across the entire 320-unit product batch).',
-        recommendedAction: 'Logistics team should submit batch scale calibration certificates to Shiprocket billing portal to reclaim ₹120 credit note.'
-      }
-    },
-    {
-      orderId: '#10844',
-      customer: 'Rohit Kulkarni',
-      phone: '+91 97654 33210',
-      address: 'B-201, Green Meadows, Baner, Pune 411045',
-      item: 'Offcomfrt Everyday Jogger (Black, Size M)',
-      itemSku: 'OC-JOG-BLK-M',
-      amount: '₹2,299',
-      forwardCarrier: 'Delhivery One',
-      forwardAwb: 'DEL-881902',
-      relatedOrders: [
-        { id: 'RET-8821', type: 'Return Request', panel: 'Custom Return & Exchange Panel', status: 'Pending Inward QC (Lagging 42h)' },
-        { id: 'EXCH-9914', type: 'Exchange Replacement Order', panel: 'Shopify Storefront', status: 'Draft Order On Hold (Awaiting QC)' }
-      ],
-      timeline: [
-        {
-          timestamp: '2026-09-01 11:20:00',
-          platform: 'Shopify Storefront',
-          platformId: 'shopify',
-          badgeColor: 'var(--sage)',
-          type: 'order_created',
-          status: 'Verified',
-          headline: 'Forward Order Placed & Delivered',
-          detail: 'Original purchase of Everyday Joggers (Size M) fulfilled and delivered to customer Rohit Kulkarni on Sep 01.',
-          panelData: { 'Order': '#10844', 'Delivered': '2026-09-01 16:45', 'Forward AWB': 'DEL-881902' }
-        },
-        {
-          timestamp: '2026-09-02 10:15:30',
-          platform: 'Custom Return & Exchange Panel',
-          platformId: 'return_panel',
-          badgeColor: 'var(--plum)',
-          type: 'exchange_initiated',
-          status: 'Verified',
-          headline: 'Customer Logged Exchange Request #RET-8821',
-          detail: 'Customer logged request on custom returns portal: "Jogger waist elastic is slightly tighter than expected. Would like to exchange for Size L". Customer uploaded photos showing tags intact.',
-          panelData: { 'Return ID': 'RET-8821', 'Reason': 'Size Mismatch (Tight Waist)', 'Requested Exchange': 'Size L (Black)', 'Photos': 'Verified Clean' }
-        },
-        {
-          timestamp: '2026-09-02 11:00:00',
-          platform: 'Custom Return & Exchange Panel',
-          platformId: 'return_panel',
-          badgeColor: 'var(--plum)',
-          type: 'reverse_awb_generated',
-          status: 'Verified',
-          headline: 'Reverse Pickup Scheduled via Delhivery',
-          detail: 'Reverse courier AWB DEL-REV-4912 allocated for doorstep return pickup from customer address in Pune.',
-          panelData: { 'Reverse AWB': 'DEL-REV-4912', 'Carrier': 'Delhivery Reverse Logistics' }
-        },
-        {
-          timestamp: '2026-09-03 10:45:12',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--amber)',
-          type: 'reverse_pickup_done',
-          status: 'Verified',
-          headline: 'Delhivery Rider Picked Up Return Parcel',
-          detail: 'Doorstep quality verification passed by rider. Item collected and inwarded into Pune Hub.',
-          panelData: { 'Reverse Hub': 'Pune West Hub', 'Status': 'In Transit to Bhiwandi Central' }
-        },
-        {
-          timestamp: '2026-09-03 16:15:33',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--sage)',
-          type: 'reverse_delivered',
-          status: 'Verified',
-          headline: 'Reverse Parcel Delivered to Warehouse Gate',
-          detail: 'Delhivery bulk truck unloaded at Offcomfrt Bhiwandi Warehouse Gate 2. Signed by Receiving Bay Clerk. Physical custody handed over.',
-          panelData: { 'Receiving Bay': 'Gate 2 Inward', 'Delivered Timestamp': '2026-09-03 16:15:33', 'Carrier Proof': 'Signed Handover Sheet' }
-        },
-        {
-          timestamp: '2026-09-05 10:00:00',
-          platform: 'Custom Return & Exchange Panel',
-          platformId: 'return_panel',
-          badgeColor: 'var(--brick)',
-          type: 'qc_inward_stalled',
-          status: 'Discrepancy (42-Hour Inwarding Lag)',
-          headline: 'Custom Return Panel Status: Still "Awaiting Warehouse QC"',
-          detail: '42 hours have elapsed since physical delivery at the warehouse gate, but Zone C intake staff have not scanned the return barcode into the custom portal. Exchange order #EXCH-9914 remains on hold.',
-          panelData: { 'Elapsed Lag': '42 hours (SLA is <12 hours)', 'Impacted Customer': 'Awaiting replacement dispatch for 3 days', 'Blocker': 'Zone C QC queue overflow' }
-        }
-      ],
-      verdict: {
-        status: 'Reverse Exchange Inwarding Bottleneck',
-        summary: 'Delhivery successfully delivered return parcel DEL-REV-4912 to the warehouse on Sep 03 at 16:15. However, the parcel has remained unscanned in the Custom Return Panel for 42 hours. This is blocking the release of customer Rohit Kulkarni\'s replacement Size L order (#EXCH-9914).',
-        financialImpact: 'High risk of customer cancellation and negative CSAT/NPS rating for slow exchange turnaround.',
-        recommendedAction: 'Warehouse Lead (Neha Chawla) to prioritize Zone C reverse intake queue and scan parcel DEL-REV-4912 to auto-trigger replacement dispatch.'
-      }
-    },
-    {
-      orderId: '#10845',
-      customer: 'Kavita Menon',
-      phone: '+91 99887 76655',
-      address: 'Tower 3, Flat 12B, Skyline Towers, Kochi 682020',
-      item: 'Offcomfrt Modal Pajama Set (Navy, Size XL)',
-      itemSku: 'OC-PAJ-NVY-XL',
-      itemWeightKg: 0.95,
-      amount: '₹2,799',
-      forwardCarrier: 'Delhivery One',
-      forwardAwb: 'DEL-662019',
-      relatedOrders: [],
-      timeline: [
-        {
-          timestamp: '2026-09-03 09:12:00',
-          platform: 'Shopify Storefront',
-          platformId: 'shopify',
-          badgeColor: 'var(--sage)',
-          type: 'order_created',
-          status: 'Verified',
-          headline: 'Customer Placed Order #10845',
-          detail: 'Prepaid order captured via UPI. Item allocated from Kochi regional inventory.',
-          panelData: { 'Payment': 'UPI / PhonePe', 'Status': 'Captured' }
-        },
-        {
-          timestamp: '2026-09-03 11:00:00',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--sage)',
-          type: 'manifest_pickup',
-          status: 'Verified',
-          headline: 'Dispatched via Delhivery Express',
-          detail: 'Picked up from Kochi fulfillment hub. Scaled weight: 0.95 kg. AWB DEL-662019.',
-          panelData: { 'Hub': 'Kochi Hub 01', 'Weight': '0.95 kg' }
-        },
-        {
-          timestamp: '2026-09-04 15:10:45',
-          platform: 'Delhivery One',
-          platformId: 'delhivery',
-          badgeColor: 'var(--sage)',
-          type: 'delivered',
-          status: 'Verified',
-          headline: 'Successfully Delivered with OTP Verification',
-          detail: 'Delivered directly to customer Kavita Menon with valid 4-digit OTP verified at doorstep. Transit TAT: 29 hours (beats 48h SLA).',
-          panelData: { 'Delivery Status': 'Delivered', 'OTP Verified': 'Yes', 'TAT': '29.2 hours' }
-        },
-        {
-          timestamp: '2026-09-04 15:12:00',
-          platform: 'Shopify Storefront',
-          platformId: 'shopify',
-          badgeColor: 'var(--sage)',
-          type: 'webhook_sync',
-          status: 'Verified',
-          headline: 'Shopify Status Updated to "Delivered"',
-          detail: 'Delhivery webhook synchronized with Shopify orders API within 75 seconds. Order closed.',
-          panelData: { 'Shopify Status': 'Fulfilled & Delivered', 'Webhook Latency': '75s' }
-        }
-      ],
-      verdict: {
-        status: '100% Clean Verified Order',
-        summary: 'All platforms (Shopify Storefront, Delhivery One Express, Warehouse packing) are in 100% synchronization. Delivered in 29.2 hours (well under the 48-hour SLA) with OTP verification. Zero discrepancies or returns recorded.',
-        financialImpact: 'Zero loss / optimal fulfillment margin.',
-        recommendedAction: 'No action required.'
-      }
-    }
-  ];
-
-  return { brandName:"Offcomfrt", brandSub:"COO / CXO Control Room", platformIntegrations, platformDiscrepancies, platformRegistry, orders, returnRecords, people, projects, tasks, meetings, approvals, followUps, oneOnOnes, goals, sops, recurringTemplates, auditLog, endOfDayLogs,
-    settings:{ staleNoUpdateDays:3, staleOpenDays:7, staleDeadlineDays:2, escalation:{owner:1, manager:2, cmo:4}, seededOn: today },
+  return {
+    brandName: "Offcomfrt",
+    brandSub: "COO / CXO Control Room",
+    platformIntegrations,
+    platformDiscrepancies,
+    platformRegistry,
+    orders,
+    returnRecords,
+    people,
+    projects,
+    tasks,
+    meetings,
+    approvals,
+    followUps,
+    oneOnOnes,
+    goals,
+    sops,
+    recurringTemplates,
+    auditLog,
+    endOfDayLogs,
+    settings: { staleNoUpdateDays:3, staleOpenDays:7, staleDeadlineDays:2, escalation:{owner:1, manager:2, cmo:4}, seededOn: today },
     notifDismissed: [],
+    mockDataCleaned: true
   };
+}
+
+function clearAllMockData(preserveUserConfig){
+  if(!STATE.data) return;
+  STATE.data.orders = [];
+  STATE.data.returnRecords = [];
+  STATE.data.platformDiscrepancies = [];
+  STATE.data.tasks = [];
+  STATE.data.projects = [];
+  STATE.data.approvals = [];
+  STATE.data.meetings = [];
+  STATE.data.followUps = [];
+  STATE.data.oneOnOnes = [];
+  STATE.data.goals = [];
+  STATE.data.sops = [];
+  STATE.data.recurringTemplates = [];
+  STATE.data.auditLog = [];
+  STATE.data.endOfDayLogs = [];
+  STATE.data.platformIntegrations = {
+    shopify: { name: 'Shopify Store', status: 'Connected', lastSync: 'Just now', ordersToday: 0, unfulfilledOrders: 0, grossSales: '₹0', aov: '₹0', canceledOrders: 0, currency: 'INR' },
+    delhivery: { name: 'Delhivery One', status: 'Connected', lastSync: 'Just now', manifestedShipments: 0, inTransit: 0, deliveredToday: 0, ndrAlerts: 0, suspectFakeAttempts: 0, slaCompliancePct: 100 },
+    shiprocket: { name: 'Shiprocket Multi-Carrier', status: 'Connected', lastSync: 'Just now', manifestedShipments: 0, rtoRatePct: 0, weightDiscrepancies: 0, overchargeAmount: '₹0', averageTatDays: 0 },
+    returnPanel: { name: 'Custom Return & Exchange Panel', status: 'Connected', lastSync: 'Just now', openExchangeRequests: 0, pendingInwardQC: 0, avgRefundHours: 0, sizingIssuePct: 0, defectiveIssuePct: 0 }
+  };
+  STATE.selectedOrderAudit = null;
+  STATE.data.mockDataCleaned = true;
+}
+
+function resetAllMockData(){
+  if(!confirm('Are you sure you want to remove all mock and sample data? This will clear all sample orders, return records, and demo tasks so your dashboard starts completely clean for real operations.')) return;
+  clearAllMockData(true);
+  saveState();
+  render();
+  toast('All mock data removed! Dashboard is now 100% clean for live operations.');
 }
 
 /* ============================== STATE ============================== */
@@ -1374,14 +801,18 @@ async function loadState(){
     }
 
     if(STATE.data){
+      // Auto-purge any legacy mock orders or sample discrepancies from previous sessions
+      if(STATE.data.orders && STATE.data.orders.some(o => o.orderId === '#10842' || o.orderId === '#10843' || o.orderId === '#10844' || o.orderId === '#10845')){
+        clearAllMockData(true);
+      }
       if(!STATE.data.settings) STATE.data.settings = buildDemoData().settings;
       if(!STATE.data.brandName) STATE.data.brandName = 'Offcomfrt';
       if(!STATE.data.brandSub) STATE.data.brandSub = 'COO / CXO Control Room';
       if(!STATE.data.platformIntegrations) STATE.data.platformIntegrations = buildDemoData().platformIntegrations;
-      if(!STATE.data.platformDiscrepancies) STATE.data.platformDiscrepancies = buildDemoData().platformDiscrepancies;
+      if(!STATE.data.platformDiscrepancies) STATE.data.platformDiscrepancies = [];
       if(!STATE.data.platformRegistry) STATE.data.platformRegistry = buildDemoData().platformRegistry;
-      if(!STATE.data.orders) STATE.data.orders = buildDemoData().orders;
-      if(!STATE.data.returnRecords) STATE.data.returnRecords = buildDemoData().returnRecords;
+      if(!STATE.data.orders) STATE.data.orders = [];
+      if(!STATE.data.returnRecords) STATE.data.returnRecords = [];
       if(!STATE.data.endOfDayLogs) STATE.data.endOfDayLogs = [];
       if(!STATE.data.notifDismissed) STATE.data.notifDismissed = [];
     } else {
@@ -2114,6 +1545,13 @@ function openEditProfileModal(){
         <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;background:var(--paper-sunken);padding:9px 12px;border-radius:var(--radius-s);line-height:1.4;">
           &#128161; Updating your name updates your greeting, personal queue, standup notes, and export reports automatically.
         </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-weight:600;font-size:12.5px;">Operational Data Slate</div>
+            <div style="font-size:11px;color:var(--text-muted);">Reset or remove any remaining sample data.</div>
+          </div>
+          <button class="btn small danger" onclick="resetAllMockData()">🧹 Clear All Mock Data</button>
+        </div>
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closeModal()">Cancel</button>
@@ -2697,7 +2135,7 @@ function viewProjects(){
     <div class="page-head"><div><div class="page-eyebrow">Strategic Programs</div><h1 class="page-title">Operations & Customer Experience Initiatives</h1><div class="page-sub">Milestones, operational risks, and cross-functional deliverables for all core programs.</div></div>
       <button class="btn-primary" onclick="openNewProjectModal()">+ New Project</button>
     </div>
-    <div class="grid grid-3">${projects.map(p=>projectCardHtml(p)).join('')}</div>
+    ${projects.length ? `<div class="grid grid-3">${projects.map(p=>projectCardHtml(p)).join('')}</div>` : `<div class="card" style="padding:36px 18px;text-align:center;">${emptyState('No operational initiatives or projects created yet. Click "+ New Project" above to define your first initiative.')}</div>`}
   `;
 }
 
@@ -3281,7 +2719,7 @@ function viewGoals(){
   STATE.data.goals.forEach(g=>{ objectives[g.objective]=objectives[g.objective]||[]; objectives[g.objective].push(g); });
   return `
     <div class="page-head"><div><div class="page-eyebrow">Strategic Architecture</div><h1 class="page-title">Operations & CX Strategic Goals</h1><div class="page-sub">Connecting high-level operational efficiency and customer delight goals directly to projects and frontline tasks.</div></div></div>
-    ${Object.entries(objectives).map(([obj, goals])=>`
+    ${Object.keys(objectives).length ? Object.entries(objectives).map(([obj, goals])=>`
       <div class="section-block">
         <div class="card" style="background:var(--ink);color:#fff;margin-bottom:10px;"><b>${escapeHtml(obj)}</b></div>
         <div class="grid grid-2">
@@ -3297,7 +2735,7 @@ function viewGoals(){
         }).join('')}
         </div>
       </div>
-    `).join('')}
+    `).join('') : `<div class="card" style="padding:36px 18px;text-align:center;">${emptyState('No strategic goals defined yet. Connect company OKRs to frontline tasks.')}</div>`}
   `;
 }
 
@@ -3306,10 +2744,10 @@ function viewSops(){
   return `
     <div class="page-head"><div><div class="page-eyebrow">Standard Operating Procedures</div><h1 class="page-title">Operations & CX SOP Library</h1><div class="page-sub">Audited protocols for warehouse receiving, carrier SLA enforcement, AQL 2.5 defect inspections, and customer escalation matrices.</div></div></div>
     <div class="table-wrap"><table class="data-table"><thead><tr><th>SOP Name</th><th>Functional Department</th><th>Owner</th><th>Version</th><th>Last Audited</th><th>Access</th></tr></thead><tbody>
-    ${STATE.data.sops.map(s=>`<tr>
+    ${STATE.data.sops.length ? STATE.data.sops.map(s=>`<tr>
       <td><b>${escapeHtml(s.name)}</b></td><td>${escapeHtml(s.department)}</td><td>${escapeHtml(personName(s.owner))}</td><td class="mono">${escapeHtml(s.version)}</td><td>${fmtDate(s.lastUpdated)}</td>
-      <td><a href="#" class="btn small ghost" onclick="event.preventDefault();toast('Demo documentation link.')">View Protocol</a></td>
-    </tr>`).join('')}
+      <td><a href="#" class="btn small ghost" onclick="event.preventDefault();toast('Protocol document link.')">View Protocol</a></td>
+    </tr>`).join('') : `<tr><td colspan="6">${emptyState('No standard operating procedures (SOPs) registered yet.')}</td></tr>`}
     </tbody></table></div>
   `;
 }
@@ -3762,23 +3200,25 @@ function renderOrderTimelineCard(order){
 
 /* -------------------- VIEW 1: ORDER ACTIVITY INSPECTOR -------------------- */
 function renderAIInspectorView(){
-  const orderId = STATE.selectedOrderAudit || '#10842';
-  const orderData = verifyOrderAcrossAllPanels(orderId);
+  const orders = (STATE.data && STATE.data.orders) ? STATE.data.orders : [];
+  const orderId = STATE.selectedOrderAudit || (orders.length ? orders[0].orderId : '');
+  const orderData = orderId ? verifyOrderAcrossAllPanels(orderId) : null;
 
   return `
     <!-- Top Search & Inspection Bar -->
     <div class="card" style="margin-bottom:18px;background:var(--paper-raised);">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div style="flex:1;min-width:280px;display:flex;gap:8px;">
-          <input type="text" id="inspector-query-input" class="field-input" value="${escapeHtml(orderId)}" placeholder="Enter Order ID (e.g. #10842) or Carrier AWB (e.g. DEL-908124)..." style="font-size:13.5px;" onkeydown="if(event.key==='Enter'){selectOrderToAudit(document.getElementById('inspector-query-input').value);}">
+          <input type="text" id="inspector-query-input" class="field-input" value="${escapeHtml(orderId)}" placeholder="Enter Order ID (e.g. #1001) or Carrier AWB (e.g. DEL-908124)..." style="font-size:13.5px;" onkeydown="if(event.key==='Enter'){selectOrderToAudit(document.getElementById('inspector-query-input').value);}">
           <button class="btn dark" onclick="selectOrderToAudit(document.getElementById('inspector-query-input').value)">&#128269; Verify Order</button>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <span style="font-size:11.5px;color:var(--text-muted);font-weight:600;">Sample Cases:</span>
-          <button class="btn small" onclick="selectOrderToAudit('#10842')" title="Delhivery Fake NDR attempt with 0s call duration">#10842 (Fake NDR)</button>
-          <button class="btn small" onclick="selectOrderToAudit('#10843')" title="Shiprocket Volumetric Surcharge discrepancy">#10843 (Weight Surcharge)</button>
-          <button class="btn small" onclick="selectOrderToAudit('#10844')" title="Stalled return parcel in Zone C inwarding">#10844 (Stalled Return)</button>
-          <button class="btn small" onclick="selectOrderToAudit('#10845')" title="Clean verified on-time delivery">#10845 (Clean Delivered)</button>
+          ${orders.length ? `
+            <span style="font-size:11.5px;color:var(--text-muted);font-weight:600;">Recent Orders:</span>
+            ${orders.slice(0,5).map(o=>`<button class="btn small" onclick="selectOrderToAudit('${escapeHtml(o.orderId)}')">${escapeHtml(o.orderId)}</button>`).join('')}
+          ` : `
+            <span style="font-size:11.5px;color:var(--text-muted);">&#128269; Real-Time Multi-Panel Inspector</span>
+          `}
         </div>
       </div>
 
@@ -3789,8 +3229,16 @@ function renderAIInspectorView(){
       </div>
     </div>
 
-    <!-- Render Current Verified Timeline -->
-    ${renderOrderTimelineCard(orderData)}
+    <!-- Render Current Verified Timeline or Clean State -->
+    ${orderData ? renderOrderTimelineCard(orderData) : `
+      <div class="card" style="text-align:center;padding:48px 24px;background:var(--paper-raised);">
+        <div style="font-size:36px;margin-bottom:12px;">&#128269;</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;">Live Multi-Panel Order Verifier Ready</h3>
+        <p style="font-size:13px;color:var(--text-muted);max-width:540px;margin:0 auto 18px;line-height:1.5;">
+          Enter any <b>Shopify Order ID</b> (e.g. <code>#1001</code>) or <b>Carrier AWB</b> in the box above to inspect its chronological journey across <b>Shopify</b>, <b>Delhivery One</b>, <b>Shiprocket</b>, and your <b>Custom Return Panel</b>.
+        </p>
+      </div>
+    `}
   `;
 }
 
@@ -3895,16 +3343,16 @@ function renderAIChatView(){
       </div>
       <div class="chip-row">
         ${[
-          "Verify Order #10842 across all panels",
-          "Audit Order #10843 for weight surcharges",
-          "Check Order #10844 and related exchange return",
-          "Verify Order #10845 delivery timeline",
-          "What are the top 3 discrepancies between warehouse and courier manifests?",
+          "Verify order across all connected panels",
+          "Audit carrier delivery SLA compliance and NDR rates",
+          "Check weight reconciliation against carrier freight invoices",
+          "Review reverse returns and exchange inwarding queue",
+          "What are the operational discrepancies detected today?",
           "List all connected shipping partners and custom platforms"
         ].map(q => `<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}
       </div>
       <div class="assistant-input-row">
-        <input type="text" id="assistant-input" placeholder="Ask AI to verify any order (e.g. 'Verify order #10842') or check carrier SLAs…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
+        <input type="text" id="assistant-input" placeholder="Ask AI to verify any order (e.g. 'Verify order #1001') or check carrier SLAs…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
         <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Audit Query</button>
       </div>
     </div>
@@ -3968,7 +3416,7 @@ function renderAIAuditorView(pi, discrepancies){
       </div>
 
       <div class="grid grid-2">
-        ${discrepancies.map(d => `
+        ${discrepancies.length ? discrepancies.map(d => `
           <div class="card accent-left" style="border-left-color:${d.severity==='Critical'?'var(--brick)':d.severity==='High'?'var(--amber-deep)':'var(--slate)'};">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
               <div style="font-weight:700;font-size:13.5px;">${escapeHtml(d.title)}</div>
@@ -3996,7 +3444,11 @@ function renderAIAuditorView(pi, discrepancies){
               </div>
             </div>
           </div>
-        `).join('')}
+        `).join('') : `
+          <div class="card" style="grid-column:1/-1;text-align:center;padding:36px 18px;">
+            ${emptyState('Zero operational discrepancies detected across Shopify, Delhivery One, Shiprocket, and Return Panel. All manifest, delivery, and reverse records are clean.')}
+          </div>
+        `}
       </div>
     </div>
   `;
@@ -4117,7 +3569,7 @@ function renderAICustomReportView(){
       </div>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;">
-        <button class="btn" onclick="document.getElementById('cr-input-data').value='AWB908124, Order #10842, Status: NDR Door Locked, DeliveryTAT: 4d, Weight: 1.5kg, Pincode: 400001\nAWB908125, Order #10843, Status: NDR Customer Unavailable, Weight: 1.5kg, Pincode: 400050';toast('Loaded sample report snippet.');">Load Sample Snippet</button>
+        <button class="btn small ghost" onclick="document.getElementById('cr-input-data').value='';">Clear</button>
         <button class="btn dark" onclick="processCustomReportAI()">&#128260; Run AI Cross-Match</button>
       </div>
 
@@ -4178,7 +3630,16 @@ async function askAssistant(question){
   const qlow = question.toLowerCase();
 
   if(match || qlow.includes('order') || qlow.includes('awb') || qlow.includes('verify') || qlow.includes('audit')){
-    const targetQuery = match ? (match[0].startsWith('#') ? match[0] : '#' + match[0]) : (qlow.includes('10842') ? '#10842' : qlow.includes('10843') ? '#10843' : qlow.includes('10844') ? '#10844' : qlow.includes('10845') ? '#10845' : '#10842');
+    const targetQuery = match ? (match[0].startsWith('#') ? match[0] : '#' + match[0]) : (STATE.selectedOrderAudit || (STATE.data.orders && STATE.data.orders[0] ? STATE.data.orders[0].orderId : ''));
+    if(!targetQuery){
+      ASSISTANT_MESSAGES.push({
+        role: 'ai',
+        text: 'Please provide an Order ID or Carrier AWB to verify (e.g. "Verify order #1001" or "Verify AWB DEL-908124"). I will immediately audit it across Shopify, Delhivery One, Shiprocket, and your Return Panel.'
+      });
+      render();
+      setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 40);
+      return;
+    }
     const orderData = verifyOrderAcrossAllPanels(targetQuery);
     
     setTimeout(() => {
@@ -4245,7 +3706,9 @@ async function askAssistant(question){
     } else if(qlow.includes('risk') || qlow.includes('project')){
       fallbackText += `• ${atRisk.length} projects at risk: ${atRisk.map(p=>`"${p.name}" (${p.risk} risk)`).join(', ')}.`;
     } else {
-      fallbackText += `• Real-time status: Shopify (4,820 orders today), Delhivery One (94.2% SLA compliance), Shiprocket (1,570 active shipments), and Return Panel (210 open requests).\n• 4 operational discrepancies identified across panels.\n• Tip: Type any Order ID (e.g. 'Verify #10842') to generate an instant chronological multi-panel audit.`;
+      const reg = (STATE.data && STATE.data.platformRegistry) ? STATE.data.platformRegistry : [];
+      const pi = (STATE.data && STATE.data.platformIntegrations) || {};
+      fallbackText += `• Connected platforms: ${reg.map(p=>p.name).join(', ')}.\n• Active records: Shopify (${pi.shopify?pi.shopify.ordersToday:0} orders today), Delhivery One (${pi.delhivery?pi.delhivery.slaCompliancePct:100}% SLA), Shiprocket (${pi.shiprocket?pi.shiprocket.manifestedShipments:0} active), Return Panel (${pi.returnPanel?pi.returnPanel.openExchangeRequests:0} open requests).\n• Tip: Type any Order ID (e.g. 'Verify #1001') to run an instant chronological multi-panel audit.`;
     }
 
     ASSISTANT_MESSAGES.push({role:'ai', text: fallbackText});
@@ -4612,10 +4075,9 @@ function openIngestReturnDataModal(){
         </div>
         <div class="field">
           <label class="field-label">Paste CSV Rows or Table Columns</label>
-          <textarea id="ingest-return-text" style="min-height:160px;font-family:var(--font-mono);font-size:12px;" placeholder="Order ID, Return ID, Customer, SKU, Reason, Reverse AWB, Status\n#10844, RET-8821, Rohit Kulkarni, OC-JOG-BLK-M, Size too tight, DEL-REV-4912, Pending Inward QC"></textarea>
+          <textarea id="ingest-return-text" style="min-height:160px;font-family:var(--font-mono);font-size:12px;" placeholder="Order ID, Return ID, Customer, Product SKU, Reason, Reverse AWB, Status\n#1001, RET-101, Customer Name, OC-SKU-01, Size Mismatch, DEL-REV-01, Pending Inward QC"></textarea>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <button class="btn small" onclick="document.getElementById('ingest-return-text').value='#10844, RET-8821, Rohit Kulkarni, OC-JOG-BLK-M, Size too tight around waist (Needs L), DEL-REV-4912, Pending Inward QC\n#10848, RET-8830, Siddharth Rao, OC-LOU-BLU-XL, Defective zipper, DEL-REV-5102, Reverse Pickup Done\n#10850, RET-8834, Pooja Nair, OC-PAJ-NVY-S, Size too loose, SR-REV-9012, Delivered to Warehouse';toast('Loaded return sample records.');">Load Sample Data</button>
+        <div style="display:flex;justify-content:flex-end;align-items:center;">
           <span style="font-size:11.5px;color:var(--text-muted);">Supports comma, tab, or pipe separated lines</span>
         </div>
       </div>
