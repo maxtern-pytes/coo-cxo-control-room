@@ -71,28 +71,52 @@ An executive control room dashboard tailored for a leader simultaneously managin
 
 ## Connecting Google Drive as Your Database (2 Minutes)
 
-1. Open your dashboard and click the **"☁️ Drive DB"** button in the top navigation bar.
-2. In the modal, copy the provided Google Apps Script code (also available in [](google-drive-database-script.gs)).
-3. Go to [script.google.com](https://script.google.com/home/start) (or in Google Drive: click **New + &rarr; More &rarr; Google Apps Script**).
-4. Name the project , erase the default code, and paste the script.
-5. Click **Deploy** (top right) &rarr; **New deployment**:
-   - Click the ⚙️ icon &rarr; select **Web app**.
-   - Set **Execute as**: 
-   - Set **Who has access**: 
-6. Click **Deploy**, authorize permissions with your Google account, and copy the **Web app URL**.
+1. Open your dashboard and click the **"Drive DB"** button in the top navigation bar.
+2. In the modal, copy the provided Google Apps Script code (also available in `google-drive-database-script.gs`).
+3. Go to [script.google.com](https://script.google.com/home/start) (or in Google Drive: click **New + → More → Google Apps Script**).
+4. Name the project `ControlRoomDB`, erase any default code, and paste the script.
+5. Click **Deploy** (top right) → **New deployment**:
+   - Click the ⚙️ icon next to "Select type" → choose **Web app**.
+   - Set **Execute as**: **Me** (`your-email@gmail.com`).
+   - Set **Who has access**: **Anyone**.
+6. Click **Deploy**, authorize permissions with your Google account, and copy the generated **Web app URL**.
 7. Paste your Web App URL into the dashboard modal and click **"Save & Connect"**.
 
 ---
 
-## Deployment on Render (Free)
+## Deployment on Render (100% Free & Always Online)
 
-### Option A: Static Site (Recommended & Fastest)
-1. Go to [Render Dashboard](https://dashboard.render.com/) &rarr; **New +** &rarr; **Static Site**.
-2. Connect your GitHub repository: .
-3. Keep default settings () and click **Create Static Site**.
+### Method 1: 1-Click Blueprint Deployment (Easiest)
+This repository includes a pre-configured `render.yaml` blueprint:
+1. Log in to your [Render Dashboard](https://dashboard.render.com/).
+2. Click **New +** (top right) → **Blueprint**.
+3. Connect your GitHub repository: `https://github.com/maxtern-pytes/coo-cxo-control-room`.
+4. Render will automatically detect `render.yaml` and configure the static web service.
+5. Click **Apply**. Your dashboard will deploy within seconds at your custom Render URL (`https://coo-cxo-control-room.onrender.com`).
 
-### Option B: Node.js Web Service
-1. Go to [Render Dashboard](https://dashboard.render.com/) &rarr; **New +** &rarr; **Web Service**.
+---
+
+### Method 2: Manual Static Site Deployment (Recommended & Instant CDN)
+1. In [Render Dashboard](https://dashboard.render.com/), click **New +** → **Static Site**.
+2. Connect your GitHub repository: `maxtern-pytes/coo-cxo-control-room`.
+3. Configure the following fields:
+   - **Name**: `coo-cxo-control-room` (or your preferred project name)
+   - **Branch**: `main`
+   - **Root Directory**: leave blank (or `./`)
+   - **Build Command**: leave blank
+   - **Publish Directory**: `.` (or `./`)
+4. Click **Create Static Site**.
+5. Your dashboard will be live within 30 seconds on Render's global CDN with automatic SSL, zero cold starts, and instant deploys on every git push!
+
+---
+
+### Method 3: Node.js Web Service
+If you prefer running the included Node.js server (`server.js`):
+1. In [Render Dashboard](https://dashboard.render.com/), click **New +** → **Web Service**.
 2. Connect your repository.
-3. Set **Build Command**:  (or leave empty) and **Start Command**: .
+3. Configure:
+   - **Runtime**: `Node`
+   - **Build Command**: `npm install` (or leave empty)
+   - **Start Command**: `npm start` (or `node server.js`)
+   - **Plan**: `Free`
 4. Click **Create Web Service**.
