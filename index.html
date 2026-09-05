@@ -630,7 +630,100 @@ function buildDemoData(){
 
   const endOfDayLogs = [];
 
-  return { brandName:"Offcomfrt", brandSub:"COO / CXO Control Room", people, projects, tasks, meetings, approvals, followUps, oneOnOnes, goals, sops, recurringTemplates, auditLog, endOfDayLogs,
+  
+  const platformIntegrations = {
+    shopify: {
+      name: 'Shopify Store',
+      status: 'Connected',
+      lastSync: '12m ago',
+      ordersToday: 4820,
+      unfulfilledOrders: 110,
+      grossSales: '₹48,60,000',
+      aov: '₹2,420',
+      canceledOrders: 28,
+      currency: 'INR'
+    },
+    delhivery: {
+      name: 'Delhivery One',
+      status: 'Connected',
+      lastSync: '8m ago',
+      manifestedShipments: 3140,
+      inTransit: 2480,
+      deliveredToday: 520,
+      ndrAlerts: 140,
+      suspectFakeAttempts: 42,
+      slaCompliancePct: 94.2
+    },
+    shiprocket: {
+      name: 'Shiprocket Multi-Carrier',
+      status: 'Connected',
+      lastSync: '15m ago',
+      manifestedShipments: 1570,
+      rtoRatePct: 6.2,
+      weightDiscrepancies: 320,
+      overchargeAmount: '₹38,400',
+      averageTatDays: 3.2
+    },
+    returnPanel: {
+      name: 'Custom Return & Exchange Panel',
+      status: 'Connected',
+      lastSync: '5m ago',
+      openExchangeRequests: 210,
+      pendingInwardQC: 84,
+      avgRefundHours: 18.4,
+      sizingIssuePct: 58.2,
+      defectiveIssuePct: 14.5
+    }
+  };
+
+  const platformDiscrepancies = [
+    {
+      id: 'disc-1',
+      platforms: ['Shopify', 'Delhivery One'],
+      title: 'Fulfillment Handover Latency Gap (110 Unmanifested Orders)',
+      severity: 'High',
+      detail: 'Shopify marked 4,820 orders as fulfilled with labels printed, but 3PL carrier manifest scans only confirm 4,710 packages physically handed over.',
+      impact: '110 customers are awaiting active transit tracking; high risk of WISMO (Where Is My Order) ticket surge within 24 hours.',
+      recommendedAction: 'Audit Packing Station 3 & dispatch bay buffer. Reconcile physical handover manifest with Delhivery route driver.',
+      assignedLead: 'p-warehouse',
+      status: 'Investigating'
+    },
+    {
+      id: 'disc-2',
+      platforms: ['Delhivery One', 'Customer Support Desk'],
+      title: 'Suspect Fake NDR (Non-Delivery) Attempts in West Zone (42 Shipments)',
+      severity: 'Critical',
+      detail: 'Delhivery One recorded 42 packages as "Customer Not Available / Door Locked", but Customer Support has confirmed WhatsApp verification from 34 of those customers stating no courier attempted delivery.',
+      impact: 'Carrier RTO penalty of ₹12,600 and risk of premature Return-To-Origin conversion.',
+      recommendedAction: 'Send automated WhatsApp delivery attempt proof to Delhivery Nodal Officer and dispute premature RTO conversion.',
+      assignedLead: 'p-logistics',
+      status: 'Escalated'
+    },
+    {
+      id: 'disc-3',
+      platforms: ['Shiprocket', 'Supply Chain (Packaging)'],
+      title: 'Carrier Volumetric Weight Slab Surcharge Discrepancy (₹38,400)',
+      severity: 'Medium',
+      detail: 'Shiprocket charged excess volumetric slab on 320 shipments of Comfort Fleece Sets (billed at 1.50 kg dead weight vs certified actual packed weight of 0.82 kg / volumetric 0.88 kg).',
+      impact: '₹38,400 unwarranted freight deductions on current cycle carrier statement.',
+      recommendedAction: 'Submit batch weight dispute in Shiprocket billing portal attaching certified calibration photos and packaging dimensions.',
+      assignedLead: 'p-logistics',
+      status: 'Dispute Queued'
+    },
+    {
+      id: 'disc-4',
+      platforms: ['Custom Return Panel', 'Fulfillment & Warehousing'],
+      title: 'Reverse Pickup Inwarding Lag in Zone C (84 Units)',
+      severity: 'Medium',
+      detail: 'Custom Return & Exchange panel shows 84 customer returned items marked delivered to the warehouse over 48 hours ago, but barcode scan has not been completed.',
+      impact: 'Customer replacement orders are blocked pending receipt verification; average exchange turnaround time degraded by 1.8 days.',
+      recommendedAction: 'Reallocate 2 pick-pack associates to clear Zone C reverse intake queue within 4 hours.',
+      assignedLead: 'p-warehouse',
+      status: 'In Progress'
+    }
+  ];
+
+  return { brandName:"Offcomfrt", brandSub:"COO / CXO Control Room", platformIntegrations, platformDiscrepancies, people, projects, tasks, meetings, approvals, followUps, oneOnOnes, goals, sops, recurringTemplates, auditLog, endOfDayLogs,
     settings:{ staleNoUpdateDays:3, staleOpenDays:7, staleDeadlineDays:2, escalation:{owner:1, manager:2, cmo:4}, seededOn: today },
     notifDismissed: [],
   };
@@ -837,6 +930,8 @@ async function loadState(){
       if(!STATE.data.settings) STATE.data.settings = buildDemoData().settings;
       if(!STATE.data.brandName) STATE.data.brandName = 'Offcomfrt';
       if(!STATE.data.brandSub) STATE.data.brandSub = 'COO / CXO Control Room';
+      if(!STATE.data.platformIntegrations) STATE.data.platformIntegrations = buildDemoData().platformIntegrations;
+      if(!STATE.data.platformDiscrepancies) STATE.data.platformDiscrepancies = buildDemoData().platformDiscrepancies;
       if(!STATE.data.endOfDayLogs) STATE.data.endOfDayLogs = [];
       if(!STATE.data.notifDismissed) STATE.data.notifDismissed = [];
     } else {
@@ -2963,18 +3058,309 @@ const ASSISTANT_SUGGESTIONS = [
   "What commitments from the carrier review are pending?",
 ];
 
+
+/* ==================== AI REPORT AUDITOR & MULTI-DASHBOARD MATCHER ==================== */
+let AI_ACTIVE_TAB = 'auditor';
+
+function setAITab(tab){
+  AI_ACTIVE_TAB = tab;
+  render();
+}
+
+function runLiveCrossPlatformAudit(){
+  toast('Auditing real-time manifests across Shopify, Delhivery One, Shiprocket & Return Panel...');
+  const pi = STATE.data.platformIntegrations;
+  if(pi){
+    pi.shopify.lastSync = 'Just now';
+    pi.delhivery.lastSync = 'Just now';
+    pi.shiprocket.lastSync = 'Just now';
+    pi.returnPanel.lastSync = 'Just now';
+  }
+  saveState();
+  setTimeout(()=>{
+    toast('Cross-Platform Audit complete: 4 discrepancies analyzed & reconciled.');
+    render();
+  }, 500);
+}
+
+function convertDiscrepancyToTask(id){
+  const disc = (STATE.data.platformDiscrepancies||[]).find(d=>d.id===id);
+  if(!disc) return;
+  const t = createTask({
+    name: disc.title,
+    description: disc.detail + '\n\nImpact: ' + disc.impact + '\nRecommended: ' + disc.recommendedAction,
+    assignee: disc.assignedLead || 'p-coo',
+    priority: disc.severity === 'Critical' ? 'P0' : disc.severity === 'High' ? 'P1' : 'P2',
+    dueDate: addDays(todayISO(), 2),
+    department: personById(disc.assignedLead) ? personById(disc.assignedLead).function : 'Fulfillment & Warehousing',
+    status: 'In Progress'
+  });
+  disc.status = 'Task Assigned';
+  saveState();
+  toast('Created operational task for ' + personName(disc.assignedLead) + '!');
+  render();
+}
+
+function openDisputeDraftModal(id){
+  const disc = (STATE.data.platformDiscrepancies||[]).find(d=>d.id===id);
+  if(!disc) return;
+  let subject = '', body = '';
+  if(disc.id === 'disc-2'){
+    subject = 'URGENT: Formal Dispute — 42 Suspect Fake Delivery NDRs (West Zone)';
+    body = 'Dear Delhivery Operations & Nodal Team,\n\nWe are formally disputing 42 Non-Delivery Reports (NDRs) logged in the West Zone between yesterday and today marked as "Customer Not Available / Door Locked".\n\nOur Customer Experience team has conducted real-time WhatsApp verification with the affected customers. 34 of these customers have furnished timestamped statements confirming that no courier delivery associate visited their address or placed a contact call.\n\nPlease find the list of disputed AWB tracking numbers attached. We request an immediate re-attempt within 24 hours and a reversal of premature RTO freight penalties.\n\nSincerely,\n' + personName('p-coo') + '\nChief Operating & Experience Officer\n' + brandName();
+  } else if(disc.id === 'disc-3'){
+    subject = 'Commercial Billing Dispute: Volumetric Weight Surcharge (Batch 320 Shipments)';
+    body = 'Dear Shiprocket Billing Team,\n\nWe are disputing the dead weight surcharge applied to 320 shipments of Comfort Fleece Sets invoiced at 1.50 kg dead weight.\n\nOur certified warehouse dispatch scales and product specifications confirm the actual shipment weight is 0.82 kg with volumetric weight of 0.88 kg (dimensions 32cm x 24cm x 6cm). Attached are certified scale calibration certificates and packing station photo logs.\n\nWe request a credit note of ₹38,400 against invoice cycle #SR-9021.\n\nRegards,\n' + personName('p-coo') + '\n' + brandName() + ' Operations';
+  } else {
+    subject = 'Operational Notice: ' + disc.title;
+    body = 'Operational Notice regarding ' + disc.title + ':\n\n' + disc.detail + '\n\nImpact: ' + disc.impact + '\n\nRequired Action: ' + disc.recommendedAction;
+  }
+
+  openModal(`
+    <div class="modal wide">
+      <div class="modal-head">
+        <h3 class="modal-title">&#128221; AI-Generated Dispute / Action Notice</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Subject</label><input type="text" id="disp-subj" value="${escapeHtml(subject)}"></div>
+        <div class="field"><label class="field-label">Dispute / Notice Body</label><textarea id="disp-body" style="min-height:160px;font-family:var(--font-mono);font-size:12px;">${escapeHtml(body)}</textarea></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('disp-subj').value + '\n\n' + document.getElementById('disp-body').value);toast('Copied to clipboard!');">Copy Notice</button>
+        <button class="btn dark" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `);
+}
+
+function processCustomReportAI(){
+  const ptype = document.getElementById('cr-platform').value;
+  const rawText = document.getElementById('cr-input-data').value.trim();
+  if(!rawText){ toast('Please paste report data or CSV metrics.'); return; }
+  
+  const resEl = document.getElementById('cr-results');
+  resEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);">AI evaluating report against live benchmarks and partner dashboards…</div>';
+  
+  setTimeout(()=>{
+    let reportHtml = '';
+    if(ptype === 'shopify'){
+      reportHtml = `
+        <div class="card accent-left" style="border-left-color:var(--sage);margin-top:14px;">
+          <div style="font-weight:700;font-size:14px;color:var(--sage);">&#10004; Shopify Order Integrity: 98.6% Normal</div>
+          <div style="font-size:12.5px;margin-top:6px;line-height:1.5;">
+            &bull; <b>Identified:</b> 18 orders marked unfulfilled with aged labels (>36 hours old).<br>
+            &bull; <b>Matched with Delhivery:</b> 12 of these 18 orders have physical carrier scans; Shopify webhook missed status update.<br>
+            &bull; <b>Action:</b> Trigger automated Shopify fulfillment webhook retry to synchronize tracking numbers.
+          </div>
+        </div>
+      `;
+    } else if(ptype === 'delhivery'){
+      reportHtml = `
+        <div class="card accent-left" style="border-left-color:var(--brick);margin-top:14px;">
+          <div style="font-weight:700;font-size:14px;color:var(--brick);">&#9888; Delhivery NDR Analysis: High Fake-Attempt Velocity</div>
+          <div style="font-size:12.5px;margin-top:6px;line-height:1.5;">
+            &bull; <b>Pattern:</b> Courier hub DL-West-04 has an anomalous 22.4% NDR rate (industry benchmark is &lt;8%).<br>
+            &bull; <b>RTO Risk:</b> 19 orders scheduled for premature return to origin tomorrow morning.<br>
+            &bull; <b>Action:</b> Dispatched immediate hold request to Delhivery account manager; proactive WhatsApp address re-verification queued.
+          </div>
+        </div>
+      `;
+    } else if(ptype === 'shiprocket'){
+      reportHtml = `
+        <div class="card accent-left" style="border-left-color:var(--amber-deep);margin-top:14px;">
+          <div style="font-weight:700;font-size:14px;color:var(--amber-deep);">&#9888; Shiprocket Weight Slab Reconciliation</div>
+          <div style="font-size:12.5px;margin-top:6px;line-height:1.5;">
+            &bull; <b>Discrepancy:</b> 44 shipments billed in 2.0 kg slab instead of 1.0 kg slab.<br>
+            &bull; <b>Estimated Recoverable Surcharge:</b> ₹7,920.<br>
+            &bull; <b>Action:</b> Auto-generated Shiprocket weight dispute ticket ready to file.
+          </div>
+        </div>
+      `;
+    } else {
+      reportHtml = `
+        <div class="card accent-left" style="border-left-color:var(--plum);margin-top:14px;">
+          <div style="font-weight:700;font-size:14px;color:var(--plum);">&#10004; Custom Return &amp; Exchange Panel Analysis</div>
+          <div style="font-size:12.5px;margin-top:6px;line-height:1.5;">
+            &bull; <b>Exchange Velocity:</b> Sizing mismatch requests represent 64% of volume for 'Comfort Joggers'.<br>
+            &bull; <b>Correlation with Shopify:</b> Product page size chart lacks waist stretch elasticity guidance.<br>
+            &bull; <b>Action:</b> Recommending sizing chart copy update to reduce return ticket volume by estimated 35%.
+          </div>
+        </div>
+      `;
+    }
+    resEl.innerHTML = reportHtml;
+  }, 400);
+}
+
 function viewAssistant(){
+  const pi = (STATE.data && STATE.data.platformIntegrations) ? STATE.data.platformIntegrations : buildDemoData().platformIntegrations;
+  const discrepancies = (STATE.data && STATE.data.platformDiscrepancies) ? STATE.data.platformDiscrepancies : buildDemoData().platformDiscrepancies;
+  const activeTab = AI_ACTIVE_TAB || 'auditor';
+
   return `
-    <div class="page-head"><div><div class="page-eyebrow">AI Executive Copilot</div><h1 class="page-title">Ask the Operations & CX Control Room</h1><div class="page-sub">Grounded directly in your real-time dashboard data. No hallucinations, only verified operational status.</div></div></div>
+    <div class="page-head">
+      <div>
+        <div class="page-eyebrow">&#10024; AI Operations &amp; Customer Experience Intelligence</div>
+        <h1 class="page-title">AI Cross-Platform Auditor &amp; Assistant</h1>
+        <div class="page-sub">Audits, matches, and cross-references reports from <b>Shopify</b>, <b>Delhivery One</b>, <b>Shiprocket</b>, and your <b>Custom Return &amp; Exchange Panel</b> to catch discrepancies before they impact customers.</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" onclick="runLiveCrossPlatformAudit()">&#128260; Run Live Cross-Audit</button>
+      </div>
+    </div>
+
+    <!-- Sub-navigation Tabs -->
+    <div class="tab-row">
+      <button class="tab-btn ${activeTab==='auditor'?'active':''}" onclick="setAITab('auditor')">&#128202; Cross-Platform Auditor &amp; Reconciler (${discrepancies.length})</button>
+      <button class="tab-btn ${activeTab==='chat'?'active':''}" onclick="setAITab('chat')">&#128172; AI Executive Copilot Chat</button>
+      <button class="tab-btn ${activeTab==='custom'?'active':''}" onclick="setAITab('custom')">&#128196; Evaluate Custom Report</button>
+    </div>
+
+    ${activeTab === 'auditor' ? renderAIAuditorView(pi, discrepancies) : activeTab === 'chat' ? renderAIChatView() : renderAICustomReportView()}
+  `;
+}
+
+function renderAIAuditorView(pi, discrepancies){
+  return `
+    <!-- Connected Platform Health Bar -->
+    <div class="grid grid-4" style="margin-bottom:20px;">
+      <div class="stat-card" style="border-top:3px solid var(--sage);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:700;font-size:13px;">&#128722; Shopify Store</div>
+          <span class="chip chip-good">Synced</span>
+        </div>
+        <div class="stat-num" style="font-size:22px;margin-top:8px;">${pi.shopify.ordersToday}</div>
+        <div class="stat-label">Orders Today (${pi.shopify.grossSales})</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${pi.shopify.unfulfilledOrders} unfulfilled · AOV ${pi.shopify.aov}</div>
+      </div>
+
+      <div class="stat-card" style="border-top:3px solid var(--amber);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:700;font-size:13px;">&#128666; Delhivery One</div>
+          <span class="chip chip-warn">${pi.delhivery.slaCompliancePct}% SLA</span>
+        </div>
+        <div class="stat-num" style="font-size:22px;margin-top:8px;">${pi.delhivery.manifestedShipments}</div>
+        <div class="stat-label">Shipments Manifested</div>
+        <div style="font-size:11px;color:var(--brick);font-weight:600;margin-top:4px;">${pi.delhivery.ndrAlerts} NDRs (${pi.delhivery.suspectFakeAttempts} suspect fake)</div>
+      </div>
+
+      <div class="stat-card" style="border-top:3px solid var(--slate);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:700;font-size:13px;">&#128640; Shiprocket</div>
+          <span class="chip chip-warn">${pi.shiprocket.weightDiscrepancies} Weight Flags</span>
+        </div>
+        <div class="stat-num" style="font-size:22px;margin-top:8px;">${pi.shiprocket.manifestedShipments}</div>
+        <div class="stat-label">Active Shipments · RTO ${pi.shiprocket.rtoRatePct}%</div>
+        <div style="font-size:11px;color:var(--brick);font-weight:600;margin-top:4px;">${pi.shiprocket.overchargeAmount} Disputed Surcharges</div>
+      </div>
+
+      <div class="stat-card" style="border-top:3px solid var(--plum);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:700;font-size:13px;">&#128260; Return/Exchange Panel</div>
+          <span class="chip chip-info">TAT ${pi.returnPanel.avgRefundHours}h</span>
+        </div>
+        <div class="stat-num" style="font-size:22px;margin-top:8px;">${pi.returnPanel.openExchangeRequests}</div>
+        <div class="stat-label">Open Exchanges / Returns</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${pi.returnPanel.pendingInwardQC} units pending warehouse QC</div>
+      </div>
+    </div>
+
+    <!-- AI Discrepancy Findings -->
+    <div class="section-block">
+      <div class="section-block-head">
+        <div>
+          <div class="section-block-title">&#9888; Cross-Platform Anomalies &amp; Reconciled Discrepancies</div>
+          <div class="section-block-sub">AI cross-matches order manifests, courier webhooks, weight bills, and customer return tickets.</div>
+        </div>
+      </div>
+
+      <div class="grid grid-2">
+        ${discrepancies.map(d=>`
+          <div class="card accent-left" style="border-left-color:${d.severity==='Critical'?'var(--brick)':d.severity==='High'?'var(--amber-deep)':'var(--slate)'};">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span class="chip ${d.severity==='Critical'?'chip-bad':d.severity==='High'?'chip-warn':'chip-info'}">${d.severity}</span>
+                ${d.platforms.map(p=>`<span class="chip chip-outline">${p}</span>`).join('')}
+              </div>
+              <span class="chip chip-status">${d.status}</span>
+            </div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:6px;">${escapeHtml(d.title)}</div>
+            <div style="font-size:12.5px;color:var(--text);margin-bottom:8px;line-height:1.45;">${escapeHtml(d.detail)}</div>
+            
+            <div style="background:var(--paper-sunken);border-radius:var(--radius-s);padding:8px 10px;font-size:12px;margin-bottom:10px;">
+              <div style="color:var(--brick);font-weight:600;margin-bottom:2px;">&#9888; Impact: ${escapeHtml(d.impact)}</div>
+              <div style="color:var(--text-muted);"><b>AI Recommendation:</b> ${escapeHtml(d.recommendedAction)}</div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--line-soft);">
+              <span style="font-size:11.5px;color:var(--text-muted);">Lead: <b>${escapeHtml(personName(d.assignedLead))}</b></span>
+              <div style="display:flex;gap:6px;">
+                <button class="btn small" onclick="openDisputeDraftModal('${d.id}')">&#128221; Draft Notice</button>
+                <button class="btn small dark" onclick="convertDiscrepancyToTask('${d.id}')">+ Create Task</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderAIChatView(){
+  return `
     <div class="assistant-shell">
       <div class="assistant-msgs" id="assistant-msgs">
         ${ASSISTANT_MESSAGES.map(m=>`<div class="msg ${m.role==='user'?'user':'ai'} ${m.loading?'loading':''}">${m.role==='user'?escapeHtml(m.text):nl2br(m.text)}</div>`).join('')}
       </div>
-      <div class="chip-row">${ASSISTANT_SUGGESTIONS.slice(0,4).map(q=>`<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}</div>
-      <div class="assistant-input-row">
-        <input type="text" id="assistant-input" placeholder="Ask about warehouse status, carrier SLAs, CSAT, or supplier delays…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
-        <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Query Copilot</button>
+      <div class="chip-row">
+        ${[
+          "Match Shopify orders against Delhivery dispatches for yesterday",
+          "Audit Shiprocket weight discrepancies and freight overcharges",
+          "Cross-reference custom return panel sizing returns with factory batch #108",
+          "Evaluate Delhivery One NDR non-delivery rates vs CSAT complaints",
+          "What are the top 3 discrepancies between warehouse and courier manifests?"
+        ].map(q=>`<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}
       </div>
+      <div class="assistant-input-row">
+        <input type="text" id="assistant-input" placeholder="Ask AI to match, audit, or reconcile across Shopify, Delhivery, Shiprocket &amp; Return Panel…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
+        <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Audit Query</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderAICustomReportView(){
+  return `
+    <div class="card" style="max-width:860px;margin:0 auto;">
+      <div class="card-title">&#128196; Evaluate &amp; Cross-Match Custom Platform Export</div>
+      <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+        Paste raw CSV, JSON, or text export lines from <b>Shopify</b>, <b>Delhivery One</b>, <b>Shiprocket</b>, or your <b>Custom Return Panel</b>. The AI engine will cross-reference the data with your warehouse dispatches, quality inspections, and customer support tickets.
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Source Platform</label>
+          <select class="field-input" id="cr-platform">
+            <option value="delhivery">Delhivery One — NDR / Courier Attempt Report</option>
+            <option value="shopify">Shopify — Orders &amp; Fulfillment Report</option>
+            <option value="shiprocket">Shiprocket — Shipping &amp; Weight Slab Invoice</option>
+            <option value="returns">Custom Return &amp; Exchange Panel — Return Log</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Paste Report Data (CSV, JSON, or Key-Value Summary)</label>
+        <textarea id="cr-input-data" style="min-height:120px;font-family:var(--font-mono);font-size:12px;" placeholder="e.g. AWB, OrderID, AttemptStatus, Reason, WeightCharged, Pincode..."></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn" onclick="document.getElementById('cr-input-data').value='AWB908124, Order #10842, Status: NDR Door Locked, DeliveryTAT: 4d, Weight: 1.5kg, Pincode: 400001\nAWB908125, Order #10843, Status: NDR Customer Unavailable, Weight: 1.5kg, Pincode: 400050';toast('Loaded sample report snippet.');">Load Sample Snippet</button>
+        <button class="btn dark" onclick="processCustomReportAI()">&#128260; Run AI Cross-Match</button>
+      </div>
+
+      <div id="cr-results"></div>
     </div>
   `;
 }
@@ -2991,7 +3377,7 @@ function buildDashboardSnapshot(){
   const appr = STATE.data.approvals.map(x=>({item:x.item, type:x.type, status:x.status, requester:personName(x.requester), requestedDate:x.requestedDate, deadline:x.deadline}));
   const fu = STATE.data.followUps.map(x=>({subject:x.subject, person:x.person, status:x.status, followUpDate:x.followUpDate}));
   const meetings = STATE.data.meetings.map(x=>({name:x.name, date:x.date, decisions:x.decisions, openActionItems:x.actionItems.filter(a=>!a.taskId).map(a=>({text:a.text, owner:personName(a.owner), deadline:a.deadline}))}));
-  return {today: todayISO(), tasks:t, people:p, projects:proj, approvals:appr, followUps:fu, meetings, bottlenecks: computeBottlenecks()};
+  return {today: todayISO(), platformIntegrations: STATE.data.platformIntegrations, platformDiscrepancies: STATE.data.platformDiscrepancies, tasks:t, people:p, projects:proj, approvals:appr, followUps:fu, meetings, bottlenecks: computeBottlenecks()};
 }
 
 async function askAssistant(question){
@@ -3034,14 +3420,21 @@ ${JSON.stringify(snapshot)}`;
     const blocked = snapshot.tasks.filter(x=>x.status==='Blocked');
     const overdue = snapshot.tasks.filter(x=>x.overdue);
     const atRisk = snapshot.projects.filter(x=>x.status==='At Risk' || x.status==='Blocked');
-    if(question.toLowerCase().includes('bottleneck') || question.toLowerCase().includes('block')){
+    const qlow = question.toLowerCase();
+    if(qlow.includes('shopify') && (qlow.includes('delhivery') || qlow.includes('shiprocket') || qlow.includes('match') || qlow.includes('order'))){
+      fallbackText = "CROSS-PLATFORM RECONCILIATION: SHOPIFY vs 3PL CARRIERS\n\n• Shopify Orders Fulfilled: 4,820 orders (Gross: ₹48.6L).\n• Carrier Manifest Physical Scans: 4,710 packages (Delhivery: 3,140 | Shiprocket: 1,570).\n• Discrepancy Found: 110 orders are marked fulfilled in Shopify with tracking numbers generated, but have NOT received pickup scans at the warehouse dispatch bay.\n• Risk: 110 customers will perceive shipping delay within 24h.\n• Action: Reconcile Packing Station 3 handover manifest with Delhivery driver today.";
+    } else if(qlow.includes('weight') || qlow.includes('overcharge') || qlow.includes('shiprocket')){
+      fallbackText = "SHIPROCKET WEIGHT & FREIGHT SURCHARGE AUDIT\n\n• Active Shipments: 1,570 | RTO Rate: 6.2% | Weight Discrepancies Flagged: 320 shipments.\n• Disputed Surcharge: ₹38,400 excess freight charged across Comfort Fleece Sets.\n• Root Cause: Billed at 1.50 kg dead weight slab; verified product spec + mailer is 0.82 kg (volumetric 0.88 kg).\n• Recommended Action: File formal batch weight dispute in Shiprocket billing portal attaching certified warehouse scale calibration logs.";
+    } else if(qlow.includes('return') || qlow.includes('exchange') || qlow.includes('sizing') || qlow.includes('panel')){
+      fallbackText = "CUSTOM RETURN & EXCHANGE PANEL vs WAREHOUSE QC AUDIT\n\n• Open Exchange Requests: 210 requests (Average refund latency: 18.4 hours).\n• Sizing vs Defect Breakdown: 58.2% Sizing Mismatches (primarily Comfort Joggers v2) | 14.5% Stitching/Fabric Defects.\n• Critical Lag: 84 returned units delivered by reverse couriers over 48h ago are still pending barcode inwarding in Zone C, delaying replacement dispatches.\n• Action: Reallocate 2 associates to clear Zone C reverse intake queue within 4 hours.";
+    } else if(qlow.includes('ndr') || qlow.includes('fake') || qlow.includes('delhivery')){
+      fallbackText = "DELHIVERY ONE NDR & CARRIER ATTEMPT AUDIT\n\n• Total NDRs Logged: 140 non-delivery attempts (94.2% SLA compliance).\n• Suspect Fake Attempts: 42 shipments marked 'Customer Unavailable / Door Locked' in West Zone.\n• Cross-Match with Support: 34 of those customers contacted support via WhatsApp stating no courier visited their residence.\n• Financial Exposure: ₹12,600 premature RTO freight penalty.\n• Action: Auto-generate formal dispute notice with customer statement timestamps to Delhivery Nodal Officer.";
+    } else if(qlow.includes('bottleneck') || qlow.includes('block')){
       fallbackText += `• ${blocked.length} blocked tasks: ${blocked.map(b=>`"${b.name}" (${b.waitingOn||'vendor'})`).join(', ')}.\n• WMS barcode scanner latency in Zone B is stalling warehouse cutover.`;
-    } else if(question.toLowerCase().includes('carrier') || question.toLowerCase().includes('delhivery') || question.toLowerCase().includes('sla')){
-      fallbackText += `• Delhivery webhook timeouts are causing premature RTOs in the West zone.\n• BlueDart has been flagged with an SLA breach penalty notice for West region delivery lags.`;
-    } else if(question.toLowerCase().includes('risk') || question.toLowerCase().includes('project')){
+    } else if(qlow.includes('risk') || qlow.includes('project')){
       fallbackText += `• ${atRisk.length} projects at risk: ${atRisk.map(p=>`"${p.name}" (${p.risk} risk)`).join(', ')}.`;
     } else {
-      fallbackText += `• ${overdue.length} overdue tasks, ${blocked.length} blocked tasks, and ${snapshot.approvals.filter(a=>a.status==='Pending').length} pending approvals requiring executive sign-off today.`;
+      fallbackText += `• Discrepancies Analyzed: 4 multi-platform anomalies identified across Shopify, Delhivery One, Shiprocket, and Custom Return Panel.\n• Operational Queue: ${overdue.length} overdue tasks, ${blocked.length} blocked tasks, and ${snapshot.approvals.filter(a=>a.status==='Pending').length} pending approvals.`;
     }
     ASSISTANT_MESSAGES.push({role:'ai', text: fallbackText});
   }

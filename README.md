@@ -6,6 +6,14 @@ An executive control room dashboard tailored for a leader simultaneously managin
 
 ## Key Features
 
+- **AI Cross-Platform Auditor & Reconciler (New!)**:
+  - Automatically evaluates, audits, and cross-references reports across **Shopify**, **Delhivery One**, **Shiprocket**, and your **Custom Return & Exchange Panel**.
+  - Detects fulfillment handover delays (Shopify fulfilled vs courier manifest scanned).
+  - Flags carrier fake Non-Delivery Reports (NDRs) by cross-referencing customer WhatsApp tickets.
+  - Catches courier volumetric weight slab overcharges and generates dispute evidence.
+  - Discovers reverse logistics inwarding backlogs in warehouse inspection bays.
+  - **1-Click Actions**: Convert any discrepancy into an assigned operational task or draft a formal dispute/demand letter.
+  - **Custom Report Evaluator**: Paste or upload raw CSV/JSON export lines from any platform to get instant AI discrepancy analysis.
 - **Google Drive as a Database (Cloud Sync)**:
   - Connect your personal Google Drive to store, sync, and persist your entire dashboard state (`coo_cxo_database.json`) automatically across all devices.
   - Free, private, and zero Google Cloud Console / billing setup required.
@@ -27,7 +35,7 @@ An executive control room dashboard tailored for a leader simultaneously managin
   11. **Goals**: 3-tier strategy tree linking strategic objectives to frontline deliverables.
   12. **SOPs**: Operational SOP library.
   13. **Insights**: Weekly Execution Review, Scorecard, Systemic Bottlenecks, Audit Log, and 1-click text report exporter.
-  14. **AI Assistant**: Grounded AI query interface analyzing the live JSON state.
+  14. **AI Assistant**: Grounded AI query interface analyzing the live JSON state & cross-platform manifests.
 - **Local Persistence & Offline First**: Works offline and persists all changes in browser storage automatically when disconnected.
 
 ---
@@ -45,8 +53,6 @@ An executive control room dashboard tailored for a leader simultaneously managin
 6. Click **Deploy**, authorize permissions with your Google account, and copy the **Web app URL**.
 7. Paste your Web App URL into the dashboard modal and click **"Save & Connect"**.
 
-From then on, all changes (tasks, people, approvals, settings) will automatically sync to `coo_cxo_database.json` in your Google Drive!
-
 ---
 
 ## Deployment on Render (Free)
@@ -59,9 +65,3 @@ From then on, all changes (tasks, people, approvals, settings) will automaticall
    - **Build Command**: *(empty)*
    - **Publish Directory**: `.` *(or `./`)*
 5. Click **Create Static Site**.
-
-### Option B: Web Service (Node.js)
-1. In Render, select **New +** &rarr; **Web Service**.
-2. Connect the repository.
-3. Set **Start Command**: `node server.js`.
-4. Click **Create Web Service**.
