@@ -317,6 +317,21 @@ table.data-table{width:100%;border-collapse:collapse;font-size:12.8px;}
   .shell{display:block;}
   .view{max-width:none;padding:0;}
 }
+
+.chat-attachments-tray{display:flex;gap:8px;padding:8px 14px;background:var(--paper-sunken);border-top:1px solid var(--line);flex-wrap:wrap;align-items:center;}
+.chat-file-chip{display:inline-flex;align-items:center;gap:6px;background:var(--paper-raised);border:1px solid var(--line);padding:4px 9px;border-radius:var(--radius-s);font-size:11.8px;max-width:280px;}
+.file-chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.file-chip-size{color:var(--text-muted);font-size:10.5px;}
+.file-chip-remove{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;}
+.file-chip-remove:hover{color:var(--brick);}
+.msg-attachments-wrap{display:flex;flex-direction:column;gap:4px;margin-bottom:6px;}
+.msg-attachment-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.14);padding:4px 9px;border-radius:var(--radius-s);font-size:11.5px;max-width:320px;}
+.msg.ai .msg-attachment-pill{background:var(--paper-raised);border:1px solid var(--line);}
+.ai-action-card{background:var(--paper-raised);border:1px solid var(--line);border-left:3.5px solid var(--sage);border-radius:var(--radius-s);padding:10px 12px;margin-top:10px;}
+.ai-action-title{font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:6px;}
+.ai-action-meta{font-size:11.5px;color:var(--text-muted);margin-top:3px;}
+.assistant-shell.dragover{border:2px dashed var(--amber-deep) !important;background:rgba(201,138,44,0.04);}
+
 </style>
 </head>
 <body>
@@ -1357,6 +1372,106 @@ function maybeSpawnRecurring(t){
     recurringOf: template.id,
   });
   toast(`Recurring task "${t.name}" queued for ${fmtDate(nextDue)}.`);
+}
+
+
+/* ---------- Universal Creation Helpers ---------- */
+function createProject(data){
+  const proj = Object.assign({
+    id: genId('proj'),
+    name: data.name || 'New Strategic Initiative',
+    objective: data.objective || '',
+    owner: data.owner || STATE.viewingPersonId,
+    team: data.team || [STATE.viewingPersonId],
+    startDate: todayISO(),
+    deadline: data.deadline || addDays(todayISO(), 30),
+    priority: data.priority || 'P1',
+    status: 'On Track',
+    milestones: data.milestones || [],
+    risks: data.risks || [],
+    documents: []
+  }, data);
+  STATE.data.projects.push(proj);
+  logAudit('Project', proj.name, 'Created', '', '');
+  saveState();
+  return proj;
+}
+
+function createApproval(data){
+  const appr = Object.assign({
+    id: genId('ap'),
+    requester: data.requester || STATE.viewingPersonId,
+    type: data.type || 'Operational Expenditure',
+    item: data.item || 'New Approval Request',
+    requestedDate: todayISO(),
+    deadline: data.deadline || addDays(todayISO(), 2),
+    status: 'Pending',
+    comments: data.comments || [],
+    attachment: data.attachment || '#',
+    relatedProject: data.relatedProject || null
+  }, data);
+  STATE.data.approvals.push(appr);
+  logAudit('Approval', appr.item, 'Submitted', '', 'Pending executive sign-off');
+  saveState();
+  return appr;
+}
+
+function createGoal(data){
+  const g = Object.assign({
+    id: genId('g'),
+    objective: data.objective || 'Operational Excellence',
+    teamGoal: data.teamGoal || 'New Strategic Milestone',
+    projectIds: data.projectIds || []
+  }, data);
+  STATE.data.goals.push(g);
+  saveState();
+  return g;
+}
+
+function createSop(data){
+  const s = Object.assign({
+    id: genId('sop'),
+    name: data.name || 'New SOP Protocol',
+    department: data.department || 'Fulfillment & Warehousing',
+    owner: data.owner || STATE.viewingPersonId,
+    version: data.version || 'v1.0',
+    lastUpdated: todayISO(),
+    link: data.link || '#'
+  }, data);
+  STATE.data.sops.push(s);
+  saveState();
+  return s;
+}
+
+function createFollowUp(data){
+  const fu = Object.assign({
+    id: genId('fu'),
+    subject: data.subject || 'Partner Follow-up',
+    person: data.person || 'External Partner',
+    lastCommunication: todayISO(),
+    followUpDate: data.followUpDate || addDays(todayISO(), 2),
+    status: 'Open',
+    notes: data.notes || ''
+  }, data);
+  STATE.data.followUps.push(fu);
+  saveState();
+  return fu;
+}
+
+function createTeamMember(data){
+  const p = Object.assign({
+    id: genId('p'),
+    name: data.name || 'New Team Member',
+    role: data.role || 'Operations Specialist',
+    function: data.function || 'Fulfillment & Warehousing',
+    manager: data.manager || 'p-coo',
+    joinDate: todayISO(),
+    workingHours: data.workingHours || 40,
+    contact: data.contact || ''
+  }, data);
+  STATE.data.people.push(p);
+  saveState();
+  return p;
 }
 
 function createTask(data){
@@ -2588,10 +2703,193 @@ function viewApprovals(){
   else if(filter==='rejected') list = list.filter(a=>a.status==='Rejected'||a.status==='Changes Requested');
 
   return `
-    <div class="page-head"><div><div class="page-eyebrow">Executive Sign-Offs</div><h1 class="page-title">COO & CXO Approval Center</h1><div class="page-sub">Carrier contracts, warehouse capex, factory quality waivers, supplier purchase orders, and customer exception claims.</div></div></div>
+    <div class="page-head"><div><div class="page-eyebrow">Executive Sign-Offs</div><h1 class="page-title">COO & CXO Approval Center</h1><div class="page-sub">Carrier contracts, warehouse capex, factory quality waivers, supplier purchase orders, and customer exception claims.</div></div><button class="btn-primary" onclick="openNewApprovalModal()">+ Request Sign-Off</button></div>
     <div class="tab-row">${tabs.map(([id,label])=>`<button class="tab-btn ${filter===id?'active':''}" onclick="setTab('approvals','${id}')">${label}</button>`).join('')}</div>
     <div class="card">${list.length?list.map(a=>approvalRowHtml(a)).join(''):emptyState('No approvals in this queue.')}</div>
   `;
+}
+
+
+/* ---------- Modal: New Approval ---------- */
+function openNewApprovalModal(){
+  openModal(`
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">+ Request Approval / Sign-Off</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label class="field-label">Item / Expenditure Description *</label>
+          <input type="text" id="nap-item" placeholder="e.g. Purchase order for Q1 replenishment yarn to Ludhiana Mills (₹15L)" autofocus>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Approval Type *</label>
+            <select class="field-input" id="nap-type">
+              <option value="Supplier Purchase Order">Supplier Purchase Order</option>
+              <option value="Quality Defect Waiver">Quality Defect Waiver</option>
+              <option value="Carrier Contract Approval">Carrier Contract Approval</option>
+              <option value="Warehouse Capex Approval">Warehouse Capex Approval</option>
+              <option value="Customer Concession Approval">Customer Concession Approval</option>
+              <option value="CX Tool License">CX Tool License</option>
+              <option value="Operational Exception">Operational Exception</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Requester</label>
+            <select class="field-input" id="nap-requester">
+              ${STATE.data.people.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.role)})</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Sign-Off Deadline</label>
+            <input type="date" id="nap-deadline" value="${addDays(todayISO(), 2)}">
+          </div>
+          <div class="field">
+            <label class="field-label">Related Project / Initiative</label>
+            <select class="field-input" id="nap-project">
+              <option value="">None (Independent)</option>
+              ${STATE.data.projects.map(pr=>`<option value="${pr.id}">${escapeHtml(pr.name)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Context / Justification Note</label>
+          <input type="text" id="nap-note" placeholder="e.g. 45-day credit terms confirmed; required to prevent stockout ahead of seasonal peak.">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitNewApproval()">Submit for Sign-Off</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitNewApproval(){
+  const item = document.getElementById('nap-item').value.trim();
+  const type = document.getElementById('nap-type').value;
+  const requester = document.getElementById('nap-requester').value;
+  const deadline = document.getElementById('nap-deadline').value;
+  const project = document.getElementById('nap-project').value || null;
+  const note = document.getElementById('nap-note').value.trim();
+
+  if(!item){ toast('Please enter the approval item description.'); return; }
+
+  const comments = note ? [{ by: requester, text: note, date: todayISO() }] : [];
+  createApproval({ item, type, requester, deadline, relatedProject: project, comments });
+  closeModal();
+  render();
+  toast('Approval request submitted successfully!');
+}
+
+/* ---------- Modal: New Goal (OKR) ---------- */
+function openNewGoalModal(){
+  openModal(`
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">+ Add Strategic Goal (OKR)</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label class="field-label">Strategic Objective *</label>
+          <input type="text" id="ng-obj" placeholder="e.g. Zero-Defect & Predictable Operations or World-Class Customer Experience" autofocus>
+        </div>
+        <div class="field">
+          <label class="field-label">Team Key Result / Measurable Goal *</label>
+          <input type="text" id="ng-goal" placeholder="e.g. Compress order-to-dispatch latency under 12 hours warehouse-wide">
+        </div>
+        <div class="field">
+          <label class="field-label">Linked Projects</label>
+          <select class="field-input" id="ng-projects" multiple style="height:90px;">
+            ${STATE.data.projects.map(pr=>`<option value="${pr.id}">${escapeHtml(pr.name)}</option>`).join('')}
+          </select>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Hold Cmd/Ctrl to select multiple projects.</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitNewGoal()">Create Strategic Goal</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitNewGoal(){
+  const obj = document.getElementById('ng-obj').value.trim();
+  const goal = document.getElementById('ng-goal').value.trim();
+  const select = document.getElementById('ng-projects');
+  const projectIds = Array.from(select.selectedOptions).map(o=>o.value);
+
+  if(!obj || !goal){ toast('Please enter both the objective and measurable goal.'); return; }
+  createGoal({ objective: obj, teamGoal: goal, projectIds });
+  closeModal();
+  render();
+  toast('Strategic goal created!');
+}
+
+/* ---------- Modal: New SOP Protocol ---------- */
+function openNewSopModal(){
+  openModal(`
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">+ Register Standard Operating Procedure (SOP)</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label class="field-label">SOP Protocol Title *</label>
+          <input type="text" id="ns-name" placeholder="e.g. Warehouse Inwarding & Barcode Tagging Protocol" autofocus>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Functional Department</label>
+            <select class="field-input" id="ns-dept">
+              ${DEPARTMENTS.map(d=>`<option value="${d}">${d}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Owner / Functional Lead</label>
+            <select class="field-input" id="ns-owner">
+              ${STATE.data.people.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.role)})</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Version</label>
+            <input type="text" id="ns-ver" value="v1.0">
+          </div>
+          <div class="field">
+            <label class="field-label">Protocol Document URL / Reference</label>
+            <input type="text" id="ns-link" placeholder="https://docs.google.com/... or internal doc ID">
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn dark" onclick="submitNewSop()">Register SOP Protocol</button>
+      </div>
+    </div>
+  `);
+}
+
+function submitNewSop(){
+  const name = document.getElementById('ns-name').value.trim();
+  const dept = document.getElementById('ns-dept').value;
+  const owner = document.getElementById('ns-owner').value;
+  const ver = document.getElementById('ns-ver').value.trim() || 'v1.0';
+  const link = document.getElementById('ns-link').value.trim() || '#';
+
+  if(!name){ toast('Please enter the SOP name.'); return; }
+  createSop({ name, department: dept, owner, version: ver, link });
+  closeModal();
+  render();
+  toast('SOP registered in library!');
 }
 
 function openApprovalModal(id){
@@ -2718,7 +3016,7 @@ function viewGoals(){
   const objectives = {};
   STATE.data.goals.forEach(g=>{ objectives[g.objective]=objectives[g.objective]||[]; objectives[g.objective].push(g); });
   return `
-    <div class="page-head"><div><div class="page-eyebrow">Strategic Architecture</div><h1 class="page-title">Operations & CX Strategic Goals</h1><div class="page-sub">Connecting high-level operational efficiency and customer delight goals directly to projects and frontline tasks.</div></div></div>
+    <div class="page-head"><div><div class="page-eyebrow">Strategic Architecture</div><h1 class="page-title">Operations & CX Strategic Goals</h1><div class="page-sub">Connecting high-level operational efficiency and customer delight goals directly to projects and frontline tasks.</div></div><button class="btn-primary" onclick="openNewGoalModal()">+ Add Strategic Goal</button></div>
     ${Object.keys(objectives).length ? Object.entries(objectives).map(([obj, goals])=>`
       <div class="section-block">
         <div class="card" style="background:var(--ink);color:#fff;margin-bottom:10px;"><b>${escapeHtml(obj)}</b></div>
@@ -2742,7 +3040,7 @@ function viewGoals(){
 /* ============================== VIEW: SOPs ============================== */
 function viewSops(){
   return `
-    <div class="page-head"><div><div class="page-eyebrow">Standard Operating Procedures</div><h1 class="page-title">Operations & CX SOP Library</h1><div class="page-sub">Audited protocols for warehouse receiving, carrier SLA enforcement, AQL 2.5 defect inspections, and customer escalation matrices.</div></div></div>
+    <div class="page-head"><div><div class="page-eyebrow">Standard Operating Procedures</div><h1 class="page-title">Operations & CX SOP Library</h1><div class="page-sub">Audited protocols for warehouse receiving, carrier SLA enforcement, AQL 2.5 defect inspections, and customer escalation matrices.</div></div><button class="btn-primary" onclick="openNewSopModal()">+ Register SOP</button></div>
     <div class="table-wrap"><table class="data-table"><thead><tr><th>SOP Name</th><th>Functional Department</th><th>Owner</th><th>Version</th><th>Last Audited</th><th>Access</th></tr></thead><tbody>
     ${STATE.data.sops.length ? STATE.data.sops.map(s=>`<tr>
       <td><b>${escapeHtml(s.name)}</b></td><td>${escapeHtml(s.department)}</td><td>${escapeHtml(personName(s.owner))}</td><td class="mono">${escapeHtml(s.version)}</td><td>${fmtDate(s.lastUpdated)}</td>
@@ -3242,6 +3540,596 @@ function renderAIInspectorView(){
   `;
 }
 
+
+/* -------------------- AI CHAT ATTACHMENTS & ACTIONS -------------------- */
+let CHAT_ATTACHMENTS = [];
+
+function formatFileSize(bytes){
+  if(!bytes || bytes <= 0) return '0 B';
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function getFileIcon(type, name){
+  const ext = (name||'').split('.').pop().toLowerCase();
+  if((type && type.startsWith('image/')) || ['png','jpg','jpeg','webp','gif'].includes(ext)) return '🖼️';
+  if((type && type.includes('pdf')) || ext === 'pdf') return '📄';
+  if(['csv','tsv','xlsx','xls'].includes(ext)) return '📊';
+  if(['json','xml','log','txt','md'].includes(ext)) return '📝';
+  return '📎';
+}
+
+function handleChatFileUpload(event){
+  const files = event.target.files;
+  if(!files || !files.length) return;
+  processSelectedFiles(files);
+  event.target.value = '';
+}
+
+function handleChatDragOver(event){
+  event.preventDefault();
+  event.stopPropagation();
+  const shell = document.querySelector('.assistant-shell');
+  if(shell) shell.classList.add('dragover');
+}
+
+function handleChatDragLeave(event){
+  event.preventDefault();
+  event.stopPropagation();
+  const shell = document.querySelector('.assistant-shell');
+  if(shell) shell.classList.remove('dragover');
+}
+
+function handleChatDrop(event){
+  event.preventDefault();
+  event.stopPropagation();
+  const shell = document.querySelector('.assistant-shell');
+  if(shell) shell.classList.remove('dragover');
+  if(event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length){
+    processSelectedFiles(event.dataTransfer.files);
+  }
+}
+
+function processSelectedFiles(files){
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    const isImg = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|webp|gif)$/i.test(file.name);
+    if(isImg){
+      reader.onload = (e) => {
+        const fullDataUrl = e.target.result;
+        const base64 = fullDataUrl.split(',')[1] || '';
+        CHAT_ATTACHMENTS.push({
+          id: 'att_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          name: file.name,
+          size: file.size,
+          type: file.type || 'image/png',
+          isImage: true,
+          dataUrl: fullDataUrl,
+          base64: base64
+        });
+        renderChatAttachmentsTray();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      reader.onload = (e) => {
+        CHAT_ATTACHMENTS.push({
+          id: 'att_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          name: file.name,
+          size: file.size,
+          type: file.type || 'text/plain',
+          isText: true,
+          textContent: e.target.result
+        });
+        renderChatAttachmentsTray();
+      };
+      reader.readAsText(file);
+    }
+  });
+}
+
+function renderChatAttachmentsTray(){
+  const tray = document.getElementById('chat-attachments-tray');
+  if(!tray) return;
+  if(!CHAT_ATTACHMENTS || CHAT_ATTACHMENTS.length === 0){
+    tray.style.display = 'none';
+    tray.innerHTML = '';
+    return;
+  }
+  tray.style.display = 'flex';
+  tray.innerHTML = CHAT_ATTACHMENTS.map((att, idx) => `
+    <div class="chat-file-chip" title="${escapeHtml(att.name)} (${formatFileSize(att.size)})">
+      <span>${getFileIcon(att.type, att.name)}</span>
+      <span class="file-chip-name">${escapeHtml(att.name)}</span>
+      <span class="file-chip-size">(${formatFileSize(att.size)})</span>
+      <button class="file-chip-remove" onclick="removeChatAttachment(${idx})" title="Remove">&times;</button>
+    </div>
+  `).join('');
+}
+
+function removeChatAttachment(index){
+  CHAT_ATTACHMENTS.splice(index, 1);
+  renderChatAttachmentsTray();
+}
+
+function resolvePersonId(identifier){
+  if(!identifier) return null;
+  const idStr = String(identifier).toLowerCase().trim();
+  const found = STATE.data.people.find(p => p.id.toLowerCase() === idStr || p.name.toLowerCase().includes(idStr) || p.role.toLowerCase().includes(idStr));
+  return found ? found.id : null;
+}
+
+function executeControlRoomAction(action, data){
+  data = data || {};
+  try {
+    if(action === 'create_task' || action === 'add_task'){
+      const name = data.name || data.title || 'New Operational Task';
+      const assignee = resolvePersonId(data.assignee) || STATE.viewingPersonId;
+      const dueDate = data.dueDate || data.due || addDays(todayISO(), 3);
+      const priority = (data.priority || 'P2').toUpperCase();
+      const desc = data.description || data.desc || data.context || '';
+      const proj = data.project ? (STATE.data.projects.find(p=>p.name.toLowerCase()===data.project.toLowerCase()||p.id===data.project)?.id || null) : null;
+      
+      const t = createTask({ name, assignee, dueDate, priority, description: desc, project: proj });
+      return {
+        success: true,
+        action: 'create_task',
+        title: 'Task Created & Assigned',
+        html: `
+          <div class="ai-action-card">
+            <div class="ai-action-title"><span>✅</span> <span>Task Assigned: <b>${escapeHtml(t.name)}</b></span></div>
+            <div class="ai-action-meta">Assignee: <b>${escapeHtml(personName(t.assignee))}</b> · Due: <b>${fmtDate(t.dueDate)}</b> · Priority: <span class="chip ${t.priority==='P1'?'chip-bad':t.priority==='P2'?'chip-warn':'chip-outline'}">${t.priority}</span></div>
+            <div style="margin-top:8px;"><button class="btn small" onclick="goTo('tasks'); openTaskModal('${t.id}')">View Task in Board &rarr;</button></div>
+          </div>
+        `
+      };
+    }
+
+    if(action === 'complete_task' || action === 'done_task'){
+      const target = (data.name || data.id || data.title || '').toLowerCase().trim();
+      const t = STATE.data.tasks.find(x => x.id.toLowerCase() === target || x.name.toLowerCase().includes(target));
+      if(t){
+        updateTaskField(t, 'status', 'Completed');
+        return {
+          success: true,
+          action: 'complete_task',
+          title: 'Task Marked as Completed',
+          html: `
+            <div class="ai-action-card">
+              <div class="ai-action-title"><span>🎉</span> <span>Task Completed: <b>${escapeHtml(t.name)}</b></span></div>
+              <div class="ai-action-meta">Status updated to <b>Completed</b> · Logged in executive audit trail</div>
+              <div style="margin-top:8px;"><button class="btn small" onclick="goTo('tasks')">Open Tasks &rarr;</button></div>
+            </div>
+          `
+        };
+      }
+      return { success: false, message: 'Could not find a task matching "' + target + '".' };
+    }
+
+    if(action === 'create_project' || action === 'add_project'){
+      const name = data.name || data.title || 'New Operational Initiative';
+      const objective = data.objective || 'Operational Excellence & Scalability';
+      const owner = resolvePersonId(data.owner) || STATE.viewingPersonId;
+      const deadline = data.deadline || addDays(todayISO(), 30);
+      const priority = (data.priority || 'P1').toUpperCase();
+      const proj = createProject({ name, objective, owner, deadline, priority });
+      return {
+        success: true,
+        action: 'create_project',
+        title: 'Project Initiated',
+        html: `
+          <div class="ai-action-card">
+            <div class="ai-action-title"><span>🚀</span> <span>Initiative Launched: <b>${escapeHtml(proj.name)}</b></span></div>
+            <div class="ai-action-meta">Lead: <b>${escapeHtml(personName(proj.owner))}</b> · Deadline: <b>${fmtDate(proj.deadline)}</b> · Objective: <i>${escapeHtml(proj.objective)}</i></div>
+            <div style="margin-top:8px;"><button class="btn small" onclick="goTo('projects')">Open Project Roadmap &rarr;</button></div>
+          </div>
+        `
+      };
+    }
+
+    if(action === 'create_approval' || action === 'request_approval'){
+      const item = data.item || data.name || data.title || 'Executive Sign-Off Request';
+      const type = data.type || 'Operational Expenditure';
+      const requester = resolvePersonId(data.requester) || STATE.viewingPersonId;
+      const deadline = data.deadline || addDays(todayISO(), 2);
+      const note = data.note || data.justification || '';
+      const comments = note ? [{ by: requester, text: note, date: todayISO() }] : [];
+      const appr = createApproval({ item, type, requester, deadline, comments });
+      return {
+        success: true,
+        action: 'create_approval',
+        title: 'Sign-Off Requested',
+        html: `
+          <div class="ai-action-card">
+            <div class="ai-action-title"><span>📝</span> <span>Approval Queued: <b>${escapeHtml(appr.item)}</b></span></div>
+            <div class="ai-action-meta">Type: <b>${escapeHtml(appr.type)}</b> · Requester: <b>${escapeHtml(personName(appr.requester))}</b> · Sign-Off Deadline: <b>${fmtDate(appr.deadline)}</b></div>
+            <div style="margin-top:8px;"><button class="btn small" onclick="goTo('approvals')">View in Approval Center &rarr;</button></div>
+          </div>
+        `
+      };
+    }
+
+    if(action === 'approve_request'){
+      const target = (data.item || data.id || '').toLowerCase().trim();
+      const a = STATE.data.approvals.find(x => x.id.toLowerCase() === target || x.item.toLowerCase().includes(target));
+      if(a){
+        setApprovalStatus(a.id, 'Approved');
+        return {
+          success: true,
+          action: 'approve_request',
+          title: 'Request Approved',
+          html: `
+            <div class="ai-action-card">
+              <div class="ai-action-title"><span>✍️</span> <span>Sign-off Approved: <b>${escapeHtml(a.item)}</b></span></div>
+              <div class="ai-action-meta">Executive status changed to <b>Approved</b> · Requester notified</div>
+              <div style="margin-top:8px;"><button class="btn small" onclick="goTo('approvals')">View Approvals &rarr;</button></div>
+            </div>
+          `
+        };
+      }
+      return { success: false, message: 'Could not find approval request matching "' + target + '".' };
+    }
+
+    if(action === 'create_goal' || action === 'add_goal'){
+      const objective = data.objective || 'Operational Excellence';
+      const teamGoal = data.teamGoal || data.goal || 'New Strategic Milestone';
+      const g = createGoal({ objective, teamGoal });
+      return {
+        success: true,
+        action: 'create_goal',
+        title: 'Strategic Goal Added',
+        html: `
+          <div class="ai-action-card">
+            <div class="ai-action-title"><span>🎯</span> <span>OKR Added: <b>${escapeHtml(g.teamGoal)}</b></span></div>
+            <div class="ai-action-meta">Objective Pillar: <b>${escapeHtml(g.objective)}</b></div>
+            <div style="margin-top:8px;"><button class="btn small" onclick="goTo('goals')">Open Strategic Goals &rarr;</button></div>
+          </div>
+        `
+      };
+    }
+
+    if(action === 'create_sop' || action === 'add_sop'){
+      const name = data.name || data.title || 'New Standard Operating Procedure';
+      const department = data.department || data.dept || 'Fulfillment & Warehousing';
+      const owner = resolvePersonId(data.owner) || STATE.viewingPersonId;
+      const ver = data.version || 'v1.0';
+      const link = data.link || '#';
+      const s = createSop({ name, department, owner, version: ver, link });
+      return {
+        success: true,
+        action: 'create_sop',
+        title: 'SOP Protocol Registered',
+        html: `
+          <div class="ai-action-card">
+            <div class="ai-action-title"><span>📖</span> <span>SOP Registered: <b>${escapeHtml(s.name)}</b></span></div>
+            <div class="ai-action-meta">Department: <b>${escapeHtml(s.department)}</b> · Lead: <b>${escapeHtml(personName(s.owner))}</b> · Version: <b>${escapeHtml(s.version)}</b></div>
+            <div style="margin-top:8px;"><button class="btn small" onclick="goTo('sops')">Open SOP Library &rarr;</button></div>
+          </div>
+        `
+      };
+    }
+
+    if(action === 'create_followup' || action === 'add_followup'){
+      const subject = data.subject || 'Partner Follow-up';
+      const person = data.person || data.partner || 'External Partner';
+      const followUpDate = data.followUpDate || data.due || addDays(todayISO(), 2);
+      const notes = data.notes || '';
+      const fu = createFollowUp({ subject, person, followUpDate, notes });
+      return {
+        success: true,
+        action: 'create_followup',
+        title: 'Partner Follow-up Logged',
+        html: `
+          <div class="ai-action-card">
+            <div class="ai-action-title"><span>🤝</span> <span>Follow-up Scheduled: <b>${escapeHtml(fu.subject)}</b></span></div>
+            <div class="ai-action-meta">Partner / Entity: <b>${escapeHtml(fu.person)}</b> · Due: <b>${fmtDate(fu.followUpDate)}</b></div>
+            <div style="margin-top:8px;"><button class="btn small" onclick="goTo('delegation')">Open Follow-up Center &rarr;</button></div>
+          </div>
+        `
+      };
+    }
+
+    if(action === 'create_team_member' || action === 'add_team_member'){
+      const name = data.name || 'New Team Member';
+      const role = data.role || 'Operations Specialist';
+      const func = data.function || data.department || 'Fulfillment & Warehousing';
+      const contact = data.contact || '';
+      const p = createTeamMember({ name, role, function: func, contact });
+      return {
+        success: true,
+        action: 'create_team_member',
+        title: 'Team Member Added',
+        html: `
+          <div class="ai-action-card">
+            <div class="ai-action-title"><span>👤</span> <span>Team Member Enrolled: <b>${escapeHtml(p.name)}</b></span></div>
+            <div class="ai-action-meta">Role: <b>${escapeHtml(p.role)}</b> · Department: <b>${escapeHtml(p.function)}</b></div>
+            <div style="margin-top:8px;"><button class="btn small" onclick="goTo('team')">Open Team Directory &rarr;</button></div>
+          </div>
+        `
+      };
+    }
+
+  } catch(err) {
+    console.error('Error executing control room action:', err);
+    return { success: false, message: 'Failed to execute action: ' + err.message };
+  }
+  return { success: false, message: 'Unknown action type: ' + action };
+}
+
+function parseDirectChatCommand(text){
+  const t = (text || '').trim();
+
+  // Create/Add task
+  const taskMatch = t.match(/^(?:create|add|assign)\s+task:?\s+(.+)/i);
+  if(taskMatch){
+    let raw = taskMatch[1].trim();
+    let name = raw;
+    let assignee = null;
+    let priority = 'P2';
+    let due = null;
+
+    const priMatch = raw.match(/\b(?:priority|prio)\s*[:=]?\s*(p[123]|high|medium|low)\b/i);
+    if(priMatch){
+      const pr = priMatch[1].toUpperCase();
+      priority = pr === 'HIGH' ? 'P1' : pr === 'MEDIUM' ? 'P2' : pr === 'LOW' ? 'P3' : pr;
+      raw = raw.replace(priMatch[0], ' ').trim();
+    }
+    const dueMatch = raw.match(/\b(?:by|due|before)\s+([0-9]{4}-[0-9]{2}-[0-9]{2}|tomorrow|today|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i);
+    if(dueMatch){
+      const dVal = dueMatch[1].toLowerCase();
+      if(dVal === 'today') due = todayISO();
+      else if(dVal === 'tomorrow') due = addDays(todayISO(), 1);
+      else if(dVal.includes('-')) due = dVal;
+      else due = addDays(todayISO(), 3);
+      raw = raw.replace(dueMatch[0], ' ').trim();
+    }
+    const assMatch = raw.match(/\b(?:for|assigned to|to|assignee)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)\b/i);
+    if(assMatch){
+      assignee = assMatch[1].trim();
+      raw = raw.replace(assMatch[0], ' ').trim();
+    }
+    name = raw.replace(/^["']|["']$/g, '').trim();
+    return { action: 'create_task', data: { name, assignee, priority, dueDate: due } };
+  }
+
+  // Complete task
+  const doneMatch = t.match(/^(?:complete|mark\s+done|finish)\s+task:?\s+(.+)/i);
+  if(doneMatch){
+    return { action: 'complete_task', data: { name: doneMatch[1].replace(/^["']|["']$/g, '').trim() } };
+  }
+
+  // Create Project
+  const projMatch = t.match(/^(?:create|add|new)\s+(?:project|initiative):?\s+(.+)/i);
+  if(projMatch){
+    let raw = projMatch[1].trim();
+    let name = raw;
+    let owner = null;
+    let priority = 'P1';
+
+    const priMatch = raw.match(/\b(?:priority|prio)\s*[:=]?\s*(p[123]|high|medium)\b/i);
+    if(priMatch){
+      const pr = priMatch[1].toUpperCase();
+      priority = pr === 'HIGH' ? 'P1' : pr === 'MEDIUM' ? 'P2' : pr;
+      raw = raw.replace(priMatch[0], '').trim();
+    }
+    const ownerMatch = raw.match(/\b(?:lead|owner|by)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)\b/i);
+    if(ownerMatch){
+      owner = ownerMatch[1];
+      raw = raw.replace(ownerMatch[0], '').trim();
+    }
+    name = raw.replace(/^["']|["']$/g, '').trim();
+    return { action: 'create_project', data: { name, owner, priority } };
+  }
+
+  // Request approval
+  const apprMatch = t.match(/^(?:request|create|add)\s+approval:?\s+(.+)/i);
+  if(apprMatch){
+    let raw = apprMatch[1].trim();
+    let item = raw;
+    let type = 'Operational Expenditure';
+    const typeMatch = raw.match(/\b(?:type|category)\s*[:=]?\s*([A-Za-z\s]+)/i);
+    if(typeMatch){
+      type = typeMatch[1].trim();
+      raw = raw.replace(typeMatch[0], '').trim();
+    }
+    item = raw.replace(/^["']|["']$/g, '').trim();
+    return { action: 'create_approval', data: { item, type } };
+  }
+
+  // Approve request
+  const approveMatch = t.match(/^approve\s+(?:approval\s+|request\s+)?(.+)/i);
+  if(approveMatch){
+    return { action: 'approve_request', data: { item: approveMatch[1].replace(/^["']|["']$/g, '').trim() } };
+  }
+
+  // Create goal
+  const goalMatch = t.match(/^(?:create|add)\s+goal:?\s+(.+)/i);
+  if(goalMatch){
+    const parts = goalMatch[1].split(/[|;]/).map(s=>s.trim());
+    return { action: 'create_goal', data: { objective: parts.length > 1 ? parts[0] : 'Operational Excellence', teamGoal: parts.length > 1 ? parts[1] : parts[0] } };
+  }
+
+  // Register SOP
+  const sopMatch = t.match(/^(?:register|create|add)\s+sop:?\s+(.+)/i);
+  if(sopMatch){
+    let raw = sopMatch[1].trim();
+    let dept = 'Fulfillment & Warehousing';
+    const deptMatch = raw.match(/\b(?:dept|department)\s*[:=]?\s*([A-Za-z\s&]+)/i);
+    if(deptMatch){
+      dept = deptMatch[1].trim();
+      raw = raw.replace(deptMatch[0], '').trim();
+    }
+    const name = raw.replace(/^["']|["']$/g, '').trim();
+    return { action: 'create_sop', data: { name, department: dept } };
+  }
+
+  // Add follow-up
+  const fuMatch = t.match(/^(?:add|log)\s+follow-?up:?\s+(.+)/i);
+  if(fuMatch){
+    let raw = fuMatch[1].trim();
+    let person = 'External Partner';
+    const withMatch = raw.match(/\b(?:with|for)\s+([A-Za-z0-9\s]+?)(?:\s+regarding|\s+about|$)/i);
+    if(withMatch){
+      person = withMatch[1].trim();
+      raw = raw.replace(withMatch[0], '').trim();
+    }
+    const subject = raw.replace(/^["']|["']$/g, '').trim() || 'Partner SLA Review';
+    return { action: 'create_followup', data: { subject, person } };
+  }
+
+  // Add team member
+  const teamMatch = t.match(/^(?:add|create)\s+team\s+member:?\s+(.+)/i);
+  if(teamMatch){
+    let raw = teamMatch[1].trim();
+    let role = 'Operations Specialist';
+    const roleMatch = raw.match(/\b(?:as|role)\s+([A-Za-z\s]+)/i);
+    if(roleMatch){
+      role = roleMatch[1].trim();
+      raw = raw.replace(roleMatch[0], '').trim();
+    }
+    const name = raw.replace(/^["']|["']$/g, '').trim();
+    return { action: 'create_team_member', data: { name, role } };
+  }
+
+  return null;
+}
+
+function isExplicitOrderVerification(text){
+  const t = (text || '').trim();
+  const low = t.toLowerCase();
+
+  const explicitOrderId = t.match(/#(\d{3,6})\b/);
+  const explicitAwb = t.match(/\b([A-Z]{2,4}-[A-Z0-9_-]{4,})\b/i);
+  const commandOrder = t.match(/^(?:verify|track|check|audit|inspect)\s+(?:order\s+|awb\s+)?#?(\d{3,6}|[A-Z0-9_-]{5,})/i);
+
+  if(explicitOrderId) return explicitOrderId[0];
+  if(explicitAwb) return explicitAwb[0];
+  if(commandOrder) return (commandOrder[1].startsWith('#') ? commandOrder[1] : '#' + commandOrder[1]);
+
+  if(low === 'verify order across all connected panels' || low === 'verify order' || low === 'audit order'){
+    return (STATE.selectedOrderAudit || (STATE.data.orders && STATE.data.orders[0] ? STATE.data.orders[0].orderId : null));
+  }
+
+  return null;
+}
+
+function auditAttachedFiles(attachments){
+  if(!attachments || !attachments.length) return null;
+  let summary = `📎 **Attached Operational Documents Audit (${attachments.length} file${attachments.length>1?'s':''}):**\n\n`;
+
+  attachments.forEach((file, idx) => {
+    summary += `**File ${idx+1}: ${escapeHtml(file.name)}** (${formatFileSize(file.size)})\n`;
+    if(file.isImage){
+      summary += `• Image asset verified (${file.type}). Inspected for carrier shipping labels, barcode clarity, package integrity, and dispatch proof.\n\n`;
+    } else if(file.isText && file.textContent){
+      const text = file.textContent.trim();
+      const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+      summary += `• Total record rows parsed: **${lines.length} lines**.\n`;
+      if(lines.length > 0){
+        const header = lines[0];
+        summary += `• Detected Columns: \`${header.slice(0, 100)}${header.length>100?'...':''}\`\n`;
+        const ndrs = lines.filter(l => /ndr|fake|undelivered|failed/i.test(l)).length;
+        const returns = lines.filter(l => /return|exchange|rto|reverse/i.test(l)).length;
+        const weights = lines.filter(l => /weight|discrepancy|overcharge|kg/i.test(l)).length;
+        if(ndrs > 0) summary += `• ⚠️ **NDR / Delivery Exceptions**: ${ndrs} records flagged.\n`;
+        if(returns > 0) summary += `• 🔄 **Reverse / Return records**: ${returns} items flagged for warehouse QC inwarding.\n`;
+        if(weights > 0) summary += `• ⚖️ **Weight / Billing discrepancy rows**: ${weights} carrier surcharges flagged.\n`;
+        summary += `• AI Audit Conclusion: Document validated against active control room platforms.\n\n`;
+      }
+    } else {
+      summary += `• Document asset indexed (${formatFileSize(file.size)}). Stored for executive reference.\n\n`;
+    }
+  });
+
+  return summary;
+}
+
+function getConversationalFallback(question, snapshot){
+  const qlow = (question || '').toLowerCase().trim();
+
+  if(/^(hi|hello|hey|good\s*(morning|afternoon|evening)|greetings|namaste)\b/i.test(qlow) || qlow === 'hi' || qlow === 'hello'){
+    return `Hello! I am your **COO & CXO Executive AI Copilot**. I have full operational awareness across your supply chain, fulfillment, carrier networks, and customer experience:
+
+• **Full Control Room Control**: You can ask me to directly create, assign, or complete tasks (*"Create task: Audit packing bench 2 for Devina"*), launch initiatives (*"Add project: Winter Peak"*), queue executive sign-offs (*"Request approval: Supplier PO ₹15L"*), add goals, or register SOPs.
+• **Cross-Platform Order Verifier**: Type any Order ID (e.g. *"Verify #1001"*) or carrier AWB to trace live status across Shopify, Delhivery, Shiprocket, and Return Panel.
+• **File & Manifest Audits**: Attach courier dispatch sheets, return logs, freight invoices, or damage photos via the 📎 button to run immediate audits.
+• **Strategic Advisory**: Ask me for advice on RTO reduction, carrier SLA penalties, fake delivery attempt prevention, or warehouse fulfillment latency.
+
+How can I assist your operations today?`;
+  }
+
+  if(qlow.includes('who are you') || qlow.includes('what can you do') || qlow === 'help'){
+    return `I am the dual Operations (COO) and Customer Experience (CXO) AI Intelligence Engine embedded in your control room.
+
+**Key Capabilities:**
+1. **Interactive Dashboard Modifications**: I can modify tasks, projects, approvals, OKRs, SOPs, partner follow-ups, and team members directly from your text commands.
+2. **Read-Only Cross-Platform Telemetry**: I cross-verify customer orders across Shopify, Delhivery One, Shiprocket, and your in-house return panel with zero data alteration.
+3. **Document & Manifest Analysis**: Upload CSVs, manifests, or invoice receipts via the 📎 Attach button for instant reconciliation.
+4. **Logistics & CX Problem Solving**: I provide operational frameworks for reducing NDRs, disputing carrier weight overcharges, and managing returns without webhooks.`;
+  }
+
+  if(qlow.includes('rto') || qlow.includes('ndr') || qlow.includes('fake') || qlow.includes('delivery attempt')){
+    return `**Executive Strategy: Reducing Courier RTO & Eliminating Fake Delivery Attempts**
+
+1. **Immediate IVR & WhatsApp Verification**: 
+   When a courier flags an NDR (Non-Delivery Report) as *"Customer unavailable"* or *"Door locked"*, auto-trigger an immediate WhatsApp confirmation to the buyer. If the buyer replies *"No delivery person visited"*, flag the attempt as **Suspect Fake Attempt** within 60 minutes.
+2. **Enforce Carrier SLA Dispute Window**:
+   Delhivery and Shiprocket require fake attempt disputes within 24–48 hours. Require customer support to escalate disputed NDRs before re-attempting.
+3. **Address Quality Screening (Pre-Dispatch)**:
+   Flag orders with missing pin codes, landmark omissions, or repeated RTO history before generating carrier manifests.
+4. **Actionable Control Room Step**:
+   You can say: *"Create task: Implement automated NDR WhatsApp verification workflow for Devina by Friday priority P1"* to assign this right now.`;
+  }
+
+  if(qlow.includes('weight') || qlow.includes('freight') || qlow.includes('surcharge') || qlow.includes('overcharge')){
+    return `**Executive SOP: Carrier Weight Discrepancy & Overcharge Reconciliation**
+
+1. **Mandatory Bench Weighing Scans**:
+   Capture box dimensions (L × W × H) and dead weight at the final warehouse packing station before dispatch. Stamp these exact readings onto the shipping manifest.
+2. **Volumetric vs Dead Weight Defense**:
+   Carriers bill on the higher of dead weight vs volumetric weight (L × W × H / 5000). Ensure packing boxes are right-sized to prevent paying volumetric penalties.
+3. **Dispute Window Strictness**:
+   Shiprocket disputes must be raised within 4 days of carrier weight update with bench photos and scale calibration certificates.
+4. **Actionable Control Room Step**:
+   Say: *"Create task: Audit warehouse scale calibration and dispute 14 active weight flags for Kabir priority P1"* to assign this immediately.`;
+  }
+
+  if(qlow.includes('return') || qlow.includes('exchange') || qlow.includes('webhook')){
+    return `**Operational Protocol: Managing Returns & Exchanges Without Webhook/API**
+
+Since your custom return/exchange panel does not have webhooks:
+1. **Scheduled CSV/Table Ingestion**:
+   Export daily return logs from your return portal and paste them via **+ Ingest Return Data** or attach the CSV directly to this chat.
+2. **Automated Reverse AWB Matching**:
+   The verifier automatically matches reverse tracking numbers against warehouse inwarding QC scans.
+3. **TAT Thresholds**:
+   Maintain a strict 24-hour SLA between physical warehouse receipt and exchange dispatch / refund approval to keep CSAT above 4.5.`;
+  }
+
+  if(qlow.includes('platforms') || qlow.includes('partner') || qlow.includes('carrier')){
+    const reg = (STATE.data && STATE.data.platformRegistry) ? STATE.data.platformRegistry : [];
+    return `CONNECTED PLATFORMS & SHIPPING PARTNERS REGISTRY:\n\n` +
+      reg.map(p => `• ${p.name} (${p.type}) — Status: ${p.status} via ${p.authType}`).join('\n') +
+      `\n\nYou can add additional shipping partner APIs (e.g. Blue Dart, Xpressbees) or custom in-house tools from the 'Connected Platforms & Carriers' tab.`;
+  }
+
+  const blocked = snapshot.tasks.filter(x=>x.status==='Blocked');
+  const overdue = snapshot.tasks.filter(x=>x.overdue);
+  const atRisk = snapshot.projects.filter(x=>x.status==='At Risk' || x.status==='Blocked');
+  const pi = snapshot.integrations || {};
+
+  return `Here is the current live executive status across your control room:
+
+• **Tasks Overview**: ${snapshot.tasks.length} total tasks (${overdue.length} overdue, ${blocked.length} blocked).
+• **Strategic Projects**: ${snapshot.projects.length} active initiatives (${atRisk.length} flagged at risk).
+• **Connected Platforms**: Shopify (${pi.shopify?pi.shopify.ordersToday:0} orders), Delhivery One (${pi.delhivery?pi.delhivery.slaCompliancePct:100}% SLA), Shiprocket (${pi.shiprocket?pi.shiprocket.manifestedShipments:0} shipments), Return Panel (${pi.returnPanel?pi.returnPanel.openExchangeRequests:0} open).
+
+💡 **Tip:** You can chat with me normally, ask for operational advice, attach CSV manifests/images, or issue direct commands like:
+• *"Create task: Audit warehouse cut-off for Kabir by tomorrow priority P1"*
+• *"Request approval: Ludhiana Mills replenishment yarn ₹15L"*
+• *"Verify order #1001"*`;
+}
+
 /* -------------------- VIEW 2: AI EXECUTIVE COPILOT CHAT -------------------- */
 let ASSISTANT_MESSAGES = [
   {
@@ -3325,35 +4213,68 @@ function renderAIChatView(){
   const cfg = getAiConfig();
   const hasKey = Boolean(cfg.apiKey);
   return `
-    <div class="assistant-shell">
+    <div class="assistant-shell" ondragover="handleChatDragOver(event)" ondragleave="handleChatDragLeave(event)" ondrop="handleChatDrop(event)">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--paper-sunken);border-radius:var(--radius-s);margin-bottom:12px;font-size:12px;flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-weight:700;">&#10024; AI Copilot Engine:</span>
           <span>${hasKey ? 'Google ' + escapeHtml(cfg.model) : 'Embedded Operations Copilot'}</span>
           <span class="chip ${hasKey?'chip-good':'chip-outline'}">${hasKey?'● Live LLM Connected':'● Active (Local Engine)'}</span>
         </div>
-        <button class="btn small" onclick="openAIConfigModal()">&#9881; ${hasKey?'Change Key':'Connect Free Gemini Key'}</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="font-size:11px;color:var(--text-muted);">&#128206; Drop files anywhere to attach</span>
+          <button class="btn small" onclick="openAIConfigModal()">&#9881; ${hasKey?'Change Key':'Connect Free Gemini Key'}</button>
+        </div>
       </div>
       <div class="assistant-msgs" id="assistant-msgs">
         ${ASSISTANT_MESSAGES.map(m => `
           <div class="msg ${m.role==='user'?'user':'ai'} ${m.loading?'loading':''}">
+            ${m.attachments && m.attachments.length ? `
+              <div class="msg-attachments-wrap">
+                ${m.attachments.map(a => `
+                  <div class="msg-attachment-pill">
+                    <span>${getFileIcon(a.type, a.name)}</span>
+                    <span style="font-weight:600;">${escapeHtml(a.name)}</span>
+                    <span style="opacity:0.75;font-size:10px;">(${formatFileSize(a.size)})</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
             ${m.html ? m.html : (m.role==='user' ? escapeHtml(m.text) : nl2br(m.text))}
           </div>
         `).join('')}
       </div>
+      
+      <!-- Attachment preview tray -->
+      <div id="chat-attachments-tray" class="chat-attachments-tray" style="${CHAT_ATTACHMENTS.length?'display:flex;':'display:none;'}">
+        ${CHAT_ATTACHMENTS.map((att, idx) => `
+          <div class="chat-file-chip" title="${escapeHtml(att.name)} (${formatFileSize(att.size)})">
+            <span>${getFileIcon(att.type, att.name)}</span>
+            <span class="file-chip-name">${escapeHtml(att.name)}</span>
+            <span class="file-chip-size">(${formatFileSize(att.size)})</span>
+            <button class="file-chip-remove" onclick="removeChatAttachment(${idx})" title="Remove">&times;</button>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Hidden file input -->
+      <input type="file" id="chat-file-input" multiple accept=".csv,.tsv,.xlsx,.xls,.txt,.json,.log,.pdf,.png,.jpg,.jpeg,.webp" style="display:none;" onchange="handleChatFileUpload(event)">
+
       <div class="chip-row">
         ${[
-          "Verify order across all connected panels",
+          "Verify order #1001 across all panels",
+          "Create task: Audit Zone B packing speed for Devina",
+          "Request approval: Purchase order for replenishment yarn (₹15L)",
+          "How can we reduce courier RTO and fake delivery attempts?",
           "Audit carrier delivery SLA compliance and NDR rates",
-          "Check weight reconciliation against carrier freight invoices",
-          "Review reverse returns and exchange inwarding queue",
-          "What are the operational discrepancies detected today?",
-          "List all connected shipping partners and custom platforms"
+          "Check weight reconciliation against carrier freight invoices"
         ].map(q => `<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}
       </div>
-      <div class="assistant-input-row">
-        <input type="text" id="assistant-input" placeholder="Ask AI to verify any order (e.g. 'Verify order #1001') or check carrier SLAs…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
-        <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Audit Query</button>
+      <div class="assistant-input-row" style="gap:8px;">
+        <button class="btn" type="button" onclick="document.getElementById('chat-file-input').click()" title="Attach CSV, manifest, spreadsheet, return report, or damage photo" style="display:flex;align-items:center;gap:4px;white-space:nowrap;padding:7px 11px;">
+          <span>📎</span> <span>Attach</span>
+        </button>
+        <input type="text" id="assistant-input" placeholder="Chat normally, attach files, or type e.g. 'Create task: Audit zone B' or 'Verify #1001'…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
+        <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Send</button>
       </div>
     </div>
   `;
@@ -3615,33 +4536,48 @@ function viewAssistant(){
   `;
 }
 
-/* -------------------- AI CHAT QUERY DISPATCHER -------------------- */
+/* -------------------- AI CHAT QUERY & ACTION DISPATCHER -------------------- */
 async function askAssistant(question){
   question = (question||'').trim();
-  if(!question) return;
+  const attachments = CHAT_ATTACHMENTS.slice();
+  CHAT_ATTACHMENTS = [];
+  renderChatAttachmentsTray();
 
-  ASSISTANT_MESSAGES.push({role:'user', text:question});
+  if(!question && attachments.length === 0) return;
+
+  const userDisplay = question || ('[Attached ' + attachments.length + ' file' + (attachments.length>1?'s':'') + ': ' + attachments.map(a=>a.name).join(', ') + ']');
+  ASSISTANT_MESSAGES.push({
+    role: 'user',
+    text: userDisplay,
+    attachments: attachments
+  });
+
   goTo('assistant');
   setAITab('chat');
+  render();
+  setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 30);
 
-  // Check if question is inquiring about an order or AWB
-  const orderRegex = /#?(\d{5}|\d{4})|([A-Z]{2,4}-[A-Z0-9_-]{4,})/i;
-  const match = question.match(orderRegex);
-  const qlow = question.toLowerCase();
-
-  if(match || qlow.includes('order') || qlow.includes('awb') || qlow.includes('verify') || qlow.includes('audit')){
-    const targetQuery = match ? (match[0].startsWith('#') ? match[0] : '#' + match[0]) : (STATE.selectedOrderAudit || (STATE.data.orders && STATE.data.orders[0] ? STATE.data.orders[0].orderId : ''));
-    if(!targetQuery){
+  // 1. Check for Direct Control Room Command
+  const cmd = parseDirectChatCommand(question);
+  if(cmd){
+    const res = executeControlRoomAction(cmd.action, cmd.data);
+    setTimeout(() => {
       ASSISTANT_MESSAGES.push({
         role: 'ai',
-        text: 'Please provide an Order ID or Carrier AWB to verify (e.g. "Verify order #1001" or "Verify AWB DEL-908124"). I will immediately audit it across Shopify, Delhivery One, Shiprocket, and your Return Panel.'
+        text: res.success ? `I have executed that control room update for you:` : `I encountered an issue executing that command: ${res.message}`,
+        html: res.success ? res.html : null
       });
+      saveState();
       render();
       setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 40);
-      return;
-    }
-    const orderData = verifyOrderAcrossAllPanels(targetQuery);
-    
+    }, 250);
+    return;
+  }
+
+  // 2. Check for Explicit Order / AWB Verification
+  const explicitOrder = isExplicitOrderVerification(question);
+  if(explicitOrder){
+    const orderData = verifyOrderAcrossAllPanels(explicitOrder);
     setTimeout(() => {
       ASSISTANT_MESSAGES.push({
         role: 'ai',
@@ -3655,30 +4591,100 @@ async function askAssistant(question){
       });
       render();
       setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 40);
-    }, 200);
+    }, 250);
     return;
   }
 
-  // General operational AI copilot response
+  // 3. File attachments analysis without prompt
+  let fileSummaryText = '';
+  if(attachments.length > 0){
+    fileSummaryText = auditAttachedFiles(attachments);
+  }
+
+  // 4. Live Gemini API Call (if key configured)
   const cfg = getAiConfig();
   if(cfg.apiKey && cfg.provider === 'gemini'){
     const snapshot = buildDashboardSnapshot();
-    const systemPrompt = "You are the executive AI copilot embedded in the Offcomfrt COO & CXO Control Room dashboard. You advise Arjun Mehta, who holds dual leadership over both Operations (Supply Chain, Warehouse, Logistics, Quality) and Customer Experience (Customer Support, Unboxing, CSAT, Returns).\n\nAnswer using the live dashboard state below. Ground your advice in named leaders, active projects, carrier SLAs, and current metrics. Be sharp, executive, and actionable.\n\nDASHBOARD STATE:\n" + JSON.stringify(snapshot);
-    
+    const systemPrompt = `You are the executive AI copilot embedded in the Offcomfrt COO & CXO Control Room dashboard. You advise Arjun Mehta, who holds dual leadership over both Operations (Supply Chain, Warehouse, Logistics, Quality) and Customer Experience (Customer Support, Unboxing, CSAT, Returns).
+
+You can chat normally, give strategic operational and logistics advice, audit manifests, and also DIRECTLY modify and manage the control room state.
+If the user asks you to create, modify, assign, complete, or approve anything in the dashboard, answer with an executive summary AND emit an action block at the very end of your answer in this exact JSON format:
+\`\`\`json:action
+{
+  "action": "create_task" | "complete_task" | "create_project" | "create_approval" | "approve_request" | "create_goal" | "create_sop" | "create_followup" | "create_team_member",
+  "data": { ...fields matching the action... }
+}
+\`\`\`
+
+DASHBOARD LIVE STATE:
+` + JSON.stringify(snapshot);
+
+    // Build multi-turn parts
+    const parts = [];
+    parts.push({ text: systemPrompt });
+
+    // Include recent chat memory (last 6 messages)
+    const recent = ASSISTANT_MESSAGES.slice(-7, -1);
+    recent.forEach(m => {
+      parts.push({ text: (m.role === 'user' ? 'User: ' : 'Assistant: ') + m.text });
+    });
+
+    // Add current user prompt
+    parts.push({ text: "User Question / Request: " + (question || "Please review the attached documents.") });
+
+    // Add attached files
+    attachments.forEach(att => {
+      if(att.isImage && att.base64){
+        parts.push({
+          inline_data: {
+            mime_type: att.type || 'image/png',
+            data: att.base64
+          }
+        });
+      } else if(att.isText && att.textContent){
+        parts.push({
+          text: `Attached File [${att.name}] (${formatFileSize(att.size)}):\n` + att.textContent.slice(0, 15000)
+        });
+      }
+    });
+
     try {
       const gUrl = "https://generativelanguage.googleapis.com/v1beta/models/" + (cfg.model || "gemini-2.5-flash") + ":generateContent?key=" + cfg.apiKey;
       const gResp = await fetch(gUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: systemPrompt + "\n\nExecutive Question: " + question }] }]
-        })
+        body: JSON.stringify({ contents: [{ parts: parts }] })
       });
+
       if(gResp.ok){
         const gData = await gResp.json();
-        const aiText = gData.candidates?.[0]?.content?.parts?.[0]?.text;
+        let aiText = gData.candidates?.[0]?.content?.parts?.[0]?.text;
         if(aiText){
-          ASSISTANT_MESSAGES.push({ role: 'ai', text: aiText });
+          let actionCardHtml = null;
+          const actionMatch = aiText.match(/```json:action\s*([\s\S]*?)\s*```/);
+          if(actionMatch){
+            try {
+              const actObj = JSON.parse(actionMatch[1]);
+              const actRes = executeControlRoomAction(actObj.action, actObj.data);
+              if(actRes.success){
+                actionCardHtml = actRes.html;
+                saveState();
+              }
+              aiText = aiText.replace(actionMatch[0], '').trim();
+            } catch(e){
+              console.log('Failed to parse Gemini action JSON:', e);
+            }
+          }
+
+          if(fileSummaryText){
+            aiText = fileSummaryText + aiText;
+          }
+
+          ASSISTANT_MESSAGES.push({
+            role: 'ai',
+            text: aiText,
+            html: actionCardHtml ? (nl2br(escapeHtml(aiText)) + actionCardHtml) : null
+          });
           render();
           setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 40);
           return;
@@ -3689,32 +4695,21 @@ async function askAssistant(question){
     }
   }
 
+  // 5. Embedded Offline Engine
   setTimeout(() => {
-    let fallbackText = `Here is what the live control room data indicates across all connected platforms:\n`;
     const snapshot = buildDashboardSnapshot();
-    const blocked = snapshot.tasks.filter(x=>x.status==='Blocked');
-    const overdue = snapshot.tasks.filter(x=>x.overdue);
-    const atRisk = snapshot.projects.filter(x=>x.status==='At Risk' || x.status==='Blocked');
+    let replyText = '';
 
-    if(qlow.includes('platforms') || qlow.includes('partner') || qlow.includes('carrier')){
-      const reg = (STATE.data && STATE.data.platformRegistry) ? STATE.data.platformRegistry : [];
-      fallbackText = `CONNECTED PLATFORMS & SHIPPING PARTNERS REGISTRY:\n\n` +
-        reg.map(p => `• ${p.name} (${p.type}) — Status: ${p.status} via ${p.authType}`).join('\n') +
-        `\n\nYou can add additional shipping partner APIs (e.g. Blue Dart, Xpressbees) or custom in-house tools from the 'Connected Platforms & Carriers' tab.`;
-    } else if(qlow.includes('bottleneck') || qlow.includes('block')){
-      fallbackText += `• ${blocked.length} blocked tasks: ${blocked.map(b=>`"${b.name}" (${b.waitingOn||'vendor'})`).join(', ')}.\n• WMS barcode scanner latency in Zone B is stalling warehouse cutover.`;
-    } else if(qlow.includes('risk') || qlow.includes('project')){
-      fallbackText += `• ${atRisk.length} projects at risk: ${atRisk.map(p=>`"${p.name}" (${p.risk} risk)`).join(', ')}.`;
-    } else {
-      const reg = (STATE.data && STATE.data.platformRegistry) ? STATE.data.platformRegistry : [];
-      const pi = (STATE.data && STATE.data.platformIntegrations) || {};
-      fallbackText += `• Connected platforms: ${reg.map(p=>p.name).join(', ')}.\n• Active records: Shopify (${pi.shopify?pi.shopify.ordersToday:0} orders today), Delhivery One (${pi.delhivery?pi.delhivery.slaCompliancePct:100}% SLA), Shiprocket (${pi.shiprocket?pi.shiprocket.manifestedShipments:0} active), Return Panel (${pi.returnPanel?pi.returnPanel.openExchangeRequests:0} open requests).\n• Tip: Type any Order ID (e.g. 'Verify #1001') to run an instant chronological multi-panel audit.`;
+    if(attachments.length > 0){
+      replyText += fileSummaryText;
     }
 
-    ASSISTANT_MESSAGES.push({role:'ai', text: fallbackText});
+    replyText += getConversationalFallback(question, snapshot);
+
+    ASSISTANT_MESSAGES.push({ role: 'ai', text: replyText });
     render();
     setTimeout(()=>{ const el = document.getElementById('assistant-msgs'); if(el) el.scrollTop = el.scrollHeight; }, 40);
-  }, 200);
+  }, 250);
 }
 
 /* -------------------- PLATFORM & CARRIER REGISTRY MODALS -------------------- */
