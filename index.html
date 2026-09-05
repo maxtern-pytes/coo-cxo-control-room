@@ -9,36 +9,48 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#14161c;
-  --ink-soft:#1f222b;
-  --ink-line:#33374a;
-  --paper:#f1efe8;
-  --paper-raised:#ffffff;
-  --paper-sunken:#e8e4d8;
-  --line:#dfd9c8;
-  --line-soft:#eae5d7;
-  --text:#1c1d22;
-  --text-muted:#6d6a63;
-  --text-faint:#a29e93;
-  --amber:#c98a2c;
-  --amber-deep:#9c6b1f;
-  --amber-tint:#f3e2bd;
-  --brick:#ac4738;
-  --brick-tint:#f2ddd6;
-  --sage:#4f7a5b;
-  --sage-tint:#dde8de;
-  --slate:#3f6180;
-  --slate-tint:#dde6ec;
-  --plum:#7a5480;
-  --plum-tint:#ece0ee;
-  --radius-s:4px;
-  --radius-m:7px;
-  --radius-l:12px;
-  --shadow-card: 0 1px 0 rgba(20,22,28,0.04);
-  --shadow-modal: 0 20px 60px rgba(20,22,28,0.35);
-  --font-display:'Space Grotesk', system-ui, sans-serif;
-  --font-body:'Inter', system-ui, sans-serif;
-  --font-mono:'JetBrains Mono', ui-monospace, monospace;
+  /* Pitch Obsidian & Inks */
+  --ink: #09090b;
+  --ink-soft: #18181b;
+  --ink-line: #27272a;
+  
+  /* Crisp Monochrome Canvas & Surfaces */
+  --paper: #fafafa;
+  --paper-raised: #ffffff;
+  --paper-sunken: #f4f4f5;
+  
+  /* Razor-sharp neutral borders */
+  --line: #e4e4e7;
+  --line-soft: #f4f4f5;
+  --line-dark: #27272a;
+  
+  /* High-end typography */
+  --text: #09090b;
+  --text-muted: #71717a;
+  --text-faint: #a1a1aa;
+  
+  /* Monochrome Semantic Mappings (Strictly White, Black & Gray) */
+  --amber: #18181b;
+  --amber-deep: #09090b;
+  --amber-tint: #f4f4f5;
+  --brick: #09090b;
+  --brick-tint: #f4f4f5;
+  --sage: #27272a;
+  --sage-tint: #f4f4f5;
+  --slate: #3f3f46;
+  --slate-tint: #f4f4f5;
+  --plum: #27272a;
+  --plum-tint: #f4f4f5;
+  
+  /* Ergonomic Radii & Shadows */
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 14px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-modal: 0 20px 48px rgba(0,0,0,0.16);
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
 }
 *,*::before,*::after{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -332,6 +344,203 @@ table.data-table{width:100%;border-collapse:collapse;font-size:12.8px;}
 .ai-action-meta{font-size:11.5px;color:var(--text-muted);margin-top:3px;}
 .assistant-shell.dragover{border:2px dashed var(--amber-deep) !important;background:rgba(201,138,44,0.04);}
 
+
+/* ---------- High-End Monochrome Dashboard & Locked Chat Styling ---------- */
+body{background:var(--paper);color:var(--text);}
+::selection{background:#e4e4e7;color:#09090b;}
+:focus-visible{outline:2px solid #09090b;outline-offset:2px;}
+button:focus-visible, [tabindex]:focus-visible{outline:2px solid #09090b;outline-offset:1px;}
+
+.sidebar{background:#09090b;color:#e4e4e7;border-right:1px solid #27272a;}
+.brand{border-bottom:1px solid #27272a;padding:4px 8px 18px;}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:#ffffff;border:1px solid #27272a;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;color:#09090b;font-size:14px;flex:none;box-shadow:0 1px 2px rgba(0,0,0,0.2);}
+.brand-text .b1{color:#ffffff;font-size:14.5px;font-weight:700;}
+.brand-text .b2{color:#a1a1aa;font-size:10.5px;}
+
+.nav-group-label{color:#71717a;font-size:10px;letter-spacing:0.08em;font-weight:600;}
+.nav-item{color:#a1a1aa;border-radius:8px;font-size:13px;font-weight:500;padding:8px 12px;transition:all 0.12s ease;}
+.nav-item:hover{background:#18181b;color:#ffffff;}
+.nav-item.active{background:#18181b;color:#ffffff;box-shadow:inset 3px 0 0 #ffffff;font-weight:600;}
+.nav-badge{background:#27272a;color:#ffffff;border:1px solid #3f3f46;border-radius:10px;font-size:10px;font-weight:600;padding:1px 6px;}
+.nav-badge.amber{background:#27272a;color:#ffffff;border:1px solid #3f3f46;}
+
+.role-select{background:#18181b;color:#e4e4e7;border:1px solid #27272a;border-radius:8px;}
+.sidebar-foot{border-top:1px solid #27272a;}
+
+.topbar{background:#ffffff;border-bottom:1px solid var(--line);padding:12px 24px;}
+.search-input{background:#ffffff;border:1px solid var(--line);border-radius:8px;color:#09090b;font-size:13px;}
+.search-input:focus{border-color:#09090b;box-shadow:0 0 0 1px #09090b;}
+.btn-primary{background:#09090b;color:#ffffff;border:1px solid #09090b;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;transition:all 0.15s ease;box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+.btn-primary:hover{background:#27272a;border-color:#27272a;}
+.btn{background:#ffffff;color:#09090b;border:1px solid var(--line);border-radius:8px;padding:7px 13px;font-size:12.5px;font-weight:500;transition:all 0.12s ease;}
+.btn:hover{background:#f4f4f5;border-color:#d4d4d8;}
+.btn.dark{background:#09090b;color:#ffffff;border-color:#09090b;}
+.btn.dark:hover{background:#27272a;border-color:#27272a;}
+
+.card{background:#ffffff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-card);padding:18px;}
+.stat-card{background:#ffffff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-card);padding:16px 18px;}
+.stat-num{color:#09090b;font-weight:700;}
+.stat-label{color:#71717a;font-weight:500;font-size:12px;}
+.hero-card{background:#09090b;border:1px solid #27272a;border-radius:14px;color:#ffffff;padding:26px;}
+.hero-one-thing{background:rgba(255,255,255,0.04);border:1px solid #27272a;border-radius:10px;}
+.hero-one-thing-label{color:#a1a1aa;letter-spacing:0.06em;}
+
+.tab-btn{color:#71717a;font-weight:500;border-bottom:2px solid transparent;}
+.tab-btn.active{color:#09090b;border-bottom-color:#09090b;font-weight:600;}
+
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;line-height:1.6;border:1px solid transparent;}
+.chip-p0{background:#09090b;color:#ffffff;border-color:#09090b;}
+.chip-p1{background:#18181b;color:#ffffff;border-color:#18181b;}
+.chip-p2{background:#f4f4f5;color:#18181b;border-color:#e4e4e7;}
+.chip-p3{background:#ffffff;color:#71717a;border-color:#e4e4e7;}
+.chip-status{background:#f4f4f5;color:#18181b;border-color:#e4e4e7;}
+.chip-good{background:#f4f4f5;color:#09090b;border-color:#e4e4e7;}
+.chip-warn{background:#f4f4f5;color:#27272a;border-color:#d4d4d8;}
+.chip-bad{background:#09090b;color:#ffffff;border-color:#09090b;}
+.chip-info{background:#f4f4f5;color:#27272a;border-color:#e4e4e7;}
+.chip-plum{background:#f4f4f5;color:#27272a;border-color:#e4e4e7;}
+.chip-outline{background:#ffffff;border-color:#e4e4e7;color:#71717a;}
+
+.modal-backdrop{background:rgba(9,9,11,0.55);backdrop-filter:blur(6px);}
+.modal{background:#ffffff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-modal);}
+
+/* ---------- LOCKED IN PLACE AI CHAT CONTAINER ---------- */
+.assistant-shell{
+  display:flex;
+  flex-direction:column;
+  height:calc(100vh - 200px);
+  min-height:520px;
+  max-height:840px;
+  background:#ffffff;
+  border:1px solid var(--line);
+  border-radius:var(--radius-m);
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+  position:relative;
+}
+.assistant-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 18px;
+  background:#ffffff;
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+  z-index:2;
+}
+.buddy-avatar{
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  background:#09090b;
+  color:#ffffff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:700;
+  flex:none;
+}
+.assistant-msgs{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  scroll-behavior:smooth;
+  background:#fafafa;
+}
+.chat-dock-bottom{
+  flex-shrink:0;
+  background:#ffffff;
+  border-top:1px solid var(--line);
+  z-index:2;
+}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px 0;background:#ffffff;}
+.suggest-chip{background:#f4f4f5;border:1px solid var(--line);color:#27272a;border-radius:20px;padding:5px 12px;font-size:11.8px;font-weight:500;cursor:pointer;transition:all 0.12s ease;}
+.suggest-chip:hover{background:#09090b;color:#ffffff;border-color:#09090b;}
+.assistant-input-row{display:flex;gap:8px;padding:12px 16px;background:#ffffff;align-items:center;}
+.assistant-input-row input{flex:1;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;font-family:var(--font-body);background:#ffffff;color:#09090b;transition:border-color 0.15s ease,box-shadow 0.15s ease;}
+.assistant-input-row input:focus{border-color:#09090b;outline:none;box-shadow:0 0 0 1px #09090b;}
+
+.msg{max-width:82%;padding:11px 16px;border-radius:12px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+.msg.user{align-self:flex-end;background:#09090b;color:#fafafa;border-bottom-right-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,0.08);}
+.msg.ai{align-self:flex-start;background:#ffffff;color:#09090b;border:1px solid var(--line);border-bottom-left-radius:3px;box-shadow:var(--shadow-card);}
+.msg.ai.loading{color:#71717a;font-style:italic;}
+
+.ai-action-card{background:#ffffff;border:1px solid var(--line);border-left:3.5px solid #09090b;border-radius:8px;padding:12px 14px;margin-top:10px;}
+.ai-action-title{font-weight:700;font-size:12.5px;color:#09090b;display:flex;align-items:center;gap:6px;}
+.ai-action-meta{font-size:11.8px;color:#71717a;margin-top:4px;}
+
+/* ---------- FLOATING AI BUDDY BUTTON & DRAWER ---------- */
+.floating-buddy-btn{
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  z-index:90;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  background:#09090b;
+  color:#ffffff;
+  border:1px solid #27272a;
+  border-radius:24px;
+  padding:10px 18px;
+  font-size:13px;
+  font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  cursor:pointer;
+  transition:transform 0.15s ease,box-shadow 0.15s ease;
+}
+.floating-buddy-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.25);
+  background:#18181b;
+}
+.floating-buddy-drawer{
+  position:fixed;
+  bottom:76px;
+  right:22px;
+  width:420px;
+  max-width:calc(100vw - 32px);
+  height:580px;
+  max-height:calc(100vh - 100px);
+  background:#ffffff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.16);
+  z-index:95;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.floating-buddy-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+  border-bottom:1px solid var(--line);
+  background:#ffffff;
+  flex-shrink:0;
+}
+.floating-buddy-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  background:#fafafa;
+}
+.floating-buddy-dock{
+  flex-shrink:0;
+  border-top:1px solid var(--line);
+  background:#ffffff;
+}
+
 </style>
 </head>
 <body>
@@ -370,7 +579,7 @@ const PRIORITIES = [
 const STATUSES = ['Inbox','Planned','Assigned','Accepted','In Progress','Waiting','Blocked','In Review','Completed','Cancelled'];
 const ACTIVE_STATUSES = STATUSES.filter(s => s!=='Completed' && s!=='Cancelled');
 const PROJECT_STATUSES = ['Not Started','On Track','At Risk','Blocked','Completed','Cancelled'];
-const AVATAR_COLORS = ['#c98a2c','#3f6180','#4f7a5b','#ac4738','#7a5480','#9c6b1f','#3f6180','#4f7a5b','#7a5480','#ac4738'];
+const AVATAR_COLORS = ['#18181B', '#27272A', '#3F3F46', '#52525B', '#71717A', '#111113', '#232326', '#333338'];
 
 const PERSON_ROLE_OPTIONS = ['COO / CXO','Operations Lead','CX & Support Lead','Team Member'];
 
@@ -4047,94 +4256,112 @@ function auditAttachedFiles(attachments){
 function getConversationalFallback(question, snapshot){
   const qlow = (question || '').toLowerCase().trim();
 
-  if(/^(hi|hello|hey|good\s*(morning|afternoon|evening)|greetings|namaste)\b/i.test(qlow) || qlow === 'hi' || qlow === 'hello'){
-    return `Hello! I am your **COO & CXO Executive AI Copilot**. I have full operational awareness across your supply chain, fulfillment, carrier networks, and customer experience:
+  // Explicit status / workload summary request ONLY:
+  if(qlow.includes('workload') || qlow.includes('tasks summary') || qlow.includes('task summary') || qlow.includes('what are my tasks') || qlow.includes('status report') || qlow.includes('give me a summary') || qlow.includes('give summary')){
+    const blocked = snapshot.tasks.filter(x=>x.status==='Blocked');
+    const overdue = snapshot.tasks.filter(x=>x.overdue);
+    const atRisk = snapshot.projects.filter(x=>x.status==='At Risk' || x.status==='Blocked');
+    const pi = snapshot.integrations || {};
 
-• **Full Control Room Control**: You can ask me to directly create, assign, or complete tasks (*"Create task: Audit packing bench 2 for Devina"*), launch initiatives (*"Add project: Winter Peak"*), queue executive sign-offs (*"Request approval: Supplier PO ₹15L"*), add goals, or register SOPs.
-• **Cross-Platform Order Verifier**: Type any Order ID (e.g. *"Verify #1001"*) or carrier AWB to trace live status across Shopify, Delhivery, Shiprocket, and Return Panel.
-• **File & Manifest Audits**: Attach courier dispatch sheets, return logs, freight invoices, or damage photos via the 📎 button to run immediate audits.
-• **Strategic Advisory**: Ask me for advice on RTO reduction, carrier SLA penalties, fake delivery attempt prevention, or warehouse fulfillment latency.
-
-How can I assist your operations today?`;
-  }
-
-  if(qlow.includes('who are you') || qlow.includes('what can you do') || qlow === 'help'){
-    return `I am the dual Operations (COO) and Customer Experience (CXO) AI Intelligence Engine embedded in your control room.
-
-**Key Capabilities:**
-1. **Interactive Dashboard Modifications**: I can modify tasks, projects, approvals, OKRs, SOPs, partner follow-ups, and team members directly from your text commands.
-2. **Read-Only Cross-Platform Telemetry**: I cross-verify customer orders across Shopify, Delhivery One, Shiprocket, and your in-house return panel with zero data alteration.
-3. **Document & Manifest Analysis**: Upload CSVs, manifests, or invoice receipts via the 📎 Attach button for instant reconciliation.
-4. **Logistics & CX Problem Solving**: I provide operational frameworks for reducing NDRs, disputing carrier weight overcharges, and managing returns without webhooks.`;
-  }
-
-  if(qlow.includes('rto') || qlow.includes('ndr') || qlow.includes('fake') || qlow.includes('delivery attempt')){
-    return `**Executive Strategy: Reducing Courier RTO & Eliminating Fake Delivery Attempts**
-
-1. **Immediate IVR & WhatsApp Verification**: 
-   When a courier flags an NDR (Non-Delivery Report) as *"Customer unavailable"* or *"Door locked"*, auto-trigger an immediate WhatsApp confirmation to the buyer. If the buyer replies *"No delivery person visited"*, flag the attempt as **Suspect Fake Attempt** within 60 minutes.
-2. **Enforce Carrier SLA Dispute Window**:
-   Delhivery and Shiprocket require fake attempt disputes within 24–48 hours. Require customer support to escalate disputed NDRs before re-attempting.
-3. **Address Quality Screening (Pre-Dispatch)**:
-   Flag orders with missing pin codes, landmark omissions, or repeated RTO history before generating carrier manifests.
-4. **Actionable Control Room Step**:
-   You can say: *"Create task: Implement automated NDR WhatsApp verification workflow for Devina by Friday priority P1"* to assign this right now.`;
-  }
-
-  if(qlow.includes('weight') || qlow.includes('freight') || qlow.includes('surcharge') || qlow.includes('overcharge')){
-    return `**Executive SOP: Carrier Weight Discrepancy & Overcharge Reconciliation**
-
-1. **Mandatory Bench Weighing Scans**:
-   Capture box dimensions (L × W × H) and dead weight at the final warehouse packing station before dispatch. Stamp these exact readings onto the shipping manifest.
-2. **Volumetric vs Dead Weight Defense**:
-   Carriers bill on the higher of dead weight vs volumetric weight (L × W × H / 5000). Ensure packing boxes are right-sized to prevent paying volumetric penalties.
-3. **Dispute Window Strictness**:
-   Shiprocket disputes must be raised within 4 days of carrier weight update with bench photos and scale calibration certificates.
-4. **Actionable Control Room Step**:
-   Say: *"Create task: Audit warehouse scale calibration and dispute 14 active weight flags for Kabir priority P1"* to assign this immediately.`;
-  }
-
-  if(qlow.includes('return') || qlow.includes('exchange') || qlow.includes('webhook')){
-    return `**Operational Protocol: Managing Returns & Exchanges Without Webhook/API**
-
-Since your custom return/exchange panel does not have webhooks:
-1. **Scheduled CSV/Table Ingestion**:
-   Export daily return logs from your return portal and paste them via **+ Ingest Return Data** or attach the CSV directly to this chat.
-2. **Automated Reverse AWB Matching**:
-   The verifier automatically matches reverse tracking numbers against warehouse inwarding QC scans.
-3. **TAT Thresholds**:
-   Maintain a strict 24-hour SLA between physical warehouse receipt and exchange dispatch / refund approval to keep CSAT above 4.5.`;
-  }
-
-  if(qlow.includes('platforms') || qlow.includes('partner') || qlow.includes('carrier')){
-    const reg = (STATE.data && STATE.data.platformRegistry) ? STATE.data.platformRegistry : [];
-    return `CONNECTED PLATFORMS & SHIPPING PARTNERS REGISTRY:\n\n` +
-      reg.map(p => `• ${p.name} (${p.type}) — Status: ${p.status} via ${p.authType}`).join('\n') +
-      `\n\nYou can add additional shipping partner APIs (e.g. Blue Dart, Xpressbees) or custom in-house tools from the 'Connected Platforms & Carriers' tab.`;
-  }
-
-  const blocked = snapshot.tasks.filter(x=>x.status==='Blocked');
-  const overdue = snapshot.tasks.filter(x=>x.overdue);
-  const atRisk = snapshot.projects.filter(x=>x.status==='At Risk' || x.status==='Blocked');
-  const pi = snapshot.integrations || {};
-
-  return `Here is the current live executive status across your control room:
+    return `Here is the current live summary across the control room:
 
 • **Tasks Overview**: ${snapshot.tasks.length} total tasks (${overdue.length} overdue, ${blocked.length} blocked).
 • **Strategic Projects**: ${snapshot.projects.length} active initiatives (${atRisk.length} flagged at risk).
 • **Connected Platforms**: Shopify (${pi.shopify?pi.shopify.ordersToday:0} orders), Delhivery One (${pi.delhivery?pi.delhivery.slaCompliancePct:100}% SLA), Shiprocket (${pi.shiprocket?pi.shiprocket.manifestedShipments:0} shipments), Return Panel (${pi.returnPanel?pi.returnPanel.openExchangeRequests:0} open).
 
-💡 **Tip:** You can chat with me normally, ask for operational advice, attach CSV manifests/images, or issue direct commands like:
-• *"Create task: Audit warehouse cut-off for Kabir by tomorrow priority P1"*
-• *"Request approval: Ludhiana Mills replenishment yarn ₹15L"*
-• *"Verify order #1001"*`;
+What would you like to prioritize or adjust first?`;
+  }
+
+  // Greetings & casual buddy check-in
+  if(/^(hi|hello|hey|good\s*(morning|afternoon|evening)|yo|sup|greetings|namaste)\b/i.test(qlow) || qlow === 'hi' || qlow === 'hello' || qlow === 'hey'){
+    return `Hey Arjun! 👋 What's on your mind today?
+
+Whether you want to brainstorm ways to streamline dispatch, talk through a carrier SLA headache, queue up an approval, assign some work to the team, or just bounce ideas around—I'm right here with you.
+
+What would you like to tackle first?`;
+  }
+
+  // "Who are you" / "What can you do"
+  if(qlow.includes('who are you') || qlow.includes('what can you do') || qlow === 'help'){
+    return `Think of me as your executive operations & customer experience buddy. We work together on everything across supply chain, warehouse fulfillment, carrier performance, quality audits, and customer delight.
+
+Here's how I can help whenever you need me:
+• **Talk & Brainstorm**: Bounce strategic ideas, troubleshoot carrier disputes, or plan new operational initiatives.
+• **Run Direct Updates**: Just tell me *"Create task for Devina by Friday"* or *"Request approval for ₹15L yarn PO"*, and I'll update the control room instantly.
+• **Audit Uploads**: Drop shipping manifests, return logs, or damage photos via the 📎 button to check for discrepancies.
+• **Trace Orders**: Give me any Order ID or AWB to verify chronological telemetry across all connected panels.
+
+What are you thinking of focusing on today?`;
+  }
+
+  // Open-ended / thinking out loud
+  if(qlow.includes('where to start') || qlow.includes('help me think') || qlow.includes('what should we do') || qlow.includes('what to do') || qlow.includes('what should i do') || qlow.includes('how are things')){
+    return `I hear you! When there's a lot on the plate, it helps to just pick the biggest thorn first.
+
+What's bugging you the most right now?
+1. **Warehouse & Fulfillment**: Are packing times or dispatch cut-offs lagging?
+2. **Carrier Logistics**: Are courier NDRs, fake delivery attempts, or freight weight overcharges hitting your margins?
+3. **Customer Experience**: Are returns/exchanges piling up or refunds taking too long?
+4. **Team & Projects**: Need to clear blocked tasks or get an approval signed off?
+
+Tell me which area feels most pressing, and we'll dive right into it!`;
+  }
+
+  // RTO / Fake delivery attempts
+  if(qlow.includes('rto') || qlow.includes('fake') || qlow.includes('delivery attempt') || qlow.includes('ndr')){
+    return `Courier fake delivery attempts are one of the most frustrating leaks in e-commerce—couriers mark "customer unavailable" without even visiting the doorstep, and by the time you find out, the order is already on its way back as RTO.
+
+Here is what works best:
+1. **Immediate Buyer WhatsApp Ping**: As soon as Delhivery or Shiprocket pushes an NDR event, auto-trigger a WhatsApp message asking *"Did the delivery rider visit you today?"*. If the buyer replies *"No"*, you have instant, timestamped proof of a fake attempt.
+2. **Escalate Within Carrier Dispute Window**: Carriers usually require fake attempts to be raised within 24 to 48 hours. With the buyer's response, you can dispute the SLA penalty and demand a forced re-attempt.
+3. **Pre-Dispatch Address Screening**: Catch missing landmarks or suspicious pin codes before packing.
+
+What do you think about setting up this WhatsApp verification workflow? Want me to create an action task for Devina on this, or should we talk through how the customer messaging should sound?`;
+  }
+
+  // Weight discrepancies & freight overcharges
+  if(qlow.includes('weight') || qlow.includes('freight') || qlow.includes('surcharge') || qlow.includes('overcharge')){
+    return `Carrier weight overcharges can silently drain 3–5% of logistics margin if left unchecked. Carriers bill whichever is higher between actual dead weight and volumetric weight (L × W × H / 5000), and automated carrier hubs frequently miscalculate.
+
+The strongest defense:
+1. **Packing Bench Weighing & Camera Scans**: Weigh every packed parcel on a calibrated scale right before manifest handover and record the exact dimensions.
+2. **Right-Sized Packaging**: Ensure apparel and goods aren't packed into oversized boxes that trigger volumetric penalties.
+3. **Strict 4-Day Dispute Rhythm**: Raise disputes on Shiprocket with scale calibration certificates and packing photos before their window closes.
+
+Are you noticing this primarily on certain courier partners or specific heavy SKUs? Want me to assign an audit task to the warehouse team, or would you like to review the carrier dispute draft?`;
+  }
+
+  // Returns / Exchanges without API
+  if(qlow.includes('return') || qlow.includes('exchange') || qlow.includes('webhook')){
+    return `Running returns without an automated webhook is very common with custom-built return panels, but it doesn't have to slow you down.
+
+The cleanest workflow:
+1. Drop the daily return CSV export directly into our chat via the 📎 button or click **+ Ingest Return Data**.
+2. Our engine automatically cross-references reverse tracking AWBs against warehouse inwarding QC scans.
+3. Once the physical package is QC approved, approve the exchange dispatch or refund within 24 hours to keep customer satisfaction high.
+
+Do you have a return file on hand you'd like me to look at right now, or should we register a standard operating protocol (SOP) for the inwarding team?`;
+  }
+
+  // Default interactive buddy response:
+  return `That makes sense. As your operations buddy, I'm thinking through how we can tackle that cleanly.
+
+What's the main outcome you'd like to see here? We could:
+• Brainstorm the exact strategy or operational flow together.
+• Set up a task and assign it to someone on the team (Devina, Kabir, etc.).
+• Draft an executive approval or partner follow-up.
+• Or trace any related order data or manifests.
+
+How would you like to proceed?`;
 }
 
 /* -------------------- VIEW 2: AI EXECUTIVE COPILOT CHAT -------------------- */
 let ASSISTANT_MESSAGES = [
   {
     role:'ai',
-    text:"I'm your embedded Operations & Customer Experience AI Copilot. I verify live orders and operational activity across Shopify, Delhivery One, Shiprocket, your Custom Return & Exchange Panel, and all registered shipping partners. Ask me to audit any order number, check carrier SLAs, or inspect weight surcharges below."
+    text: `Hey Arjun! 👋 What's on your mind today?
+
+Whether you want to brainstorm ideas, solve a logistics headache, assign some work to the team, track down an order, or just talk through priorities—I'm right here with you. What would you like to tackle?`
   }
 ];
 
@@ -4214,17 +4441,25 @@ function renderAIChatView(){
   const hasKey = Boolean(cfg.apiKey);
   return `
     <div class="assistant-shell" ondragover="handleChatDragOver(event)" ondragleave="handleChatDragLeave(event)" ondrop="handleChatDrop(event)">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--paper-sunken);border-radius:var(--radius-s);margin-bottom:12px;font-size:12px;flex-wrap:wrap;gap:8px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-weight:700;">&#10024; AI Copilot Engine:</span>
-          <span>${hasKey ? 'Google ' + escapeHtml(cfg.model) : 'Embedded Operations Copilot'}</span>
-          <span class="chip ${hasKey?'chip-good':'chip-outline'}">${hasKey?'● Live LLM Connected':'● Active (Local Engine)'}</span>
+      <!-- Header locked in place at top -->
+      <div class="assistant-head">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="buddy-avatar">✦</div>
+          <div>
+            <div style="font-weight:700;font-size:13.5px;color:var(--text);letter-spacing:-0.01em;">Operations &amp; CX Buddy</div>
+            <div style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-top:1px;">
+              <span>${hasKey ? 'Google ' + escapeHtml(cfg.model) : 'Embedded Operations Copilot'}</span>
+              <span class="chip ${hasKey?'chip-bad':'chip-outline'}" style="font-size:9.5px;padding:1px 6px;">${hasKey?'● Live LLM':'● Local Engine'}</span>
+            </div>
+          </div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <span style="font-size:11px;color:var(--text-muted);">&#128206; Drop files anywhere to attach</span>
-          <button class="btn small" onclick="openAIConfigModal()">&#9881; ${hasKey?'Change Key':'Connect Free Gemini Key'}</button>
+          <button class="btn small" onclick="clearAssistantChat()" title="Start fresh conversation">Clear Chat</button>
+          <button class="btn small" onclick="openAIConfigModal()">⚙ ${hasKey?'Key Active':'Connect Gemini Key'}</button>
         </div>
       </div>
+
+      <!-- Messages container with smooth independent scrolling -->
       <div class="assistant-msgs" id="assistant-msgs">
         ${ASSISTANT_MESSAGES.map(m => `
           <div class="msg ${m.role==='user'?'user':'ai'} ${m.loading?'loading':''}">
@@ -4244,40 +4479,59 @@ function renderAIChatView(){
         `).join('')}
       </div>
       
-      <!-- Attachment preview tray -->
-      <div id="chat-attachments-tray" class="chat-attachments-tray" style="${CHAT_ATTACHMENTS.length?'display:flex;':'display:none;'}">
-        ${CHAT_ATTACHMENTS.map((att, idx) => `
-          <div class="chat-file-chip" title="${escapeHtml(att.name)} (${formatFileSize(att.size)})">
-            <span>${getFileIcon(att.type, att.name)}</span>
-            <span class="file-chip-name">${escapeHtml(att.name)}</span>
-            <span class="file-chip-size">(${formatFileSize(att.size)})</span>
-            <button class="file-chip-remove" onclick="removeChatAttachment(${idx})" title="Remove">&times;</button>
-          </div>
-        `).join('')}
-      </div>
+      <!-- Locked Dock at Bottom: Attachments, Chips, and Input Row -->
+      <div class="chat-dock-bottom">
+        <!-- Attachment preview tray -->
+        <div id="chat-attachments-tray" class="chat-attachments-tray" style="${CHAT_ATTACHMENTS.length?'display:flex;':'display:none;'}">
+          ${CHAT_ATTACHMENTS.map((att, idx) => `
+            <div class="chat-file-chip" title="${escapeHtml(att.name)} (${formatFileSize(att.size)})">
+              <span>${getFileIcon(att.type, att.name)}</span>
+              <span class="file-chip-name">${escapeHtml(att.name)}</span>
+              <span class="file-chip-size">(${formatFileSize(att.size)})</span>
+              <button class="file-chip-remove" onclick="removeChatAttachment(${idx})" title="Remove">&times;</button>
+            </div>
+          `).join('')}
+        </div>
 
-      <!-- Hidden file input -->
-      <input type="file" id="chat-file-input" multiple accept=".csv,.tsv,.xlsx,.xls,.txt,.json,.log,.pdf,.png,.jpg,.jpeg,.webp" style="display:none;" onchange="handleChatFileUpload(event)">
+        <!-- Hidden file input -->
+        <input type="file" id="chat-file-input" multiple accept=".csv,.tsv,.xlsx,.xls,.txt,.json,.log,.pdf,.png,.jpg,.jpeg,.webp" style="display:none;" onchange="handleChatFileUpload(event)">
 
-      <div class="chip-row">
-        ${[
-          "Verify order #1001 across all panels",
-          "Create task: Audit Zone B packing speed for Devina",
-          "Request approval: Purchase order for replenishment yarn (₹15L)",
-          "How can we reduce courier RTO and fake delivery attempts?",
-          "Audit carrier delivery SLA compliance and NDR rates",
-          "Check weight reconciliation against carrier freight invoices"
-        ].map(q => `<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}
-      </div>
-      <div class="assistant-input-row" style="gap:8px;">
-        <button class="btn" type="button" onclick="document.getElementById('chat-file-input').click()" title="Attach CSV, manifest, spreadsheet, return report, or damage photo" style="display:flex;align-items:center;gap:4px;white-space:nowrap;padding:7px 11px;">
-          <span>📎</span> <span>Attach</span>
-        </button>
-        <input type="text" id="assistant-input" placeholder="Chat normally, attach files, or type e.g. 'Create task: Audit zone B' or 'Verify #1001'…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
-        <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Send</button>
+        <!-- Interactive Suggestion Chips (Buddy Style) -->
+        <div class="chip-row">
+          ${[
+            "What should we focus on today?",
+            "How can we cut down fake delivery attempts?",
+            "Help me think through warehouse packing speed",
+            "Create task: Audit dispatch scans for Devina",
+            "Verify order #1001",
+            "How should we dispute carrier weight discrepancies?"
+          ].map(q => `<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}
+        </div>
+
+        <!-- Input row locked at very bottom -->
+        <div class="assistant-input-row">
+          <button class="btn" type="button" onclick="document.getElementById('chat-file-input').click()" title="Attach CSV, manifest, spreadsheet, return report, or damage photo" style="display:flex;align-items:center;gap:6px;white-space:nowrap;padding:9px 12px;border-radius:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span>Attach</span>
+          </button>
+          <input type="text" id="assistant-input" placeholder="Talk to your AI buddy, attach manifests/CSVs, or type a command…" onkeydown="if(event.key==='Enter'){askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';}">
+          <button class="btn dark" onclick="askAssistant(document.getElementById('assistant-input').value); document.getElementById('assistant-input').value='';">Send</button>
+        </div>
       </div>
     </div>
   `;
+}
+
+function clearAssistantChat(){
+  if(confirm('Clear current chat conversation history?')){
+    ASSISTANT_MESSAGES = [
+      {
+        role:'ai',
+        text:"Hey Arjun! 👋 Chat cleared. What's on your mind right now? What would you like to tackle?"
+      }
+    ];
+    render();
+  }
 }
 
 /* -------------------- VIEW 3: CROSS-PLATFORM RECONCILER -------------------- */
@@ -4504,7 +4758,7 @@ function viewAssistant(){
   const pi = (STATE.data && STATE.data.platformIntegrations) ? STATE.data.platformIntegrations : buildDemoData().platformIntegrations;
   const discrepancies = (STATE.data && STATE.data.platformDiscrepancies) ? STATE.data.platformDiscrepancies : buildDemoData().platformDiscrepancies;
   const registry = (STATE.data && STATE.data.platformRegistry) ? STATE.data.platformRegistry : [];
-  const activeTab = AI_ACTIVE_TAB || 'inspector';
+  const activeTab = AI_ACTIVE_TAB || 'chat';
 
   return `
     <div class="page-head">
@@ -4605,10 +4859,17 @@ async function askAssistant(question){
   const cfg = getAiConfig();
   if(cfg.apiKey && cfg.provider === 'gemini'){
     const snapshot = buildDashboardSnapshot();
-    const systemPrompt = `You are the executive AI copilot embedded in the Offcomfrt COO & CXO Control Room dashboard. You advise Arjun Mehta, who holds dual leadership over both Operations (Supply Chain, Warehouse, Logistics, Quality) and Customer Experience (Customer Support, Unboxing, CSAT, Returns).
+    const systemPrompt = `You are Arjun Mehta's executive operations & CX buddy and trusted partner in the Offcomfrt Control Room. 
 
-You can chat normally, give strategic operational and logistics advice, audit manifests, and also DIRECTLY modify and manage the control room state.
-If the user asks you to create, modify, assign, complete, or approve anything in the dashboard, answer with an executive summary AND emit an action block at the very end of your answer in this exact JSON format:
+TONE & BEHAVIOR:
+- Talk like a sharp, friendly, supportive human colleague / operations buddy.
+- Be conversational, warm, and interactive.
+- Ask what is on his mind, what he feels like tackling, and bounce ideas back and forth.
+- CRITICAL RULE: DO NOT automatically dump a dry checklist or summary of tasks, workloads, or dashboard metrics unless he explicitly asks for a summary or status report.
+- When answering operational questions, give clear, sharp advice and end by asking an interactive question (e.g. "What do you think about that?", "Want me to set up a task for Devina on this, or should we think through it more?").
+- You can directly create or modify tasks, projects, approvals, goals, SOPs, follow-ups, and team members. When he agrees or asks you to create/modify something, confirm it warmly and emit the json:action block at the very end.
+
+ACTION SPECIFICATION:
 \`\`\`json:action
 {
   "action": "create_task" | "complete_task" | "create_project" | "create_approval" | "approve_request" | "create_goal" | "create_sop" | "create_followup" | "create_team_member",
@@ -5423,7 +5684,7 @@ function render(){
           </div>
           <div class="topbar-spacer"></div>
           <button class="gdrive-btn" onclick="openGDriveModal()" title="Google Drive Database Sync & Backup">
-            <span style="font-size:13px;">&#9729;&#65039;</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
             <span>Drive DB</span>
             <span class="gdrive-badge ${isGDriveConnected()?'connected':'disconnected'}" id="gdrive-status-badge">${isGDriveConnected()?'Synced':'Connect'}</span>
           </button>
@@ -5432,15 +5693,64 @@ function render(){
             <span>${escapeHtml(personName('p-coo').split(' ')[0])}</span>
             <span class="profile-btn-badge">Edit Profile</span>
           </button>
-          <button class="icon-btn" title="Alerts & Notifications" onclick="openNotifications()">&#128276;${notifCount()>0?`<span class="dot-badge">${notifCount()}</span>`:''}</button>
+          <button class="icon-btn" title="Alerts & Notifications" onclick="openNotifications()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>${notifCount()>0?`<span class="dot-badge">${notifCount()}</span>`:''}</button>
           <button class="btn-primary" onclick="openQuickAddTask()">+ Quick Task</button>
         </div>
         <div class="view" id="view">${renderView()}</div>
       </div>
     </div>
+
+    <!-- Floating AI Buddy Button & Drawer -->
+    <button class="floating-buddy-btn" onclick="toggleFloatingBuddy()" title="Chat with AI Operations Buddy">
+      <span style="font-size:13px;">✦</span>
+      <span>AI Buddy</span>
+    </button>
+
+    <div id="floating-buddy-drawer" class="floating-buddy-drawer" style="display:none;">
+      <div class="floating-buddy-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="buddy-avatar" style="width:26px;height:26px;font-size:12px;">✦</div>
+          <span style="font-weight:700;font-size:13px;color:var(--text);">Operations &amp; CX Buddy</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn small" onclick="goTo('assistant'); setAITab('chat'); toggleFloatingBuddy();" title="Expand to full screen">⛶ Full</button>
+          <button class="modal-close" onclick="toggleFloatingBuddy()" style="font-size:18px;">&times;</button>
+        </div>
+      </div>
+      <div class="floating-buddy-body" id="floating-buddy-msgs"></div>
+      <div class="floating-buddy-dock">
+        <div class="assistant-input-row" style="padding:10px 12px;gap:6px;">
+          <input type="text" id="floating-assistant-input" placeholder="Talk to your buddy or give command…" onkeydown="if(event.key==='Enter'){askAssistant(this.value); this.value='';}">
+          <button class="btn dark small" onclick="const el=document.getElementById('floating-assistant-input'); askAssistant(el.value); el.value='';">Send</button>
+        </div>
+      </div>
+    </div>
   `;
+  renderFloatingBuddyMsgs();
   renderToasts();
   if(STATE.searchQuery) renderSearchResults();
+}
+
+
+/* ---------- High-End Monochrome SVG Iconography ---------- */
+function navIconSvg(id){
+  const icons = {
+    home: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    myday: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+    tasks: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
+    team: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    projects: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
+    meetings: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>`,
+    delegation: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>`,
+    blocked: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" x2="19.07" y1="4.93" y2="19.07"/></svg>`,
+    approvals: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>`,
+    deadlines: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    goals: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+    sops: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>`,
+    insights: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>`,
+    assistant: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>`
+  };
+  return icons[id] || `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`;
 }
 
 function navItemHtml(n){
@@ -5451,7 +5761,44 @@ function navItemHtml(n){
   let resetExtra = '';
   if(n.id==='projects') resetExtra = ",{selectedProjectId:null}";
   if(n.id==='team') resetExtra = ",{selectedPersonId:null}";
-  return `<li><button class="nav-item ${active?'active':''}" onclick="goTo('${n.id}'${resetExtra})"><span class="nav-icon">${n.icon}</span>${n.label}${badge}</button></li>`;
+  return `<li><button class="nav-item ${active?'active':''}" onclick="goTo('${n.id}'${resetExtra})"><span class="nav-icon">${navIconSvg(n.id)}</span>${n.label}${badge}</button></li>`;
+}
+
+
+/* ---------- Floating AI Buddy Drawer & Toggle ---------- */
+let FLOATING_BUDDY_OPEN = false;
+
+function toggleFloatingBuddy(){
+  FLOATING_BUDDY_OPEN = !FLOATING_BUDDY_OPEN;
+  const drawer = document.getElementById('floating-buddy-drawer');
+  if(drawer){
+    drawer.style.display = FLOATING_BUDDY_OPEN ? 'flex' : 'none';
+    if(FLOATING_BUDDY_OPEN){
+      renderFloatingBuddyMsgs();
+      setTimeout(()=>{ const el = document.getElementById('floating-assistant-input'); if(el) el.focus(); }, 50);
+    }
+  }
+}
+
+function renderFloatingBuddyMsgs(){
+  const container = document.getElementById('floating-buddy-msgs');
+  if(!container) return;
+  container.innerHTML = ASSISTANT_MESSAGES.map(m => `
+    <div class="msg ${m.role==='user'?'user':'ai'} ${m.loading?'loading':''}" style="font-size:12.5px;padding:9px 12px;">
+      ${m.attachments && m.attachments.length ? `
+        <div class="msg-attachments-wrap">
+          ${m.attachments.map(a => `
+            <div class="msg-attachment-pill" style="font-size:10.5px;padding:2px 7px;">
+              <span>${getFileIcon(a.type, a.name)}</span>
+              <span>${escapeHtml(a.name)}</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+      ${m.html ? m.html : (m.role==='user' ? escapeHtml(m.text) : nl2br(m.text))}
+    </div>
+  `).join('');
+  container.scrollTop = container.scrollHeight;
 }
 
 /* ============================== SHARED UI HELPERS ============================== */
