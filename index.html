@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Offcomfrt — COO / CXO Control Room</title>
+<title>COO / CXO Control Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -640,18 +640,73 @@ function nl2br(s){ return escapeHtml(s).replace(/\n/g,'<br>'); }
 
 /* ---------------------------- demo data seed ---------------------------- */
 
-function brandName(){ return (STATE.data && STATE.data.brandName) || 'Offcomfrt'; }
+function brandName(){ return (STATE.data && STATE.data.brandName) || 'Our Brand'; }
 function brandSub(){ return (STATE.data && STATE.data.brandSub) || 'COO / CXO Control Room'; }
 function brandMark(){ return (brandName() || 'O').charAt(0).toUpperCase(); }
+
+function getLeaderPerson(){
+  return personById('p-coo') || (STATE.data && STATE.data.people ? STATE.data.people[0] : null);
+}
+
+function getLeaderName(){
+  const p = getLeaderPerson();
+  return (p && p.name && p.name.trim()) ? p.name.trim() : 'Operations Leader';
+}
+
+function getLeaderFirstName(){
+  const full = getLeaderName();
+  const first = full.split(' ')[0] || '';
+  if(first === 'Operations' || first === 'Executive' || !first){
+    return 'there';
+  }
+  return first;
+}
+
+function getActiveTeamMembers(){
+  if(!STATE.data || !STATE.data.people) return [];
+  const leader = getLeaderPerson();
+  return STATE.data.people.filter(p => !leader || p.id !== leader.id);
+}
+
+function getActiveTeamNames(){
+  return getActiveTeamMembers().map(p => p.name).filter(Boolean);
+}
+
+function getSampleAssignee(){
+  const list = getActiveTeamNames();
+  return list.length > 0 ? list[0] : 'Operations Lead';
+}
+
+function getAssistantGreetingText(){
+  const first = getLeaderFirstName();
+  const nameSalutation = (first && first !== 'there') ? `Hey ${first}!` : 'Hey there!';
+  return `${nameSalutation} 👋 What's on your mind today?
+
+Whether you want to brainstorm ideas, solve a logistics headache, assign some work to the team, track down an order, or just talk through priorities—I'm right here with you. What would you like to tackle?`;
+}
+
+function refreshAssistantGreeting(){
+  if(typeof ASSISTANT_MESSAGES === 'undefined') return;
+  const greeting = getAssistantGreetingText();
+  if(!ASSISTANT_MESSAGES || ASSISTANT_MESSAGES.length === 0){
+    ASSISTANT_MESSAGES = [{ role:'ai', text: greeting }];
+    return;
+  }
+  if(ASSISTANT_MESSAGES[0].role === 'ai'){
+    if(ASSISTANT_MESSAGES[0].text.includes("What's on your mind today?") || ASSISTANT_MESSAGES[0].text.includes('Arjun') || ASSISTANT_MESSAGES[0].text.includes('Hey ')){
+      ASSISTANT_MESSAGES[0].text = greeting;
+    }
+  }
+}
 
 function buildDemoData(){
   const today = todayISO();
 
   const people = [
-    {id:'p-coo', name:'Arjun Mehta', role:'Chief Operating & Experience Officer', function:'Executive Leadership', manager:null, joinDate:today, workingHours:45, contact:'arjun.mehta@offcomfrt.com'},
-    {id:'p-lead-ops', name:'Operations Lead', role:'Head of Operations & Supply Chain', function:'Fulfillment & Warehousing', manager:'p-coo', joinDate:today, workingHours:40, contact:'ops@offcomfrt.com'},
-    {id:'p-lead-cx', name:'CX & Support Lead', role:'Head of Customer Experience & Support', function:'Customer Support & Ops', manager:'p-coo', joinDate:today, workingHours:40, contact:'cx@offcomfrt.com'},
-    {id:'p-support', name:'Support Specialist', role:'Customer Support & Escalations', function:'Customer Support & Ops', manager:'p-lead-cx', joinDate:today, workingHours:40, contact:'support@offcomfrt.com'},
+    {id:'p-coo', name:'Executive Leader', role:'Chief Operating & Experience Officer', function:'Executive Leadership', manager:null, joinDate:today, workingHours:45, contact:''},
+    {id:'p-lead-ops', name:'Operations Lead', role:'Head of Operations & Supply Chain', function:'Fulfillment & Warehousing', manager:'p-coo', joinDate:today, workingHours:40, contact:'ops@company.com'},
+    {id:'p-lead-cx', name:'CX & Support Lead', role:'Head of Customer Experience & Support', function:'Customer Support & Ops', manager:'p-coo', joinDate:today, workingHours:40, contact:'cx@company.com'},
+    {id:'p-support', name:'Support Specialist', role:'Customer Support & Escalations', function:'Customer Support & Ops', manager:'p-lead-cx', joinDate:today, workingHours:40, contact:'support@company.com'},
   ];
 
   const projects = [];
@@ -720,7 +775,7 @@ function buildDemoData(){
       type: 'Storefront',
       authType: 'REST API',
       status: 'Connected',
-      endpoint: 'https://admin.shopify.com/store/offcomfrt/api',
+      endpoint: 'https://admin.shopify.com/store/your-store/api',
       token: '—',
       description: 'Customer orders, SKU catalog specifications, payment authorizations, and fulfillment labels',
       badgeColor: 'var(--sage)',
@@ -768,7 +823,7 @@ function buildDemoData(){
   const orders = [];
 
   return {
-    brandName: "Offcomfrt",
+    brandName: "Our Brand",
     brandSub: "COO / CXO Control Room",
     platformIntegrations,
     platformDiscrepancies,
@@ -1048,12 +1103,13 @@ async function loadState(){
     }
 
     if(STATE.data){
+      refreshAssistantGreeting();
       // Auto-purge any legacy mock orders or sample discrepancies from previous sessions
       if(STATE.data.orders && STATE.data.orders.some(o => o.orderId === '#10842' || o.orderId === '#10843' || o.orderId === '#10844' || o.orderId === '#10845')){
         clearAllMockData(true);
       }
       if(!STATE.data.settings) STATE.data.settings = buildDemoData().settings;
-      if(!STATE.data.brandName) STATE.data.brandName = 'Offcomfrt';
+      if(!STATE.data.brandName) STATE.data.brandName = 'Our Brand';
       if(!STATE.data.brandSub) STATE.data.brandSub = 'COO / CXO Control Room';
       if(!STATE.data.platformIntegrations) STATE.data.platformIntegrations = buildDemoData().platformIntegrations;
       if(!STATE.data.platformDiscrepancies) STATE.data.platformDiscrepancies = [];
@@ -1929,6 +1985,7 @@ function submitEditProfile(){
   STATE.data.brandSub = sub || 'COO / CXO Control Room';
 
   logAudit('Profile', oldName, 'Updated Profile', oldName, name);
+  refreshAssistantGreeting();
   saveState();
   closeModal();
   document.title = brandName() + ' — ' + brandSub();
@@ -2092,7 +2149,7 @@ function submitAddPerson(){
     manager,
     joinDate: todayISO(),
     workingHours: hours,
-    contact: contact || (name.toLowerCase().replace(/\s+/g, '.') + '@offcomfrt.com')
+    contact: contact || (name.toLowerCase().replace(/\s+/g, '.') + '@' + brandName().toLowerCase().replace(/[^a-z0-9]/g, '') + '.com')
   };
 
   STATE.data.people.push(newPerson);
@@ -3427,7 +3484,7 @@ function downloadWeeklyReport(){
   lines.push('=====================================================');
   lines.push(brandName().toUpperCase() + ' — COO / CXO EXECUTIVE OPERATIONS REPORT');
   lines.push('Period Ending: '+fmtDateLong(todayISO()));
-  lines.push('Leader: Arjun Mehta (COO & CXO)');
+  lines.push('Leader: ' + getLeaderName() + ' (' + ((getLeaderPerson() && getLeaderPerson().role) || 'COO & CXO') + ')');
   lines.push('=====================================================');
   lines.push('');
   lines.push('1. EXECUTIVE KPIS & HEALTH');
@@ -3458,7 +3515,7 @@ function downloadWeeklyReport(){
   const blob = new Blob([lines.join('\n')], {type:'text/plain'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'offcomfrt-coo-cxo-report-'+todayISO()+'.txt';
+  a.href = url; a.download = brandName().toLowerCase().replace(/[^a-z0-9]/g, '-') + '-report-' + todayISO() + '.txt';
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
   toast('Weekly Operations & CX report exported.');
@@ -3565,8 +3622,8 @@ function verifyOrderAcrossAllPanels(query){
     customer: 'Verified Customer (Lookup)',
     phone: '+91 98XXX XXXXX',
     address: 'Regional Delivery Route, Sector 12',
-    item: 'Offcomfrt Comfort Lounger / Activewear',
-    itemSku: 'OC-PROD-VERIFIED',
+    item: brandName() + ' Order Package',
+    itemSku: 'PROD-VERIFIED',
     itemWeightKg: 0.95,
     amount: '₹2,499',
     forwardCarrier: 'Delhivery One',
@@ -4301,7 +4358,9 @@ What would you like to prioritize or adjust first?`;
 
   // Greetings & casual buddy check-in
   if(/^(hi|hello|hey|good\s*(morning|afternoon|evening)|yo|sup|greetings|namaste)\b/i.test(qlow) || qlow === 'hi' || qlow === 'hello' || qlow === 'hey'){
-    return `Hey Arjun! 👋 What's on your mind today?
+    const fName = getLeaderFirstName();
+    const salutation = (fName && fName !== 'there') ? `Hey ${fName}!` : 'Hey there!';
+    return `${salutation} 👋 What's on your mind today?
 
 Whether you want to brainstorm ways to streamline dispatch, talk through a carrier SLA headache, queue up an approval, assign some work to the team, or just bounce ideas around—I'm right here with you.
 
@@ -4314,7 +4373,7 @@ What would you like to tackle first?`;
 
 Here's how I can help whenever you need me:
 • **Talk & Brainstorm**: Bounce strategic ideas, troubleshoot carrier disputes, or plan new operational initiatives.
-• **Run Direct Updates**: Just tell me *"Create task for Devina by Friday"* or *"Request approval for ₹15L yarn PO"*, and I'll update the control room instantly.
+• **Run Direct Updates**: Just tell me *"Create task for " + getSampleAssignee() + " by Friday"* or *"Request approval for ₹15L yarn PO"*, and I'll update the control room instantly.
 • **Audit Uploads**: Drop shipping manifests, return logs, or damage photos via the 📎 button to check for discrepancies.
 • **Trace Orders**: Give me any Order ID or AWB to verify chronological telemetry across all connected panels.
 
@@ -4343,7 +4402,7 @@ Here is what works best:
 2. **Escalate Within Carrier Dispute Window**: Carriers usually require fake attempts to be raised within 24 to 48 hours. With the buyer's response, you can dispute the SLA penalty and demand a forced re-attempt.
 3. **Pre-Dispatch Address Screening**: Catch missing landmarks or suspicious pin codes before packing.
 
-What do you think about setting up this WhatsApp verification workflow? Want me to create an action task for Devina on this, or should we talk through how the customer messaging should sound?`;
+What do you think about setting up this WhatsApp verification workflow? Want me to create an action task for " + getSampleAssignee() + " on this, or should we talk through how the customer messaging should sound?`;
   }
 
   // Weight discrepancies & freight overcharges
@@ -4375,7 +4434,7 @@ Do you have a return file on hand you'd like me to look at right now, or should 
 
 What's the main outcome you'd like to see here? We could:
 • Brainstorm the exact strategy or operational flow together.
-• Set up a task and assign it to someone on the team (Devina, Kabir, etc.).
+• Set up a task and assign it to someone on the team (" + (getActiveTeamNames().join(", ") || "team") + ").
 • Draft an executive approval or partner follow-up.
 • Or trace any related order data or manifests.
 
@@ -4386,9 +4445,7 @@ How would you like to proceed?`;
 let ASSISTANT_MESSAGES = [
   {
     role:'ai',
-    text: `Hey Arjun! 👋 What's on your mind today?
-
-Whether you want to brainstorm ideas, solve a logistics headache, assign some work to the team, track down an order, or just talk through priorities—I'm right here with you. What would you like to tackle?`
+    text: getAssistantGreetingText()
   }
 ];
 
@@ -4529,7 +4586,7 @@ function renderAIChatView(){
             "What should we focus on today?",
             "How can we cut down fake delivery attempts?",
             "Help me think through warehouse packing speed",
-            "Create task: Audit dispatch scans for Devina",
+            `Create task: Audit dispatch scans for ${getSampleAssignee()}`,
             "Verify order #1001",
             "How should we dispute carrier weight discrepancies?"
           ].map(q => `<button class="suggest-chip" onclick="askAssistant(${JSON.stringify(q)})">${escapeHtml(q)}</button>`).join('')}
@@ -4551,10 +4608,12 @@ function renderAIChatView(){
 
 function clearAssistantChat(){
   if(confirm('Clear current chat conversation history?')){
+    const fName = getLeaderFirstName();
+    const salutation = (fName && fName !== 'there') ? `Hey ${fName}!` : 'Hey there!';
     ASSISTANT_MESSAGES = [
       {
         role:'ai',
-        text:"Hey Arjun! 👋 Chat cleared. What's on your mind right now? What would you like to tackle?"
+        text: `${salutation} 👋 Chat cleared. What's on your mind right now? What would you like to tackle?`
       }
     ];
     render();
@@ -4886,15 +4945,24 @@ async function askAssistant(question){
   const cfg = getAiConfig();
   if(cfg.apiKey && cfg.provider === 'gemini'){
     const snapshot = buildDashboardSnapshot();
-    const systemPrompt = `You are Arjun Mehta's executive operations & CX buddy and trusted partner in the Offcomfrt Control Room. 
+    const leaderFullName = getLeaderName();
+    const leaderFirst = getLeaderFirstName();
+    const currentBrand = brandName();
+    const activeTeam = getActiveTeamNames();
+    const sampleAssignee = getSampleAssignee();
+    const teamListStr = activeTeam.length ? activeTeam.join(', ') : 'Operations Lead, CX & Support Lead';
+
+    const systemPrompt = `You are ${leaderFullName}'s executive operations & CX buddy and trusted partner in the ${currentBrand} Control Room. 
 
 TONE & BEHAVIOR:
+- Address the user warmly as ${leaderFirst !== 'there' ? leaderFirst : 'Leader'}.
 - Talk like a sharp, friendly, supportive human colleague / operations buddy.
 - Be conversational, warm, and interactive.
-- Ask what is on his mind, what he feels like tackling, and bounce ideas back and forth.
-- CRITICAL RULE: DO NOT automatically dump a dry checklist or summary of tasks, workloads, or dashboard metrics unless he explicitly asks for a summary or status report.
-- When answering operational questions, give clear, sharp advice and end by asking an interactive question (e.g. "What do you think about that?", "Want me to set up a task for Devina on this, or should we think through it more?").
-- You can directly create or modify tasks, projects, approvals, goals, SOPs, follow-ups, and team members. When he agrees or asks you to create/modify something, confirm it warmly and emit the json:action block at the very end.
+- Ask what is on their mind, what they feel like tackling, and bounce ideas back and forth.
+- CRITICAL RULE: DO NOT automatically dump a dry checklist or summary of tasks, workloads, or dashboard metrics unless explicitly requested for a summary or status report.
+- When answering operational questions, give clear, sharp advice and end by asking an interactive question (e.g. "What do you think about that?", "Want me to set up a task for ${sampleAssignee} on this, or should we think through it more?").
+- You can directly create or modify tasks, projects, approvals, goals, SOPs, follow-ups, and team members. Active team members in this control room: ${teamListStr}.
+- When they agree or ask you to create/modify something, confirm it warmly and emit the json:action block at the very end.
 
 ACTION SPECIFICATION:
 \`\`\`json:action
@@ -4911,10 +4979,14 @@ DASHBOARD LIVE STATE:
     const parts = [];
     parts.push({ text: systemPrompt });
 
-    // Include recent chat memory (last 6 messages)
+    // Include recent chat memory (last 6 messages), replacing any stale mock names
     const recent = ASSISTANT_MESSAGES.slice(-7, -1);
     recent.forEach(m => {
-      parts.push({ text: (m.role === 'user' ? 'User: ' : 'Assistant: ') + m.text });
+      let cleanedText = m.text || '';
+      if(m.role === 'ai' && cleanedText.includes('Arjun')){
+        cleanedText = cleanedText.replace(/\bArjun\b/g, (leaderFirst !== 'there' ? leaderFirst : 'Leader'));
+      }
+      parts.push({ text: (m.role === 'user' ? 'User: ' : 'Assistant: ') + cleanedText });
     });
 
     // Add current user prompt
@@ -5698,7 +5770,7 @@ function render(){
           <select class="role-select" id="role-select" onchange="setRole(this.value)">
             ${PERSON_ROLE_OPTIONS.map(r=>`<option value="${r}" ${STATE.currentRole===r?'selected':''}>${r}${r==='COO / CXO'?(' ('+personName('p-coo')+')'):r==='Operations Lead'?(' ('+personName('p-lead-ops')+')'):r==='CX & Support Lead'?(' ('+personName('p-lead-cx')+')'):(' ('+personName('p-support')+')')}</option>`).join('')}
           </select>
-          <div class="demo-tag">OPERATIONAL CONTROL ROOM · Offcomfrt operations, logistics, quality & CX data engine.</div>
+          <div class="demo-tag">OPERATIONAL CONTROL ROOM · ${escapeHtml(brandName())} operations, logistics, quality & CX data engine.</div>
         </div>
       </aside>
       <div class="main">
