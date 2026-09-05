@@ -899,10 +899,12 @@ async function syncWithGDrive(options){
         cfg.lastSync = new Date().toISOString();
         saveGDriveConfig(cfg);
         await StorageEngine.set(STORAGE_KEY, JSON.stringify(STATE.data));
-        toast('Pulled latest database from Google Drive!');
+        if(options.notify) toast('Pulled latest database & AI config from Google Drive!');
         render();
+        return true;
       } else {
-        toast('Google Drive database is currently empty or initialized.');
+        if(options.notify) toast('Google Drive database is currently empty or initialized.');
+        return false;
       }
     } else {
       // Push local database to Google Drive
@@ -916,10 +918,12 @@ async function syncWithGDrive(options){
       cfg.lastSync = new Date().toISOString();
       saveGDriveConfig(cfg);
       if(options.notify) toast('Database synced with Google Drive!');
+      return true;
     }
   }catch(e){
     console.warn('Google Drive Sync Notice:', e);
     if(options.notify) toast('Google Drive sync notice: ' + (e.message || 'Check network / URL permissions'));
+    return false;
   }finally{
     _gdriveSyncing = false;
     updateGDriveUI();
@@ -999,6 +1003,25 @@ const StorageEngine = {
 
 async function loadState(){
   try{
+    // 0. Auto-connection via URL parameters (?db=... or ?apiKey=...)
+    try{
+      if(typeof window !== 'undefined' && window.location && window.location.search){
+        const urlParams = new URLSearchParams(window.location.search);
+        const dbParam = urlParams.get('db') || urlParams.get('gdrive');
+        if(dbParam && dbParam.startsWith('https://script.google.com')){
+          const gcfg = getGDriveConfig();
+          gcfg.url = dbParam;
+          gcfg.autoSync = true;
+          saveGDriveConfig(gcfg);
+        }
+        const aiKeyParam = urlParams.get('geminiKey') || urlParams.get('aiKey') || urlParams.get('apiKey');
+        if(aiKeyParam && STATE.data){
+          if(!STATE.data.aiConfig) STATE.data.aiConfig = { provider: 'gemini', apiKey: '', model: 'gemini-2.5-flash' };
+          STATE.data.aiConfig.apiKey = aiKeyParam.trim();
+        }
+      }
+    }catch(e){}
+
     // 1. Try local storage first for instant render
     const res = await StorageEngine.get(STORAGE_KEY);
     if(res && res.value){
@@ -2222,8 +2245,12 @@ async function submitConnectGDrive(){
   cfg.url = url;
   cfg.autoSync = true;
   saveGDriveConfig(cfg);
-  toast('Verifying and syncing with Google Drive...');
-  await syncWithGDrive({ notify: true });
+  toast('Connecting to Google Drive and pulling your cloud database...');
+  const pulled = await syncWithGDrive({ pull: true, notify: true });
+  if(!pulled && STATE.data){
+    // If remote was fresh, seed with current local state
+    await syncWithGDrive({ notify: true });
+  }
   closeModal();
   render();
 }
